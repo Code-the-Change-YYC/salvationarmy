@@ -9,12 +9,15 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    env:
-      BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
-      BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          echo "BETTER_AUTH_URL=${{ secrets.BETTER_AUTH_URL }}" >> .env
+          echo "BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo ".env file created"
       
       - name: Setup Node
         uses: actions/setup-node@v4
