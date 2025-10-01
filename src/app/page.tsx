@@ -1,20 +1,22 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 
 import AgGridTest from "@/app/_components/aggridtest";
 import FullCalendarTest from "@/app/_components/fullcalendartest";
-import Test from "@/app/_components/mantinetest";
 import MantineTest from "@/app/_components/mantinetest";
-import { LatestPost } from "@/app/_components/post";
-import { auth } from "@/server/auth";
+import { LatestForm } from "@/app/_components/testform";
+import { auth } from "@/lib/auth";
 import { HydrateClient, api } from "@/trpc/server";
 import styles from "./index.module.css";
 
 export default async function Home() {
-	const hello = await api.post.hello({ text: "from tRPC" });
-	const session = await auth();
+	const hello = await api.form.hello({ text: "from tRPC" });
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
 
 	if (session?.user) {
-		void api.post.getLatest.prefetch();
+		void api.form.getLatest.prefetch();
 	}
 
 	return (
@@ -66,7 +68,7 @@ export default async function Home() {
 						</div>
 					</div>
 
-					{session?.user && <LatestPost />}
+					{session?.user && <LatestForm />}
 				</div>
 
 				<div>
