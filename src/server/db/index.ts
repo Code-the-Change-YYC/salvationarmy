@@ -1,18 +1,7 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import * as schema from "@/server/db/schema";
+import * as authSchema from "@/server/db/auth-schema";
 
-import { env } from "@/env";
-import * as schema from "./schema";
-
-/**
- * Cache the database connection in development. This avoids creating a new connection on every HMR
- * update.
- */
-const globalForDb = globalThis as unknown as {
-	conn: postgres.Sql | undefined;
-};
-
-const conn = globalForDb.conn ?? postgres(env.DATABASE_URL);
-if (env.NODE_ENV !== "production") globalForDb.conn = conn;
-
-export const db = drizzle(conn, { schema });
+const sqlite = new Database(process.env.DATABASE_URL!);
+export const db = drizzle(sqlite, { schema: { ...schema, ...authSchema } });
