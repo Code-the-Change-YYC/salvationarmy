@@ -29,3 +29,5 @@ jobs:
       
       - name: Build
         run: yarn build
+        env:
+          SKIP_ENV_VALIDATION: 'true'
