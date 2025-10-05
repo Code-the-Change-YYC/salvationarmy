@@ -39,38 +39,24 @@ const Schedule = () => {
   const columnDefs: ColDef[] = [
     {
       ...createColumnDef(COLUMN_IDS.CREATED_AT),
-      sortable: true,
-      filter: true,
     },
     {
       ...createColumnDef(COLUMN_IDS.CLIENT_NAME),
-      sortable: true,
-      filter: true,
     },
     {
       ...createColumnDef(COLUMN_IDS.TELEPHONE),
-      sortable: true,
-      filter: true,
     },
     {
       ...createColumnDef(COLUMN_IDS.DATE_BOOKED),
-      sortable: true,
-      filter: "agDateColumnFilter",
     },
     {
       ...createColumnDef(COLUMN_IDS.TIME_BOOKED),
-      sortable: true,
-      filter: true,
     },
     {
       ...createColumnDef(COLUMN_IDS.AGENCY),
-      sortable: true,
-      filter: true,
     },
     {
       ...createColumnDef(COLUMN_IDS.LOCATION),
-      sortable: true,
-      filter: true,
     },
   ];
 
