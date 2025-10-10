@@ -5,7 +5,7 @@ import { nextCookies } from "better-auth/next-js";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "sqlite",
+    provider: "pg",
   }),
   socialProviders: {
     discord: {
@@ -14,6 +14,18 @@ export const auth = betterAuth({
     },
     // add more providers here...
   },
-  emailAndPassword: { enabled: false },
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: true,
+        defaultValue: "driver",
+        input: false, // users should not be able to set their own role
+      },
+    },
+  },
+  emailAndPassword: { enabled: true },
   plugins: [nextCookies()],
 });
+
+export type Session = typeof auth.$Infer.Session;
