@@ -4,6 +4,15 @@ import { Button, Divider, Group, Stack, TextInput, Textarea, Title } from "@mant
 import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 
+interface AgencyBookingForm {
+  residentName: string;
+  contactInfo: string;
+  additionalInfo: string;
+  transportDateTime: string;
+  purpose: string;
+  destinationAddress: string;
+}
+
 export default function AgencyForm() {
   const form = useForm({
     mode: "uncontrolled",
@@ -26,7 +35,7 @@ export default function AgencyForm() {
     },
   });
 
-  function handleSubmit(values: typeof form.values) {
+  function handleSubmit(values: AgencyBookingForm) {
     console.log(values);
   }
 
