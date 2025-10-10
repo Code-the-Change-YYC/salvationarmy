@@ -3,6 +3,7 @@
 import { Button, Divider, Group, Stack, TextInput, Textarea, Title } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
+import classes from "./agency-form.module.scss";
 
 interface AgencyBookingForm {
   residentName: string;
@@ -50,30 +51,35 @@ export default function AgencyForm() {
             Personal Information
           </Title>
 
-          <TextInput
-            withAsterisk
-            label="Resident Name"
-            placeholder="Enter name"
-            key={form.key("residentName")}
-            {...form.getInputProps("residentName")}
-          />
+          <div className={classes.formRow}>
+            <TextInput
+              withAsterisk
+              label="Resident Name"
+              placeholder="Enter name"
+              key={form.key("residentName")}
+              {...form.getInputProps("residentName")}
+            />
+          </div>
 
-          <TextInput
-            withAsterisk
-            label="Contact Information"
-            description="Phone number or email address"
-            placeholder="Enter phone number or email address"
-            key={form.key("contactInfo")}
-            {...form.getInputProps("contactInfo")}
-          />
+          <div className={classes.formRow}>
+            <TextInput
+              withAsterisk
+              label="Contact Information"
+              placeholder="Enter a phone number or email address"
+              key={form.key("contactInfo")}
+              {...form.getInputProps("contactInfo")}
+            />
+          </div>
 
-          <Textarea
-            label="Additional Information"
-            description="Any pets, personal belongings, support required entering / exiting vehicle, etc."
-            key={form.key("additionalInfo")}
-            {...form.getInputProps("additionalInfo")}
-            minRows={3}
-          />
+          <div className={classes.formRow}>
+            <Textarea
+              label="Additional Information"
+              placeholder="Enter any pets, personal belongings, support required entering / exiting vehicle, etc."
+              key={form.key("additionalInfo")}
+              {...form.getInputProps("additionalInfo")}
+              minRows={3}
+            />
+          </div>
         </Stack>
 
         <Divider />
@@ -84,30 +90,36 @@ export default function AgencyForm() {
             Logistics
           </Title>
 
-          <DateTimePicker
-            withAsterisk
-            label="Date and time of transport"
-            placeholder="Select date and time"
-            valueFormat="DD MMM YYYY hh:mm A"
-            key={form.key("transportDateTime")}
-            {...form.getInputProps("transportDateTime")}
-          />
+          <div className={classes.formRow}>
+            <DateTimePicker
+              withAsterisk
+              label="Date and time of transport"
+              placeholder="Select date and time"
+              valueFormat="DD MMM YYYY hh:mm A"
+              key={form.key("transportDateTime")}
+              {...form.getInputProps("transportDateTime")}
+            />
+          </div>
 
-          <TextInput
-            withAsterisk
-            label="Purpose"
-            placeholder="Enter purpose of transport"
-            key={form.key("purpose")}
-            {...form.getInputProps("purpose")}
-          />
+          <div className={classes.formRow}>
+            <TextInput
+              withAsterisk
+              label="Purpose of transport"
+              placeholder="Enter purpose of transport"
+              key={form.key("purpose")}
+              {...form.getInputProps("purpose")}
+            />
+          </div>
 
-          <TextInput
-            withAsterisk
-            label="Destination Address"
-            placeholder="Enter address"
-            key={form.key("destinationAddress")}
-            {...form.getInputProps("destinationAddress")}
-          />
+          <div className={classes.formRow}>
+            <TextInput
+              withAsterisk
+              label="Destination Address"
+              placeholder="Enter address"
+              key={form.key("destinationAddress")}
+              {...form.getInputProps("destinationAddress")}
+            />
+          </div>
         </Stack>
 
         <Group justify="flex-end" mt="md">
