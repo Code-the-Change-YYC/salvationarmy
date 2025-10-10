@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Divider, Group, Stack, TextInput, Textarea, Title } from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 
 export default function AgencyForm() {
@@ -74,10 +75,11 @@ export default function AgencyForm() {
             Logistics
           </Title>
 
-          <TextInput
+          <DateTimePicker
             withAsterisk
             label="Date and time of transport"
-            placeholder="YYYY-MM-DD HH:MM"
+            placeholder="Select date and time"
+            valueFormat="DD MMM YYYY hh:mm A"
             key={form.key("transportDateTime")}
             {...form.getInputProps("transportDateTime")}
           />
