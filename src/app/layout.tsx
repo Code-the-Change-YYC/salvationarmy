@@ -1,5 +1,6 @@
 import "@/styles/globals.scss";
 import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
 
 import type { Metadata } from "next";
 import { Albert_Sans } from "next/font/google";
