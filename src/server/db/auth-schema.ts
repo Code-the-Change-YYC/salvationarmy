@@ -65,7 +65,7 @@ export const verification = pgTable("verification", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
-
 export const userRelations = relations(user, ({ many }) => ({
-  bookings: many(bookings),
+  driverBookings: many(bookings, { relationName: "driverBookings" }),
+  agencyBookings: many(bookings, { relationName: "agencyBookings" }),
 }));
