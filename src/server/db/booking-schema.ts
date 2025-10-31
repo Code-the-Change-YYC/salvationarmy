@@ -19,7 +19,8 @@ export const bookings = pgTable("bookings", {
   updatedAt: timestamp("updated_at")
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
+createdBy: text("created_by").references(() => user.id),
+updatedBy: text("updated_by").references(() => user.id),
 });
 
 export const bookingsRelations = relations(bookings, ({ one }) => ({
