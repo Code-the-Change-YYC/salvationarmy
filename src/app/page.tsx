@@ -4,6 +4,7 @@ import Link from "next/link";
 import AgGridTest from "@/app/_components/aggridtest";
 import FullCalendarTest from "@/app/_components/fullcalendartest";
 import MantineTest from "@/app/_components/mantinetest";
+import SegmentedControlTest from "@/app/_components/segmentedControlTest";
 import { LatestForm } from "@/app/_components/testform";
 import { auth } from "@/lib/auth";
 import { HydrateClient, api } from "@/trpc/server";
@@ -81,6 +82,10 @@ export default async function Home() {
         <div>
           <h1>mantine test</h1>
           <MantineTest />
+        </div>
+        <div>
+          <h1>Segmented Control Test</h1>
+          <SegmentedControlTest />
         </div>
       </main>
     </HydrateClient>
