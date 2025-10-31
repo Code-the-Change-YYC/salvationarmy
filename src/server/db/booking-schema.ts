@@ -12,9 +12,13 @@ export const bookings = pgTable("bookings", {
   status: text("status", { enum: ["incomplete", "completed", "in-progress"] })
     .notNull()
     .default("incomplete"),
-  driverId: text("driver_id")
+  // the agency that created the booking
+  agencyId: text("agency_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
+
+  driverId: text("driver_id")
+    .references(() => user.id, { onDelete: "set null" }), 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
