@@ -24,8 +24,14 @@ updatedBy: text("updated_by").references(() => user.id),
 });
 
 export const bookingsRelations = relations(bookings, ({ one }) => ({
+  agency: one(user, {
+    fields: [bookings.agencyId],
+    references: [user.id],
+    relationName: "agencyBookings",
+  }),
   driver: one(user, {
     fields: [bookings.driverId],
     references: [user.id],
+    relationName: "driverBookings",
   }),
 }));
