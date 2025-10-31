@@ -55,6 +55,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.21",
+    "babel-plugin-react-compiler": "^1.0.0",
     "drizzle-kit": "^0.30.5",
     "lefthook": "^1.13.6",
     "postcss": "^8.5.6",
