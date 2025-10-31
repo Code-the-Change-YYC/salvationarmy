@@ -1,12 +1,14 @@
 import "@/styles/globals.scss";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
+import "@mantine/notifications/styles.css";
 
 import type { Metadata } from "next";
 import { Albert_Sans } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -29,6 +31,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className={albertSans.className}>
         <MantineProvider>
+          <Notifications />
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </MantineProvider>
       </body>
