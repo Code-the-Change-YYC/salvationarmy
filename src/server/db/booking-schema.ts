@@ -17,14 +17,15 @@ export const bookings = pgTable("bookings", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
 
-  driverId: text("driver_id")
-    .references(() => user.id, { onDelete: "set null" }), 
+  driverId: text("driver_id").references(() => user.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-createdBy: text("created_by").references(() => user.id),
-updatedBy: text("updated_by").references(() => user.id),
+    .$onUpdate(() => /* @__PURE__ */ new Date()),
+  createdBy: text("created_by").references(() => user.id),
+  updatedBy: text("updated_by").references(() => user.id),
 });
 
 export const bookingsRelations = relations(bookings, ({ one }) => ({
