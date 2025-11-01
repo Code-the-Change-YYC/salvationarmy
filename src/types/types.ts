@@ -20,3 +20,10 @@ export const ROLE_PERMISSIONS = {
     canManageUsers: false,
   },
 } as const;
+
+export enum ViewMode {
+  CALENDAR = "calendar",
+  TABLE = "table",
+}
+
+export type { ViewMode as IViewMode };

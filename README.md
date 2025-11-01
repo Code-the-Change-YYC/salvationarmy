@@ -15,6 +15,10 @@ If you are not familiar with the different technologies used in this project, pl
 - [SASS](https://sass-lang.com/)
 - [tRPC](https://trpc.io)
 
+## Enabling typesense for SCSS modules
+
+I've added a plugin `typescript-plugin-css-modules` but you also might have to follow this tutorial [here](https://www.npmjs.com/package/typescript-plugin-css-modules#visual-studio-code) and add it to your VSCode settings.
+
 ## Learn More
 
 To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:

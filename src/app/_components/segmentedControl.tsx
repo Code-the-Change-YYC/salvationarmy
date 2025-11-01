@@ -3,18 +3,18 @@
 import { Center, SegmentedControl as MantineSegmentedControl } from "@mantine/core";
 import type React from "react";
 
-export interface SegmentedControlOption {
-  value: string;
+export interface SegmentedControlOption<T extends string = string> {
+  value: T;
   label: string;
   icon?: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   disabled?: boolean;
 }
 
-export interface SegmentedControlProps {
+export interface SegmentedControlProps<T extends string = string> {
   leftOption: SegmentedControlOption;
   rightOption: SegmentedControlOption;
-  value?: string;
-  onChange?: (value: string) => void;
+  value?: T;
+  onChange?: (value: T) => void;
   color?: string;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   fullWidth?: boolean;
@@ -23,8 +23,7 @@ export interface SegmentedControlProps {
   readOnly?: boolean;
   disabled?: boolean;
 }
-
-export const SegmentedControl: React.FC<SegmentedControlProps> = ({
+export function SegmentedControl<T extends string = string>({
   leftOption,
   rightOption,
   value,
@@ -36,7 +35,7 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
   transitionTimingFunction = "ease",
   readOnly = false,
   disabled = false,
-}) => {
+}: SegmentedControlProps<T>) {
   const data = [
     {
       value: leftOption.value,
@@ -88,11 +87,16 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
     },
   ];
 
+  // Cast to T for the external onChange consumer because Mantine has it's own handle change type casted to a string
+  const handleChange = (v: string) => {
+    if (onChange) onChange(v as T);
+  };
+
   return (
     <MantineSegmentedControl
       data={data}
       value={value}
-      onChange={onChange}
+      onChange={handleChange}
       color={color}
       size={size}
       fullWidth={fullWidth}
@@ -115,6 +119,6 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
       }}
     />
   );
-};
+}
 
 export default SegmentedControl;
