@@ -1,6 +1,6 @@
 "use client";
 
-import AgencyForm from "@/app/_components/agency-form";
+import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
 import Modal from "@/app/_components/common/modal/modal";
 import {
   Alert,
