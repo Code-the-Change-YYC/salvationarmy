@@ -1,0 +1,34 @@
+@import "@/styles/variables";
+
+.primaryButton {
+  background-color: $color-primary;
+  color: $color-primary-text;
+
+  &:hover:not(:disabled) {
+    background-color: $color-primary-hover;
+    color: $color-primary-hover-text;
+  }
+}
+
+.secondaryButton {
+  background-color: $color-secondary;
+  color: $color-secondary-text;
+  border: 1px solid $color-light-grey;
+
+  &:hover:not(:disabled) {
+    background-color: $color-secondary-hover;
+    color: $color-secondary-text;
+  }
+}
+
+.disabledButton {
+  background-color: $color-disabled;
+  color: $color-disabled-text;
+  border: none;
+  cursor: not-allowed;
+
+  &:hover {
+    background-color: $color-disabled;
+    color: $color-disabled-text;
+  }
+}

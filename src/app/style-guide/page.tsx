@@ -37,6 +37,15 @@ export default function StylesPage() {
             <Button text="Custom Height" variant="secondary" height="50px" />
           </Group>
         </Stack>
+
+        <Stack gap="sm">
+          <Title order={3} size="h4">
+            Disabled Buttons
+          </Title>
+          <Group>
+            <Button text="Disabled Button" disabled />
+          </Group>
+        </Stack>
       </Stack>
 
       <Divider />
