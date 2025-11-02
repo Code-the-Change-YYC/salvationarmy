@@ -2,7 +2,7 @@ import Bell from "@/assets/icons/bell";
 import Face from "@/assets/icons/face";
 import Home from "@/assets/icons/home";
 
-import { AgencyInteractiveArea } from "@/app/_components/agencycomponents/agencyinteractivearea";
+import { AgencyInteractiveArea } from "@/app/_components/agencycomponents/agency-interactive-area";
 import { HydrateClient, api } from "@/trpc/server";
 import { ViewMode } from "@/types/types";
 import styles from "./agency-page.module.scss";

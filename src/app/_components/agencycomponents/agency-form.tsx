@@ -14,7 +14,7 @@ interface AgencyBookingForm {
   destinationAddress: string;
 }
 
-export default function AgencyForm() {
+export const AgencyForm = () => {
   const form = useForm({
     mode: "uncontrolled",
     initialValues: {
@@ -129,4 +129,4 @@ export default function AgencyForm() {
       </Stack>
     </form>
   );
-}
+};

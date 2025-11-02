@@ -27,9 +27,14 @@ import type React from "react";
 interface ViewControllerProps {
   viewMode: ViewMode;
   setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
+  setShowBookingModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const ViewController = ({ viewMode, setViewMode }: ViewControllerProps) => {
+export const ViewController = ({
+  viewMode,
+  setViewMode,
+  setShowBookingModal,
+}: ViewControllerProps) => {
   return (
     <div className={styles.controlsBar}>
       <div className={styles.viewToggles}>
@@ -48,7 +53,7 @@ export const ViewController = ({ viewMode, setViewMode }: ViewControllerProps) =
           <span>This week</span>
           <Chevron rotation="right" />
         </div>
-        <Button text="Add booking" icon={<Plus />} />
+        <Button onClick={() => setShowBookingModal(true)} text="Add booking" icon={<Plus />} />
       </div>
     </div>
   );
