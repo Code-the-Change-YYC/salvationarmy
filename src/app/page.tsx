@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 
 import AgGridTest from "@/app/_components/aggridtest";
+import ModalTests from "@/app/_components/common/modal/modaltests";
 import FullCalendarTest from "@/app/_components/fullcalendartest";
 import MantineTest from "@/app/_components/mantinetest";
 import SegmentedControlTest from "@/app/_components/segmentedControlTest";
@@ -102,6 +103,10 @@ export default async function Home() {
         <div>
           <h1>Mantine notifications test</h1>
           <TestNotificationButton />
+        </div>
+        <div>
+          <h1>Modal Tests</h1>
+          <ModalTests />
         </div>
       </main>
     </HydrateClient>
