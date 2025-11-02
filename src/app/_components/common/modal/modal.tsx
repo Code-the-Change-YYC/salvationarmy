@@ -1,4 +1,4 @@
-import { Button, Group, Modal as MantineModal } from "@mantine/core";
+import { Button, Group, Modal as MantineModal, type ModalBaseOverlayProps } from "@mantine/core";
 import type { ReactNode } from "react";
 
 interface ModalProps {
@@ -17,7 +17,7 @@ interface ModalProps {
   confirmText?: string;
   cancelText?: string;
   loading?: boolean;
-  overlayProps?: Record<string, string | number | boolean>;
+  overlayProps?: ModalBaseOverlayProps;
 }
 
 export default function Modal({
