@@ -13,14 +13,14 @@ const SvgComponent = ({ width = "16px", height = "16px", ...props }: SVGProps<SV
   >
     <title>Add</title>
     <path
-      stroke="#434343"
+      stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
       d="M8 3.333v9.334"
     />
     <path
-      stroke="#000"
+      stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeOpacity={0.2}
@@ -28,14 +28,14 @@ const SvgComponent = ({ width = "16px", height = "16px", ...props }: SVGProps<SV
       d="M8 3.333v9.334M8 3.333v9.334M8 3.333v9.334M8 3.333v9.334M8 3.333v9.334"
     />
     <path
-      stroke="#434343"
+      stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
       d="M3.333 8h9.334"
     />
     <path
-      stroke="#000"
+      stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeOpacity={0.2}
