@@ -79,6 +79,8 @@ export default async function Home() {
           <Link href="/admin/home">Admin Home Page</Link>
           <h1>Go to drivers page (there is auth here)</h1>
           <Link href="/driver/home">Drivers Home Page</Link>
+          <h1>Go to button style guide</h1>
+          <Link href="/style-guide">Button Style Guide</Link>
         </div>
         <div>
           <h1>ag grid test</h1>

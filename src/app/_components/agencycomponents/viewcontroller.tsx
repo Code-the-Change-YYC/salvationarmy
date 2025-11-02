@@ -4,7 +4,9 @@ import SegmentedControl from "@/app/_components/segmentedControl";
 import Calendar from "@/assets/icons/calendar";
 import Grid from "@/assets/icons/grid";
 
+import Button from "@/app/_components/Button";
 import Chevron from "@/assets/icons/chevron";
+import Plus from "@/assets/icons/plus";
 import type { ViewMode } from "@/types/types";
 import styles from "./view-controller.module.scss";
 
@@ -46,7 +48,7 @@ export const ViewController = ({ viewMode, setViewMode }: ViewControllerProps) =
           <span>This week</span>
           <Chevron rotation="right" />
         </div>
-        <div>button here once ethan done</div>
+        <Button text="Add booking" icon={<Plus />} />
       </div>
     </div>
   );
