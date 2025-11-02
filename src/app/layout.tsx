@@ -30,7 +30,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <ColorSchemeScript />
       </head>
       <body className={albertSans.className}>
-        <MantineProvider>
+        <MantineProvider
+          theme={{
+            fontFamily: "var(--font-albert-sans), sans-serif",
+            fontFamilyMonospace: "var(--font-albert-sans), monospace",
+            headings: {
+              fontFamily: "var(--font-albert-sans), sans-serif",
+            },
+          }}
+        >
           <Notifications />
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </MantineProvider>
