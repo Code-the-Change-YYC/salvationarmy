@@ -1,6 +1,6 @@
 "use client";
 
-import AgencyForm from "@/app/_components/agency-form";
+import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
 import Modal from "@/app/_components/common/modal/modal";
 import {
   Alert,
@@ -303,23 +303,6 @@ export const ModalTests = () => {
           />
           <NumberInput label="Session timeout (minutes)" defaultValue={30} min={5} max={120} />
         </Stack>
-      </Modal>
-      <Button onClick={() => setAgencyFormOpen(true)} color="cyan">
-        Modal that we care about
-      </Button>
-      <Modal
-        opened={agencyFormOpen}
-        onClose={() => setAgencyFormOpen(false)}
-        onConfirm={() => {
-          console.log("Form submitted");
-          setAgencyFormOpen(false);
-        }}
-        title="Agency Form"
-        size="xl"
-        showDefaultFooter
-        confirmText="Confirm Booking"
-      >
-        <AgencyForm />
       </Modal>
     </Stack>
   );
