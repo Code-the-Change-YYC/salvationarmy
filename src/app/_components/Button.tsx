@@ -48,14 +48,16 @@ export default function Button({
       onClick={onClick}
       disabled={disabled}
       variant={isPrimary ? "filled" : "outline"}
-      leftSection={icon}
+      {...(isIconOnly ? {} : { leftSection: icon })}
       aria-label={ariaLabel}
       classNames={{
         root: disabled
           ? styles.disabledButton
-          : isPrimary
-            ? styles.primaryButton
-            : styles.secondaryButton,
+          : isIconOnly
+            ? styles.iconButton
+            : isPrimary
+              ? styles.primaryButton
+              : styles.secondaryButton,
       }}
       styles={{
         root: {
@@ -67,7 +69,7 @@ export default function Button({
         },
       }}
     >
-      {text}
+      {isIconOnly ? icon : text}
     </MantineButton>
   );
 }

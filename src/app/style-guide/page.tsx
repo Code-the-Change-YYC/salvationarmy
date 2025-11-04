@@ -1,10 +1,8 @@
 "use client";
 
-import Bell from "@/assets/icons/bell";
-import Calendar from "@/assets/icons/calendar";
 import Chevron from "@/assets/icons/chevron";
-import Clock from "@/assets/icons/clock";
-import Cross from "@/assets/icons/cross";
+import Face from "@/assets/icons/face";
+import Location from "@/assets/icons/location";
 import Plus from "@/assets/icons/plus";
 import { Divider, Group, Stack, Title } from "@mantine/core";
 import Button from "../_components/Button";
@@ -57,12 +55,13 @@ export default function StylesPage() {
             Icon Buttons
           </Title>
           <Group>
-            <Button icon={<Plus />} variant="icon" /> icon
-            <Button icon={<Bell />} variant="icon" /> small
-            <Button icon={<Calendar />} variant="icon" /> large
-            <Button icon={<Chevron />} variant="icon" disabled /> disabled
-            <Button icon={<Clock />} variant="icon" /> custom width
-            <Button icon={<Cross />} variant="icon" /> custom height
+            <Button icon={<Plus />} variant="icon" ariaLabel="plus" /> icon
+            <Button icon={<Chevron />} variant="icon" ariaLabel="chevron" disabled />
+            disabled
+            <Button icon={<Face />} variant="icon" ariaLabel="clock" width="200px" />
+            Custom Width
+            <Button icon={<Location />} variant="icon" ariaLabel="location" height="60px" />
+            Custom Height
           </Group>
         </Stack>
       </Stack>
