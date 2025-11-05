@@ -4,7 +4,7 @@ import { adminProcedure, createTRPCRouter, protectedProcedure } from "@/server/a
 import { bookings } from "@/server/db/booking-schema";
 
 export const tripRouter = createTRPCRouter({
-  create: protectedProcedure
+  create: adminProcedure
     .input(
       z.object({
         title: z.string(),
