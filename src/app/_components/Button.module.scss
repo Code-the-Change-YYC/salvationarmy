@@ -1,54 +1,54 @@
 @import "@/styles/variables";
 
 .primaryButton {
-	background-color: $color-primary;
-	color: $color-primary-text;
+  background-color: $color-primary;
+  color: $color-primary-text;
 
-	&:hover:not(:disabled) {
-		background-color: $color-primary-hover;
-		color: $color-primary-hover-text;
-	}
+  &:hover:not(:disabled) {
+    background-color: $color-primary-hover;
+    color: $color-primary-hover-text;
+  }
 }
 
 .secondaryButton {
-	background-color: $color-secondary;
-	color: $color-secondary-text;
-	border: 1px solid $color-light-grey;
+  background-color: $color-secondary;
+  color: $color-secondary-text;
+  border: 1px solid $color-light-grey;
 
-	&:hover:not(:disabled) {
-		background-color: $color-secondary-hover;
-		color: $color-secondary-text;
-	}
+  &:hover:not(:disabled) {
+    background-color: $color-secondary-hover;
+    color: $color-secondary-text;
+  }
 }
 
 .disabledButton {
-	background-color: $color-disabled;
-	color: $color-disabled-text;
-	border: none;
-	cursor: not-allowed;
+  background-color: $color-disabled;
+  color: $color-disabled-text;
+  border: none;
+  cursor: not-allowed;
 
-	&:hover {
-		background-color: $color-disabled;
-		color: $color-disabled-text;
-	}
+  &:hover {
+    background-color: $color-disabled;
+    color: $color-disabled-text;
+  }
 }
 
 .iconButton {
-	background-color: $color-secondary;
-	color: $color-secondary-text;
-	border: 1px solid $color-light-grey;
+  background-color: $color-secondary;
+  color: $color-secondary-text;
+  border: 1px solid $color-light-grey;
 
-	/* Ensure a comfortable touch target */
-	min-width: 44px;
-	min-height: 44px;
-	padding: 0;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 8px;
+  /* Ensure a comfortable touch target */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
 
-	&:hover:not(:disabled) {
-		background-color: $color-secondary-hover;
-		color: $color-secondary-hover;
-	}
+  &:hover:not(:disabled) {
+    background-color: $color-secondary-hover;
+    color: $color-secondary-hover;
+  }
 }
