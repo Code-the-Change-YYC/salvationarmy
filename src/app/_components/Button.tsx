@@ -4,10 +4,10 @@ import { Button as MantineButton } from "@mantine/core";
 import type { ReactNode } from "react";
 import styles from "./Button.module.scss";
 
-export type ButtonVariant = "primary" | "secondary" | "icon";
+export type ButtonVariant = "primary" | "secondary";
 
 export interface ButtonProps {
-  text?: string;
+  text: string;
   variant?: ButtonVariant;
   color?: string;
   width?: string | number;
@@ -16,7 +16,6 @@ export interface ButtonProps {
   icon?: ReactNode;
   onClick?: () => void;
   disabled?: boolean;
-  ariaLabel?: string;
 }
 
 export default function Button({
@@ -29,18 +28,8 @@ export default function Button({
   icon,
   onClick,
   disabled = false,
-  ariaLabel,
 }: ButtonProps) {
   const isPrimary = variant === "primary";
-  const isIconOnly = variant === "icon" || (!text && !!icon);
-
-  // Accessibility enforcement (development only)
-  if (isIconOnly && !ariaLabel && process.env.NODE_ENV !== "production") {
-    // eslint-disable-next-line no-console
-    console.warn(
-      "Button: icon-only button rendered without `ariaLabel` — provide `ariaLabel` for screen reader accessibility.",
-    );
-  }
 
   return (
     <MantineButton
@@ -48,16 +37,13 @@ export default function Button({
       onClick={onClick}
       disabled={disabled}
       variant={isPrimary ? "filled" : "outline"}
-      {...(isIconOnly ? {} : { leftSection: icon })}
-      aria-label={ariaLabel}
+      leftSection={icon}
       classNames={{
         root: disabled
           ? styles.disabledButton
-          : isIconOnly
-            ? styles.iconButton
-            : isPrimary
-              ? styles.primaryButton
-              : styles.secondaryButton,
+          : isPrimary
+            ? styles.primaryButton
+            : styles.secondaryButton,
       }}
       styles={{
         root: {
@@ -69,7 +55,7 @@ export default function Button({
         },
       }}
     >
-      {isIconOnly ? icon : text}
+      {text}
     </MantineButton>
   );
 }

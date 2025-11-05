@@ -6,6 +6,7 @@ import Location from "@/assets/icons/location";
 import Plus from "@/assets/icons/plus";
 import { Divider, Group, Stack, Title } from "@mantine/core";
 import Button from "../_components/Button";
+import IconButton from "../_components/IconButton";
 
 export default function StylesPage() {
   return (
@@ -55,12 +56,13 @@ export default function StylesPage() {
             Icon Buttons
           </Title>
           <Group>
-            <Button icon={<Plus />} variant="icon" ariaLabel="plus" /> icon
-            <Button icon={<Chevron />} variant="icon" ariaLabel="chevron" disabled />
+            <IconButton icon={<Plus />} ariaLabel="plus" size="sm" /> sm
+            <IconButton icon={<Plus />} ariaLabel="plus" size="lg" /> lg
+            <IconButton icon={<Chevron />} ariaLabel="chevron" disabled />
             disabled
-            <Button icon={<Face />} variant="icon" ariaLabel="clock" width="200px" />
+            <IconButton icon={<Face />} ariaLabel="clock" width="200px" />
             Custom Width
-            <Button icon={<Location />} variant="icon" ariaLabel="location" height="60px" />
+            <IconButton icon={<Location />} ariaLabel="location" height="50px" />
             Custom Height
           </Group>
         </Stack>

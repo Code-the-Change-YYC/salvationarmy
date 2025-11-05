@@ -34,21 +34,11 @@
 }
 
 .iconButton {
-  background-color: $color-secondary;
-  color: $color-secondary-text;
-  border: 1px solid $color-light-grey;
-
-  /* Ensure a comfortable touch target */
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
+  background-color: $color-primary;
+  color: $color-primary-text;
 
   &:hover:not(:disabled) {
-    background-color: $color-secondary-hover;
-    color: $color-secondary-hover;
+    background-color: $color-primary-hover;
+    color: $color-primary-hover-text;
   }
 }
