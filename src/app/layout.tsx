@@ -1,11 +1,14 @@
 import "@/styles/globals.scss";
 import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
+import "@mantine/notifications/styles.css";
 
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Albert_Sans } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -13,8 +16,11 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-const geist = Geist({
+const albertSans = Albert_Sans({
   subsets: ["latin"],
+  variable: "--font-albert-sans",
+  weight: ["500", "600", "700"],
+  display: "swap",
 });
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -23,8 +29,17 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <ColorSchemeScript />
       </head>
-      <body className={geist.className}>
-        <MantineProvider>
+      <body className={albertSans.className}>
+        <MantineProvider
+          theme={{
+            fontFamily: "var(--font-albert-sans), sans-serif",
+            fontFamilyMonospace: "var(--font-albert-sans), monospace",
+            headings: {
+              fontFamily: "var(--font-albert-sans), sans-serif",
+            },
+          }}
+        >
+          <Notifications />
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </MantineProvider>
       </body>

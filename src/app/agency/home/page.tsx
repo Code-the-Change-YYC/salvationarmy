@@ -1,25 +1,32 @@
-import { requireRole } from "@/lib/auth-helpers";
+import Bell from "@/assets/icons/bell";
+import Face from "@/assets/icons/face";
+import Home from "@/assets/icons/home";
+
+import { AgencyInteractiveArea } from "@/app/_components/agencycomponents/agency-interactive-area";
 import { HydrateClient, api } from "@/trpc/server";
-import styles from "./index.module.css";
+import { ViewMode } from "@/types/types";
+import styles from "./agency-page.module.scss";
 
 export default async function AgencyHome() {
-  const session = await requireRole(["admin", "agency"]);
-  const hello = await api.form.hello({ text: "from tRPC" });
-
-  if (session?.user) {
-    void api.form.getLatest.prefetch();
-  }
+  // server side call
+  await api.form.hello({ text: "from tRPC" });
 
   return (
     <HydrateClient>
-      <main className={styles.main}>
-        <div className={styles.container}>
-          <h1 className={styles.title}>Agency home page</h1>
-          <p className={styles.showcaseText}>{hello ? hello.greeting : "Loading tRPC query..."}</p>
-          <p className={styles.showcaseText}>
-            {session && <span>Logged in as {session.user?.name}</span>}
-          </p>
-        </div>
+      <main className={styles.schedulePage}>
+        <header className={styles.header}>
+          <div className={styles.headerLeft}>
+            <Home />
+            <span>agency name home</span>
+          </div>
+          <div className={styles.headerRight}>
+            <Bell />
+            <Face />
+          </div>
+        </header>
+        <h1 className={styles.title}>This Week's Navigation Schedule</h1>
+
+        <AgencyInteractiveArea initialViewMode={ViewMode.CALENDAR} />
       </main>
     </HydrateClient>
   );

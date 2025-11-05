@@ -26,7 +26,11 @@
           }
         }
       },
-      "recommended": true
+      "recommended": true,
+      "style": {
+        "useImportType": "error",
+        "useNodejsImportProtocol": "error"
+      }
     }
   }
 }

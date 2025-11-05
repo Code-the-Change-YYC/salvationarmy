@@ -21,7 +21,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "jsx": "preserve",
-    "plugins": [{ "name": "next" }],
+    "plugins": [{ "name": "next" }, { "name": "typescript-plugin-css-modules" }],
     "incremental": true,
 
     /* Path Aliases */

@@ -21,6 +21,13 @@ export const ROLE_PERMISSIONS = {
   },
 } as const;
 
+export enum ViewMode {
+  CALENDAR = "calendar",
+  TABLE = "table",
+}
+
+export type { ViewMode as IViewMode };
+
 export interface ScheduleInformation {
   CREATED_AT: string; // string or date type?
   CLIENT_NAME: string;

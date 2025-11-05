@@ -1,17 +1,94 @@
-html,
+@use "variables" as *;
+
 body {
-	padding: 0;
-	margin: 0;
-	font-family:
-		-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-		Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  padding: 0;
+  margin: 0;
+  font-family: var(--font-albert-sans), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  color: $color-text-primary;
+  background-color: $color-background;
 }
 
 a {
-	color: inherit;
-	text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }
 
 * {
-	box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+h1,
+.heading-1 {
+  font-size: clamp(40px, 5vw, 32px);
+  font-weight: $font-weight-bold;
+}
+
+h2,
+.heading-2 {
+  font-size: clamp(32px, 4vw, 24px);
+  font-weight: $font-weight-bold;
+}
+
+h3,
+.heading-3 {
+  font-size: clamp(24px, 3vw, 18px);
+  font-weight: $font-weight-bold;
+}
+
+h4,
+.heading-4 {
+  font-size: clamp(18px, 2vw, 16px);
+  font-weight: $font-weight-semibold;
+}
+
+p,
+.text-regular {
+  font-size: clamp(16px, 1.5vw, 14px);
+  font-weight: $font-weight-regular;
+  color: $color-text-primary;
+}
+
+.bg-primary { 
+  background-color: $color-primary; 
+  color: $color-primary-text; 
+}
+
+.bg-primary-hover:hover { 
+  background-color: $color-primary-hover; 
+  color: $color-primary-hover-text; 
+}
+
+.bg-secondary { 
+  background-color: $color-secondary; 
+  color: $color-secondary-text; 
+}
+
+.bg-secondary-hover:hover { 
+  background-color: $color-secondary-hover;
+  color: $color-secondary-text;
+}
+
+.bg-disabled { 
+  background-color: $color-disabled; 
+  color: $color-disabled-text; 
+}
+
+.bg-view-selected { 
+  background-color: $color-view-selected; 
+  color: $color-view-selected-text; 
+}
+
+.bg-view-hover:hover { 
+  background-color: $color-view-hover; 
+  color: $color-view-hover-text; 
+}
+
+.bg-view-deselected { 
+  background-color: $color-view-deselected; 
+  color: $color-view-deselected-text; 
+}
+
+.border { 
+  border: 1px solid $color-border; 
 }
