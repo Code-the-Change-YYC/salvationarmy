@@ -15,12 +15,24 @@ export interface ButtonProps {
   fontSize?: string | number;
   icon?: ReactNode;
   onClick?: () => void;
+  transparent?: boolean;
   disabled?: boolean;
 }
 
-function getButtonStyles(variant: ButtonVariant, disabled: boolean) {
-  if (disabled) return styles.disabledButton;
-  return variant === "primary" ? styles.primaryButton : styles.secondaryButton;
+function getButtonStyles(variant: ButtonVariant, disabled: boolean, transparent: boolean) {
+  const classes = [];
+
+  if (disabled) {
+    classes.push(styles.disabledButton);
+  } else {
+    classes.push(variant === "primary" ? styles.primaryButton : styles.secondaryButton);
+  }
+
+  if (transparent) {
+    classes.push(styles.transparentButton);
+  }
+
+  return classes.join(" ");
 }
 
 export default function Button({
@@ -32,19 +44,18 @@ export default function Button({
   fontSize,
   icon,
   onClick,
+  transparent = false,
   disabled = false,
 }: ButtonProps) {
-  const isPrimary = variant === "primary";
-
   return (
     <MantineButton
       type="button"
       onClick={onClick}
       disabled={disabled}
-      variant={isPrimary ? "filled" : "outline"}
+      variant={transparent ? "transparent" : "filled"}
       leftSection={icon}
       classNames={{
-        root: getButtonStyles(variant, disabled),
+        root: getButtonStyles(variant, disabled, transparent),
       }}
       styles={{
         root: {

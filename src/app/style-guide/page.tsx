@@ -64,10 +64,7 @@ export default function StylesPage() {
             Custom Width
             <IconButton icon={<Location />} ariaLabel="location" height="50px" />
             Custom Height
-          </Group>
-          <Group>
-            <IconButton icon={<Plus />} ariaLabel="plus" variant="outline" /> outline
-            <IconButton icon={<Plus />} ariaLabel="plus" variant="transparent" /> transparent
+            <IconButton icon={<Plus />} ariaLabel="plus" transparent /> transparent
           </Group>
         </Stack>
       </Stack>

@@ -12,7 +12,7 @@ export interface IconButtonProps {
   width?: string | number;
   height?: string | number;
   size?: "sm" | "md" | "lg" | number;
-  variant?: "filled" | "outline" | "transparent";
+  transparent?: boolean;
   disabled?: boolean;
 }
 
@@ -24,18 +24,29 @@ export default function IconButton({
   width,
   height,
   size = "md",
-  variant = "filled",
+  transparent = false,
   disabled = false,
 }: IconButtonProps) {
+  const getIconButtonClass = () => {
+    const classes = [styles.iconButton];
+    if (disabled) {
+      classes.push(styles.disabledButton);
+    }
+    if (transparent) {
+      classes.push(styles.transparentButton);
+    }
+    return classes.join(" ");
+  };
+
   return (
     <ActionIcon
       onClick={onClick}
       aria-label={ariaLabel}
-      color={color ?? "var(--color-primary)"}
-      variant={variant}
+      color={color}
+      variant={transparent ? "transparent" : "filled"}
       size={size}
       disabled={disabled}
-      className={variant === "filled" ? styles.iconButton : undefined}
+      className={getIconButtonClass()}
       style={{
         width: width,
         height: height,
