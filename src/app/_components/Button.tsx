@@ -18,6 +18,11 @@ export interface ButtonProps {
   disabled?: boolean;
 }
 
+function getButtonStyles(variant: ButtonVariant, disabled: boolean) {
+  if (disabled) return styles.disabledButton;
+  return variant === "primary" ? styles.primaryButton : styles.secondaryButton;
+}
+
 export default function Button({
   text,
   variant = "primary",
@@ -39,11 +44,7 @@ export default function Button({
       variant={isPrimary ? "filled" : "outline"}
       leftSection={icon}
       classNames={{
-        root: disabled
-          ? styles.disabledButton
-          : isPrimary
-            ? styles.primaryButton
-            : styles.secondaryButton,
+        root: getButtonStyles(variant, disabled),
       }}
       styles={{
         root: {

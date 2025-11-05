@@ -60,10 +60,14 @@ export default function StylesPage() {
             <IconButton icon={<Plus />} ariaLabel="plus" size="lg" /> lg
             <IconButton icon={<Chevron />} ariaLabel="chevron" disabled />
             disabled
-            <IconButton icon={<Face />} ariaLabel="clock" width="200px" />
+            <IconButton icon={<Face />} ariaLabel="face" width="200px" />
             Custom Width
             <IconButton icon={<Location />} ariaLabel="location" height="50px" />
             Custom Height
+          </Group>
+          <Group>
+            <IconButton icon={<Plus />} ariaLabel="plus" variant="outline" /> outline
+            <IconButton icon={<Plus />} ariaLabel="plus" variant="transparent" /> transparent
           </Group>
         </Stack>
       </Stack>
