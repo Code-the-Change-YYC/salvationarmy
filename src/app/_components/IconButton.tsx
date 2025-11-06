@@ -16,6 +16,17 @@ export interface IconButtonProps {
   disabled?: boolean;
 }
 
+function getIconButtonStyles(disabled: boolean, transparent: boolean) {
+  const classes = [styles.iconButton];
+  if (disabled) {
+    classes.push(styles.disabledButton);
+  }
+  if (transparent) {
+    classes.push(styles.transparentButton);
+  }
+  return classes.join(" ");
+}
+
 export default function IconButton({
   icon,
   onClick,
@@ -27,17 +38,6 @@ export default function IconButton({
   transparent = false,
   disabled = false,
 }: IconButtonProps) {
-  const getIconButtonClass = () => {
-    const classes = [styles.iconButton];
-    if (disabled) {
-      classes.push(styles.disabledButton);
-    }
-    if (transparent) {
-      classes.push(styles.transparentButton);
-    }
-    return classes.join(" ");
-  };
-
   return (
     <ActionIcon
       onClick={onClick}
@@ -46,7 +46,7 @@ export default function IconButton({
       variant={transparent ? "transparent" : "filled"}
       size={size}
       disabled={disabled}
-      className={getIconButtonClass()}
+      className={getIconButtonStyles(disabled, transparent)}
       style={{
         width: width,
         height: height,
