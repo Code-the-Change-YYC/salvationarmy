@@ -21,6 +21,16 @@
   }
 }
 
+.iconButton {
+  background-color: $color-primary;
+  color: $color-primary-text;
+
+  &:hover:not(:disabled) {
+    background-color: $color-primary-hover;
+    color: $color-primary-hover-text;
+  }
+}
+
 .disabledButton {
   background-color: $color-disabled;
   color: $color-disabled-text;
@@ -30,5 +40,16 @@
   &:hover {
     background-color: $color-disabled;
     color: $color-disabled-text;
+  }
+}
+
+.transparentButton {
+  background-color: transparent;
+  color: $color-primary;
+  border: none;
+
+  &:hover:not(:disabled) {
+    background-color: rgba($color-primary-hover, 0.1);
+    color: $color-primary-hover;
   }
 }
