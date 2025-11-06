@@ -1,5 +1,7 @@
 export type Role = "admin" | "driver" | "agency";
 
+export const ADMIN_PROCEDURE_ROLES = ["admin", "agency"];
+
 export const ROLE_PERMISSIONS = {
   admin: {
     canAccessAdmin: true,
