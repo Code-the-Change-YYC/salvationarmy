@@ -22,6 +22,33 @@ export default async function Home() {
     void api.form.getLatest.prefetch();
   }
 
+  //--google maps link integration code (SANC-39)--
+  const locationName = "1600 Amphitheatre Parkway, Mountain View, CA"; //NOTE: Grab from DB?
+  /*
+  //Call the google maps API to get the placeID for locationName
+  const googleMapsAPIResponse = await fetch(`
+    https://maps.googleapis.com/maps/api/place/findplacefromtext/json?
+    input=${encodeURIComponent(locationName)}&
+    inputtype=textquery&
+    fields=place_id&
+    key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+  );
+
+  //Get the JSON object from the above fetch
+  const googleMapsJSONObject = await googleMapsAPIResponse.json();
+  console.log(googleMapsJSONObject);//
+  if (googleMapsJSONObject.status == "OK"){
+
+  } else{
+    const placeID = googleMapsJSONObject.candidates[0].place_id; //place_id is stored as a nested JSON inside candidates
+  }
+  
+
+  //Craft the google maps link
+  //const googleMapsLink = `https://www.google.com/maps/place/?q=place_id:${placeID}`;
+  */
+  //-----------------------------------------------
+
   return (
     <HydrateClient>
       <main className={styles.main}>
@@ -107,6 +134,11 @@ export default async function Home() {
         <div>
           <h1>Modal Tests</h1>
           <ModalTests />
+        </div>
+        <div id="SANC_39_GOOGLE_MAPS_LINK_INTEGRATION_CODE">
+          <a href={locationName} target="_blank" rel="noreferrer">
+            View in Google Maps
+          </a>
         </div>
       </main>
     </HydrateClient>
