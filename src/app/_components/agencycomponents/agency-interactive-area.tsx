@@ -4,6 +4,7 @@ import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
 import { ViewController } from "@/app/_components/agencycomponents/view-controller";
 import Modal from "@/app/_components/common/modal/modal";
 import { notify } from "@/lib/notifications";
+import { api } from "@/trpc/react";
 import { ViewMode } from "@/types/types";
 import { Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -20,6 +21,9 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
   // eventually this loading state will be replacted with a tanstack mutation loading state
   const [loading, setLoading] = useState<boolean>(false);
   const [googleScriptLoaded, setInitialLoad] = useState<boolean>(false); //Initially, the script has not loaded
+
+  //Define backend endpoint
+  const validateDestinationAddressAPI = api.form.validateDestinationAddress.useMutation();
 
   //Run the following once
   useEffect(() => {
@@ -62,6 +66,15 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
 
   const handleConfirm = async () => {
     setLoading(true);
+
+    //temp
+    const result = await validateDestinationAddressAPI.mutateAsync({
+      regionCode: "US",
+      destinationAddress: ["1600 Amphitheatre Pkwy", "Mountain View, CA, 94043"],
+    });
+    console.log(result);
+
+    /*
     const validation = form.validate();
 
     //Validate destination address using Google maps API
@@ -87,6 +100,7 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
     } else {
       console.log("Given destination address is valid");
     }
+      
 
     const hasErrors = Object.keys(validation.errors).length > 0;
 
@@ -100,7 +114,7 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
     console.log("submit", values);
 
     // enter an actual api call here like a tanstack mutation
-
+*/
     setTimeout(() => {
       setLoading(false);
       setShowBookingModal(false);

@@ -107,4 +107,36 @@ export const formRouter = createTRPCRouter({
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
   }),
+
+  //TODO: Change from publicProcedure to protectedProcedure (it is the former for testing until authentication is made)
+  validateDestinationAddress: publicProcedure
+    .input(z.object({ regionCode: z.string(), destinationAddress: z.array(z.string()) }))
+    .mutation(async ({ input }) => {
+      const { regionCode, destinationAddress } = input; //Grab passed variables
+
+      //Make an API call to Google Maps API to validate the inputs
+      const response = await fetch(
+        `https://addressvalidation.googleapis.com/v1:validateAddress?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            address: {
+              regionCode: regionCode,
+              addressLines: destinationAddress,
+            },
+          }),
+        },
+      );
+
+      //Turn the response object into a JSON to check the result
+      const data = await response.json();
+
+      //If the address is good (addressComplete === true) then return Google's formatted version of the address, else false
+      return data.result.verdict.addressComplete === true
+        ? data.result.address.formattedAddress
+        : false;
+    }),
 });
