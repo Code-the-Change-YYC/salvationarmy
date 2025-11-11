@@ -294,7 +294,10 @@ export default function CalendarView({
   useEffect(() => {
     if (currentDate && calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
-      calendarApi.gotoDate(currentDate);
+      // defer the change date to avoid flushSync error
+      setTimeout(() => {
+        calendarApi.gotoDate(currentDate);
+      }, 0);
     }
   }, [currentDate]);
 
@@ -307,7 +310,10 @@ export default function CalendarView({
 
       // Only change view if it's different from current view
       if (currentView !== targetView) {
-        calendarApi.changeView(targetView);
+        // defer the change view to avoid flushSync error
+        setTimeout(() => {
+          calendarApi.changeView(targetView);
+        }, 0);
       }
     }
     // Notify parent of view change
