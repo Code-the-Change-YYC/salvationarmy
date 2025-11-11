@@ -252,11 +252,16 @@ const sampleEvents: CalendarEvent[] = [
 ];
 
 interface CalendarViewProps {
+  events?: CalendarEvent[];
   currentDate?: Date;
   onViewChange?: (isDayView: boolean) => void;
 }
 
-export default function CalendarView({ currentDate, onViewChange }: CalendarViewProps) {
+export default function CalendarView({
+  events = sampleEvents, // Remove this once we have real events
+  currentDate,
+  onViewChange,
+}: CalendarViewProps) {
   const calendarRef = useRef<FullCalendar>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -375,7 +380,7 @@ export default function CalendarView({ currentDate, onViewChange }: CalendarView
       initialView={isMobile ? "timeGridDay" : "timeGridWeek"}
       initialDate={currentDate}
       headerToolbar={false}
-      events={sampleEvents}
+      events={events}
       eventClick={handleEventClick}
       eventContent={renderEventContent}
       slotMinTime="08:00:00"
