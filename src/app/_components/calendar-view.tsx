@@ -321,16 +321,34 @@ export default function CalendarView({
     const event = clickInfo.event;
     const extendedProps = event.extendedProps;
 
-    // Just logs the event details to the console for now
-    console.log("Event clicked:", {
-      title: event.title,
-      start: event.start,
-      end: event.end,
-      address: extendedProps.address,
-      status: extendedProps.status,
-      driver: extendedProps.driver,
-      notes: extendedProps.notes,
-    });
+    // Format the event details for display
+    const startTime = event.start
+      ? new Date(event.start).toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : "N/A";
+    const endTime = event.end
+      ? new Date(event.end).toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : "N/A";
+
+    const alertMessage = [
+      `Title: ${event.title}`,
+      `Time: ${startTime} - ${endTime}`,
+      extendedProps.address ? `Address: ${extendedProps.address}` : "",
+      extendedProps.status ? `Status: ${extendedProps.status}` : "",
+      extendedProps.driver ? `Driver: ${extendedProps.driver}` : "",
+      extendedProps.notes ? `Notes: ${extendedProps.notes}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    alert(alertMessage);
   };
 
   // Custom event content renderer
