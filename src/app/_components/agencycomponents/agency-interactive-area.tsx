@@ -81,7 +81,7 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
 
       <div className={styles.calendarContainer}>
         {viewMode === ViewMode.CALENDAR ? (
-          <CalendarView currentDate={currentDate} onViewChange={setIsDayView} />
+          <CalendarView currentDate={currentDate} setIsDayView={setIsDayView} />
         ) : (
           <div>ag grid table will be here</div>
         )}

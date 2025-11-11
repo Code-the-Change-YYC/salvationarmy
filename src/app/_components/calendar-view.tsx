@@ -254,13 +254,13 @@ const sampleEvents: CalendarEvent[] = [
 interface CalendarViewProps {
   events?: CalendarEvent[];
   currentDate?: Date;
-  onViewChange?: (isDayView: boolean) => void;
+  setIsDayView?: (isDayView: boolean) => void;
 }
 
 export default function CalendarView({
   events = sampleEvents, // Remove this once we have real events
   currentDate,
-  onViewChange,
+  setIsDayView,
 }: CalendarViewProps) {
   const calendarRef = useRef<FullCalendar>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -278,8 +278,8 @@ export default function CalendarView({
     setIsMobile(initialIsMobile);
 
     // Notify parent of initial view state
-    if (onViewChange) {
-      onViewChange(initialIsMobile);
+    if (setIsDayView) {
+      setIsDayView(initialIsMobile);
     }
 
     // Listen for changes
@@ -288,7 +288,7 @@ export default function CalendarView({
     return () => {
       mediaQuery.removeEventListener("change", handleMediaChange);
     };
-  }, [onViewChange]);
+  }, [setIsDayView]);
 
   // Update calendar date when currentDate prop changes
   useEffect(() => {
@@ -317,10 +317,10 @@ export default function CalendarView({
       }
     }
     // Notify parent of view change
-    if (onViewChange) {
-      onViewChange(isMobile);
+    if (setIsDayView) {
+      setIsDayView(isMobile);
     }
-  }, [isMobile, onViewChange]);
+  }, [isMobile, setIsDayView]);
 
   // Handle event click
   const handleEventClick = (clickInfo: EventClickArg) => {
