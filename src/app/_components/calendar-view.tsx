@@ -4,7 +4,7 @@ import type { EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./calendar-view.module.scss";
 import { Box, Text } from "@mantine/core";
 import Check from "../../assets/icons/check";
@@ -253,10 +253,37 @@ const sampleEvents: CalendarEvent[] = [
 
 interface CalendarViewProps {
   currentDate?: Date;
+  onViewChange?: (isDayView: boolean) => void;
 }
 
-export default function CalendarView({ currentDate }: CalendarViewProps) {
+export default function CalendarView({ currentDate, onViewChange }: CalendarViewProps) {
   const calendarRef = useRef<FullCalendar>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect screen size for responsive view using media query
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    const handleMediaChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+    };
+
+    // Set initial value
+    const initialIsMobile = mediaQuery.matches;
+    setIsMobile(initialIsMobile);
+
+    // Notify parent of initial view state
+    if (onViewChange) {
+      onViewChange(initialIsMobile);
+    }
+
+    // Listen for changes
+    mediaQuery.addEventListener("change", handleMediaChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleMediaChange);
+    };
+  }, [onViewChange]);
 
   // Update calendar date when currentDate prop changes
   useEffect(() => {
@@ -265,6 +292,24 @@ export default function CalendarView({ currentDate }: CalendarViewProps) {
       calendarApi.gotoDate(currentDate);
     }
   }, [currentDate]);
+
+  // Update calendar view when screen size changes
+  useEffect(() => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      const currentView = calendarApi.view.type;
+      const targetView = isMobile ? "timeGridDay" : "timeGridWeek";
+
+      // Only change view if it's different from current view
+      if (currentView !== targetView) {
+        calendarApi.changeView(targetView);
+      }
+    }
+    // Notify parent of view change
+    if (onViewChange) {
+      onViewChange(isMobile);
+    }
+  }, [isMobile, onViewChange]);
 
   // Handle event click
   const handleEventClick = (clickInfo: EventClickArg) => {
@@ -327,7 +372,7 @@ export default function CalendarView({ currentDate }: CalendarViewProps) {
     <FullCalendar
       ref={calendarRef}
       plugins={[timeGridPlugin, dayGridPlugin]}
-      initialView="timeGridWeek"
+      initialView={isMobile ? "timeGridDay" : "timeGridWeek"}
       initialDate={currentDate}
       headerToolbar={false}
       events={sampleEvents}

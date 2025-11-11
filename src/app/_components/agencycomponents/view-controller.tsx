@@ -31,6 +31,7 @@ interface ViewControllerProps {
   setShowBookingModal: React.Dispatch<React.SetStateAction<boolean>>;
   currentDate: Date;
   onDateChange: (date: Date) => void;
+  isDayView?: boolean;
 }
 
 export const ViewController = ({
@@ -39,62 +40,93 @@ export const ViewController = ({
   setShowBookingModal,
   currentDate,
   onDateChange,
+  isDayView = false,
 }: ViewControllerProps) => {
-  // Get the start of the week (Monday)
+  // Check if a date is a weekend
+  const isWeekend = (date: Date): boolean => {
+    const day = date.getDay();
+    return day === 0 || day === 6; // Sunday or Saturday
+  };
+
+  // Adjust a weekend day to the nearest weekday
+  const toWeekday = (date: Date): Date => {
+    const d = new Date(date);
+    if (d.getDay() === 0) d.setDate(d.getDate() + 1); // Sunday -> Monday
+    if (d.getDay() === 6) d.setDate(d.getDate() - 1); // Saturday -> Friday
+    return d;
+  };
+
+  // Move to next/previous weekday
+  const moveWeekday = (date: Date, direction: 1 | -1): Date => {
+    const d = new Date(date);
+    do {
+      d.setDate(d.getDate() + direction);
+    } while (isWeekend(d));
+    return d;
+  };
+
+  // Get Monday of the week containing the date
   const getWeekStart = (date: Date): Date => {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-    const weekStart = new Date(d);
-    weekStart.setDate(diff);
-    return weekStart;
+    const daysFromMonday = day === 0 ? 6 : day - 1; // Sunday is 6 days from Monday
+    d.setDate(d.getDate() - daysFromMonday);
+    return d;
   };
 
-  // Get the end of the week (Sunday)
-  const getWeekEnd = (date: Date): Date => {
-    const weekStart = getWeekStart(date);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 6);
-    return weekEnd;
+  // Format date
+  const formatDate = (date: Date): string => {
+    const month = date.toLocaleDateString("en-US", { month: "short" });
+    return `${month} ${date.getDate()}`;
   };
 
-  // Format week range text
-  const formatWeekRange = (date: Date): string => {
-    const weekStart = getWeekStart(date);
-    const weekEnd = getWeekEnd(date);
+  // Check if date is today
+  const isToday = (date: Date): boolean => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const startDate = new Date(weekStart);
-    startDate.setHours(0, 0, 0, 0);
-    const endDate = new Date(weekEnd);
-    endDate.setHours(0, 0, 0, 0);
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
 
-    // Check if this is the current week
-    if (startDate <= today && today <= endDate) {
-      return "This week";
+  // Format date display text
+  const formatDateDisplay = (date: Date): string => {
+    const weekdayDate = toWeekday(new Date(date));
+
+    if (isDayView) {
+      if (isToday(weekdayDate)) return "Today";
+      const weekday = weekdayDate.toLocaleDateString("en-US", {
+        weekday: "short",
+      });
+      return `${weekday}, ${formatDate(weekdayDate)}`;
     }
 
-    // Format date range
-    const formatDate = (d: Date): string => {
-      const month = d.toLocaleDateString("en-US", { month: "short" });
-      const day = d.getDate();
-      return `${month} ${day}`;
-    };
+    // Week view
+    const weekStart = getWeekStart(weekdayDate);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 4);
+
+    const today = new Date();
+    if (weekStart <= today && today <= weekEnd) {
+      return "This week";
+    }
 
     return `${formatDate(weekStart)} - ${formatDate(weekEnd)}`;
   };
 
-  // Navigate to previous week
-  const handlePreviousWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() - 7);
+  // Navigation handlers
+  const handlePrevious = () => {
+    const newDate = isDayView
+      ? moveWeekday(currentDate, -1)
+      : toWeekday(new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000)); // Move back a week in milliseconds
     onDateChange(newDate);
   };
 
-  // Navigate to next week
-  const handleNextWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() + 7);
+  const handleNext = () => {
+    const newDate = isDayView
+      ? moveWeekday(currentDate, 1)
+      : toWeekday(new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000)); // Move forward a week in milliseconds
     onDateChange(newDate);
   };
 
@@ -114,15 +146,15 @@ export const ViewController = ({
         <div className={styles.weekNavigation}>
           <IconButton
             icon={<Chevron rotation="left" />}
-            onClick={handlePreviousWeek}
-            ariaLabel="Previous week"
+            onClick={handlePrevious}
+            ariaLabel={isDayView ? "Previous day" : "Previous week"}
             transparent
           />
-          <span>{formatWeekRange(currentDate)}</span>
+          <span>{formatDateDisplay(currentDate)}</span>
           <IconButton
             icon={<Chevron rotation="right" />}
-            onClick={handleNextWeek}
-            ariaLabel="Next week"
+            onClick={handleNext}
+            ariaLabel={isDayView ? "Next day" : "Next week"}
             transparent
           />
         </div>

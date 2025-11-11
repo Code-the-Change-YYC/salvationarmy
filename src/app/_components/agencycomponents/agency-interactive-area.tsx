@@ -21,6 +21,7 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
   // eventually this loading state will be replacted with a tanstack mutation loading state
   const [loading, setLoading] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [isDayView, setIsDayView] = useState<boolean>(false);
 
   const form = useForm({
     mode: "uncontrolled",
@@ -75,11 +76,12 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
         setViewMode={setViewMode}
         currentDate={currentDate}
         onDateChange={setCurrentDate}
+        isDayView={isDayView}
       />
 
       <div className={styles.calendarContainer}>
         {viewMode === ViewMode.CALENDAR ? (
-          <CalendarView currentDate={currentDate} />
+          <CalendarView currentDate={currentDate} onViewChange={setIsDayView} />
         ) : (
           <div>ag grid table will be here</div>
         )}
