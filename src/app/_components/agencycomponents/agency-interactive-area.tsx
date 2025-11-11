@@ -8,6 +8,7 @@ import { ViewMode } from "@/types/types";
 import { Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import React, { useState } from "react";
+import CalendarView from "../calendar-view";
 import styles from "./agency-interactive-area.module.scss";
 
 interface Props {
@@ -19,6 +20,7 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
   // eventually this loading state will be replacted with a tanstack mutation loading state
   const [loading, setLoading] = useState<boolean>(false);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
   const form = useForm({
     mode: "uncontrolled",
@@ -71,11 +73,13 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
         setShowBookingModal={setShowBookingModal}
         viewMode={viewMode}
         setViewMode={setViewMode}
+        currentDate={currentDate}
+        onDateChange={setCurrentDate}
       />
 
       <div className={styles.calendarContainer}>
         {viewMode === ViewMode.CALENDAR ? (
-          <div>calendar will be here</div>
+          <CalendarView currentDate={currentDate} />
         ) : (
           <div>ag grid table will be here</div>
         )}

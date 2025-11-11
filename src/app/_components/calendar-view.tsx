@@ -4,7 +4,7 @@ import type { EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import "./calendar-view.module.scss";
 import { Box, Text } from "@mantine/core";
 import Check from "../../assets/icons/check";
@@ -251,8 +251,20 @@ const sampleEvents: CalendarEvent[] = [
   },
 ];
 
-export default function CalendarView() {
+interface CalendarViewProps {
+  currentDate?: Date;
+}
+
+export default function CalendarView({ currentDate }: CalendarViewProps) {
   const calendarRef = useRef<FullCalendar>(null);
+
+  // Update calendar date when currentDate prop changes
+  useEffect(() => {
+    if (currentDate && calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.gotoDate(currentDate);
+    }
+  }, [currentDate]);
 
   // Handle event click
   const handleEventClick = (clickInfo: EventClickArg) => {
@@ -316,6 +328,8 @@ export default function CalendarView() {
       ref={calendarRef}
       plugins={[timeGridPlugin, dayGridPlugin]}
       initialView="timeGridWeek"
+      initialDate={currentDate}
+      headerToolbar={false}
       events={sampleEvents}
       eventClick={handleEventClick}
       eventContent={renderEventContent}

@@ -1,3 +1,8 @@
+// Ensure FullCalendar takes full width
+:global(.fc) {
+  width: 100% !important;
+}
+
 // Remove yellow background from current day
 :global(.fc-day-today) {
   background-color: transparent !important;
