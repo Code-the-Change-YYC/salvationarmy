@@ -1,40 +1,43 @@
-// Ensure FullCalendar takes full width
-:global(.fc) {
-  width: 100% !important;
-}
+.calendarWrapper {
+  width: 100%;
+  // Ensure FullCalendar takes full width
+  :global(.fc) {
+    width: 100% !important;
+  }
 
-// Remove yellow background from current day
-:global(.fc-day-today) {
-  background-color: transparent !important;
-}
+  // Remove yellow background from current day
+  :global(.fc-day-today) {
+    background-color: transparent !important;
+  }
 
-// Remove border from calendar
-:global(.fc-scrollgrid) {
-  border: none !important;
-}
+  // Remove border from calendar
+  :global(.fc-scrollgrid) {
+    border: none !important;
+  }
 
-// Remove borders from table cells
-:global(.fc-theme-standard td) {
-  border-bottom: none !important;
-}
+  // Remove borders from table cells
+  :global(.fc-theme-standard td) {
+    border-bottom: none !important;
+  }
 
-// Style time labels on the left side
-:global(.fc-timegrid-slot-label) {
-  font-weight: 500 !important;
-  font-size: 10px !important;
-  padding: 8px 12px !important;
-  background-color: transparent !important;
-  border: none !important;
-}
+  // Style time labels on the left side
+  :global(.fc-timegrid-slot-label) {
+    font-weight: 500 !important;
+    font-size: 10px !important;
+    padding: 8px 12px !important;
+    background-color: transparent !important;
+    border: none !important;
+  }
 
-// Style timegrid axis
-:global(.fc-timegrid-axis) {
-  background-color: transparent !important;
-  border: none !important;
-}
+  // Style timegrid axis
+  :global(.fc-timegrid-axis) {
+    background-color: transparent !important;
+    border: none !important;
+  }
 
-// Increase spacing around events
-:global(.fc-event) {
-  margin: 0 4px !important;
-  cursor: pointer !important;
+  // Increase spacing around events
+  :global(.fc-event) {
+    margin: 0 4px !important;
+    cursor: pointer !important;
+  }
 }

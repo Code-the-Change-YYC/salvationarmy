@@ -4,11 +4,11 @@ import type { EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { useEffect, useRef, useState } from "react";
-import "./calendar-view.module.scss";
 import { Box, Text } from "@mantine/core";
+import { useEffect, useRef, useState } from "react";
 import Check from "../../assets/icons/check";
 import Cross from "../../assets/icons/cross";
+import styles from "./calendar-view.module.scss";
 
 // Event data type
 interface CalendarEvent {
@@ -398,57 +398,59 @@ export default function CalendarView({
   };
 
   return (
-    <FullCalendar
-      ref={calendarRef}
-      plugins={[timeGridPlugin, dayGridPlugin]}
-      initialView={isMobile ? "timeGridDay" : "timeGridWeek"}
-      initialDate={currentDate}
-      headerToolbar={false}
-      events={events}
-      eventClick={handleEventClick}
-      eventContent={renderEventContent}
-      slotMinTime="08:00:00"
-      slotMaxTime="19:00:00"
-      slotDuration="01:00:00"
-      slotLabelFormat={{
-        hour: "numeric",
-        hour12: true,
-      }}
-      dayHeaderFormat={{
-        weekday: "short",
-        day: "numeric",
-      }}
-      dayHeaderContent={(arg) => (
-        <div style={{ textAlign: "center" }}>
-          <div
-            style={{
-              fontSize: "12px",
-              fontWeight: 600,
-              textTransform: "uppercase",
-              marginTop: "2px",
-            }}
-          >
-            {arg.text.split(" ")[1]}
+    <div className={styles.calendarWrapper}>
+      <FullCalendar
+        ref={calendarRef}
+        plugins={[timeGridPlugin, dayGridPlugin]}
+        initialView={isMobile ? "timeGridDay" : "timeGridWeek"}
+        initialDate={currentDate}
+        headerToolbar={false}
+        events={events}
+        eventClick={handleEventClick}
+        eventContent={renderEventContent}
+        slotMinTime="08:00:00"
+        slotMaxTime="19:00:00"
+        slotDuration="01:00:00"
+        slotLabelFormat={{
+          hour: "numeric",
+          hour12: true,
+        }}
+        dayHeaderFormat={{
+          weekday: "short",
+          day: "numeric",
+        }}
+        dayHeaderContent={(arg) => (
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                marginTop: "2px",
+              }}
+            >
+              {arg.text.split(" ")[1]}
+            </div>
+            <div
+              style={{
+                fontSize: "20px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+              }}
+            >
+              {arg.text.split(" ")[0]}
+            </div>
           </div>
-          <div
-            style={{
-              fontSize: "20px",
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-            }}
-          >
-            {arg.text.split(" ")[0]}
-          </div>
-        </div>
-      )}
-      allDaySlot={false}
-      expandRows={true}
-      nowIndicator={true}
-      scrollTime="09:00:00"
-      firstDay={1}
-      height={700}
-      weekends={false}
-    />
+        )}
+        allDaySlot={false}
+        expandRows={true}
+        nowIndicator={true}
+        scrollTime="09:00:00"
+        firstDay={1}
+        height={700}
+        weekends={false}
+      />
+    </div>
   );
 }
