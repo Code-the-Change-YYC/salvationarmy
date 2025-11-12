@@ -15,7 +15,7 @@ interface NavbarProps {
 
 export default function Navbar({ view, agencyName }: NavbarProps) {
   return (
-    <Group justify="space-between" className="border-bottom">
+    <Group justify="space-between" className="border-bottom" style={{ padding: "1rem 2rem" }}>
       <Group>
         <Home />
         <Text>
