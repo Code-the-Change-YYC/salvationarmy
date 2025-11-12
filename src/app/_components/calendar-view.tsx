@@ -5,263 +5,288 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { Box, Text } from "@mantine/core";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Check from "../../assets/icons/check";
 import Cross from "../../assets/icons/cross";
+import type { CalendarBooking, CalendarEvent } from "../../types/types";
 import styles from "./calendar-view.module.scss";
 
-// Event data type
-interface CalendarEvent {
-  id: string;
-  title: string;
-  start: string;
-  end?: string;
-  allDay?: boolean;
-  color?: string;
-  extendedProps?: {
-    address?: string;
-    status?: "confirmed" | "pending" | "cancelled";
-    driver?: string;
-    notes?: string;
-  };
+// Get color based on event date: past = grey, today = red, future = blue
+function getEventColor(startDate: string): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset to start of day for comparison
+
+  const eventDate = new Date(startDate);
+  eventDate.setHours(0, 0, 0, 0); // Reset to start of day for comparison
+
+  if (eventDate < today) {
+    return "#BFBFBF"; // Grey for past dates
+  }
+  if (eventDate.getTime() === today.getTime()) {
+    return "#A03145"; // Red for current day
+  }
+  return "#375A87"; // Blue for future dates
 }
 
-// Sample data for demonstration - First week of November 2025
-const sampleEvents: CalendarEvent[] = [
+function transformBookingsToEvents(bookings: CalendarBooking[]): CalendarEvent[] {
+  return bookings.map((booking) => ({
+    id: String(booking.id),
+    title: booking.title,
+    start: booking.start,
+    end: booking.end,
+    color: getEventColor(booking.start),
+    extendedProps: {
+      pickupLocation: booking.pickupLocation,
+      dropoffLocation: booking.dropoffLocation,
+      purpose: booking.purpose,
+      passengerInfo: booking.passengerInfo,
+      status: booking.status,
+      agencyId: booking.agencyId,
+      driverId: booking.driverId,
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
+    },
+  }));
+}
+
+// Sample bookings for demonstration
+const sampleBookings: CalendarBooking[] = [
   {
     id: "1",
     title: "123 Somestreet SW",
-    start: "2025-11-03T09:00:00",
-    end: "2025-11-03T10:00:00",
-    color: "#BFBFBF",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "confirmed",
-      driver: "John Doe",
-      notes: "Regular pickup",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "456 Main St",
+    passengerInfo: "John Doe",
+    status: "completed",
+    agencyId: "agency-1",
+    driverId: "driver-1",
+    purpose: "Regular pickup",
+    start: "2025-11-10T09:00:00",
+    end: "2025-11-10T10:00:00",
   },
   {
     id: "2",
     title: "123 Somestreet SW",
-    start: "2025-11-03T11:45:00",
-    end: "2025-11-03T13:30:00",
-    color: "#BFBFBF",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "confirmed",
-      driver: "Jane Smith",
-      notes: "Large donation pickup",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "789 Oak Ave",
+    passengerInfo: "Jane Smith",
+    status: "completed",
+    agencyId: "agency-1",
+    driverId: "driver-2",
+    purpose: "Large donation pickup",
+    start: "2025-11-10T11:45:00",
+    end: "2025-11-10T13:30:00",
   },
   {
     id: "3",
     title: "123 Somestreet SW",
-    start: "2025-11-03T13:00:00",
-    end: "2025-11-03T14:00:00",
-    color: "#BFBFBF",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "cancelled",
-      driver: "Mike Johnson",
-      notes: "Cancelled by donor",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "321 Elm St",
+    passengerInfo: "Mike Johnson",
+    status: "incomplete",
+    agencyId: "agency-1",
+    driverId: "driver-3",
+    purpose: "Cancelled by donor",
+    start: "2025-11-10T13:00:00",
+    end: "2025-11-10T14:00:00",
   },
   {
     id: "4",
     title: "123 Somestreet SW",
-    start: "2025-11-04T09:30:00",
-    end: "2025-11-04T11:00:00",
-    color: "#BFBFBF",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "confirmed",
-      driver: "Sarah Wilson",
-      notes: "Furniture pickup",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "654 Pine Rd",
+    passengerInfo: "Sarah Wilson",
+    status: "completed",
+    agencyId: "agency-1",
+    driverId: "driver-4",
+    purpose: "Furniture pickup",
+    start: "2025-11-11T09:30:00",
+    end: "2025-11-11T11:00:00",
   },
   {
     id: "5",
     title: "123 Somestreet SW",
-    start: "2025-11-04T12:30:00",
-    end: "2025-11-04T14:00:00",
-    color: "#BFBFBF",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "confirmed",
-      driver: "Tom Brown",
-      notes: "Clothing donation",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "987 Maple Dr",
+    passengerInfo: "Tom Brown",
+    status: "completed",
+    agencyId: "agency-1",
+    driverId: "driver-5",
+    purpose: "Clothing donation",
+    start: "2025-11-11T12:30:00",
+    end: "2025-11-11T14:00:00",
   },
   {
     id: "6",
     title: "123 Somestreet SW",
-    start: "2025-11-04T14:30:00",
-    end: "2025-11-04T16:00:00",
-    color: "#BFBFBF",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "confirmed",
-      driver: "Lisa Davis",
-      notes: "Household items",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "147 Cedar Ln",
+    passengerInfo: "Lisa Davis",
+    status: "completed",
+    agencyId: "agency-1",
+    driverId: "driver-6",
+    purpose: "Household items",
+    start: "2025-11-11T14:30:00",
+    end: "2025-11-11T16:00:00",
   },
   {
     id: "7",
     title: "123 Somestreet SW",
-    start: "2025-11-05T09:30:00",
-    end: "2025-11-05T11:00:00",
-    color: "#A03145",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "confirmed",
-      driver: "Robert Taylor",
-      notes: "Electronics pickup",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "258 Birch Way",
+    passengerInfo: "Robert Taylor",
+    status: "completed",
+    agencyId: "agency-2",
+    driverId: "driver-7",
+    purpose: "Electronics pickup",
+    start: "2025-11-12T09:30:00",
+    end: "2025-11-12T11:00:00",
   },
   {
     id: "8",
     title: "123 Somestreet SW",
-    start: "2025-11-05T11:30:00",
-    end: "2025-11-05T13:00:00",
-    color: "#A03145",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "confirmed",
-      driver: "Emily Clark",
-      notes: "Books and media",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "369 Spruce Ct",
+    passengerInfo: "Emily Clark",
+    status: "completed",
+    agencyId: "agency-2",
+    driverId: "driver-8",
+    purpose: "Books and media",
+    start: "2025-11-12T11:30:00",
+    end: "2025-11-12T13:00:00",
   },
   {
     id: "9",
     title: "123 Somestreet SW",
-    start: "2025-11-05T12:30:00",
-    end: "2025-11-05T14:00:00",
-    color: "#A03145",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "pending",
-      driver: "David Miller",
-      notes: "Large furniture",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "741 Willow St",
+    passengerInfo: "David Miller",
+    status: "in-progress",
+    agencyId: "agency-2",
+    driverId: "driver-9",
+    purpose: "Large furniture",
+    start: "2025-11-12T12:30:00",
+    end: "2025-11-12T14:00:00",
   },
   {
     id: "10",
     title: "123 Somestreet SW",
-    start: "2025-11-06T09:30:00",
-    end: "2025-11-06T11:00:00",
-    color: "#375A87",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "cancelled",
-      driver: "Anna Garcia",
-      notes: "Kitchen items",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "852 Ash Blvd",
+    passengerInfo: "Anna Garcia",
+    status: "incomplete",
+    agencyId: "agency-3",
+    driverId: "driver-10",
+    purpose: "Kitchen items",
+    start: "2025-11-13T09:30:00",
+    end: "2025-11-13T11:00:00",
   },
   {
     id: "11",
     title: "123 Somestreet SW",
-    start: "2025-11-06T11:30:00",
-    end: "2025-11-06T12:30:00",
-    color: "#375A87",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "confirmed",
-      driver: "Chris Lee",
-      notes: "Small appliances",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "963 Poplar Ave",
+    passengerInfo: "Chris Lee",
+    status: "completed",
+    agencyId: "agency-3",
+    driverId: "driver-11",
+    purpose: "Small appliances",
+    start: "2025-11-13T11:30:00",
+    end: "2025-11-13T12:30:00",
   },
   {
     id: "12",
     title: "123 Somestreet SW",
-    start: "2025-11-06T12:30:00",
-    end: "2025-11-06T13:30:00",
-    color: "#375A87",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "confirmed",
-      driver: "Maria Rodriguez",
-      notes: "Bedding and linens",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "159 Fir St",
+    passengerInfo: "Maria Rodriguez",
+    status: "completed",
+    agencyId: "agency-3",
+    driverId: "driver-12",
+    purpose: "Bedding and linens",
+    start: "2025-11-13T12:30:00",
+    end: "2025-11-13T13:30:00",
   },
   {
     id: "13",
     title: "123 Somestreet SW",
-    start: "2025-11-06T15:00:00",
-    end: "2025-11-06T16:00:00",
-    color: "#375A87",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "pending",
-      driver: "James Wilson",
-      notes: "Toys and games",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "357 Hemlock Rd",
+    passengerInfo: "James Wilson",
+    status: "in-progress",
+    agencyId: "agency-3",
+    driverId: "driver-13",
+    purpose: "Toys and games",
+    start: "2025-11-13T15:00:00",
+    end: "2025-11-13T16:00:00",
   },
   {
     id: "14",
     title: "123 Somestreet SW",
-    start: "2025-11-07T08:30:00",
-    end: "2025-11-07T10:00:00",
-    color: "#375A87",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "pending",
-      driver: "Jennifer Martinez",
-      notes: "Early morning pickup",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "468 Juniper Dr",
+    passengerInfo: "Jennifer Martinez",
+    status: "in-progress",
+    agencyId: "agency-3",
+    driverId: "driver-14",
+    purpose: "Early morning pickup",
+    start: "2025-11-14T08:30:00",
+    end: "2025-11-14T10:00:00",
   },
   {
     id: "15",
     title: "123 Somestreet SW",
-    start: "2025-11-07T10:00:00",
-    end: "2025-11-07T11:00:00",
-    color: "#375A87",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "pending",
-      driver: "Kevin Thompson",
-      notes: "Office supplies",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "579 Cypress Ln",
+    passengerInfo: "Kevin Thompson",
+    status: "in-progress",
+    agencyId: "agency-3",
+    driverId: "driver-15",
+    purpose: "Office supplies",
+    start: "2025-11-14T10:00:00",
+    end: "2025-11-14T11:00:00",
   },
   {
     id: "16",
     title: "123 Somestreet SW",
-    start: "2025-11-07T11:30:00",
-    end: "2025-11-07T12:30:00",
-    color: "#375A87",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "pending",
-      driver: "Rachel Green",
-      notes: "Art and decorations",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "680 Redwood Way",
+    passengerInfo: "Rachel Green",
+    status: "in-progress",
+    agencyId: "agency-3",
+    driverId: "driver-16",
+    purpose: "Art and decorations",
+    start: "2025-11-14T11:30:00",
+    end: "2025-11-14T12:30:00",
   },
   {
     id: "17",
     title: "123 Somestreet SW",
-    start: "2025-11-07T13:30:00",
-    end: "2025-11-07T15:00:00",
-    color: "#375A87",
-    extendedProps: {
-      address: "123 Somestreet SW",
-      status: "pending",
-      driver: "Mark Johnson",
-      notes: "Large donation - multiple items",
-    },
+    pickupLocation: "123 Somestreet SW",
+    dropoffLocation: "791 Sequoia Ct",
+    passengerInfo: "Mark Johnson",
+    status: "in-progress",
+    agencyId: "agency-3",
+    driverId: "driver-17",
+    purpose: "Large donation - multiple items",
+    start: "2025-11-14T13:30:00",
+    end: "2025-11-14T15:00:00",
   },
 ];
 
 interface CalendarViewProps {
-  events?: CalendarEvent[];
+  bookings?: CalendarBooking[];
   currentDate?: Date;
   setIsDayView?: (isDayView: boolean) => void;
 }
 
 export default function CalendarView({
-  events = sampleEvents, // Remove this once we have real events
+  bookings = sampleBookings, // Remove this once we have real bookings
   currentDate,
   setIsDayView,
 }: CalendarViewProps) {
+  // Transform bookings to FullCalendar events
+  const events = useMemo(() => transformBookingsToEvents(bookings), [bookings]);
   const calendarRef = useRef<FullCalendar>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -346,10 +371,12 @@ export default function CalendarView({
     const alertMessage = [
       `Title: ${event.title}`,
       `Time: ${startTime} - ${endTime}`,
-      extendedProps.address ? `Address: ${extendedProps.address}` : "",
+      extendedProps.pickupLocation ? `Pickup: ${extendedProps.pickupLocation}` : "",
+      extendedProps.dropoffLocation ? `Dropoff: ${extendedProps.dropoffLocation}` : "",
       extendedProps.status ? `Status: ${extendedProps.status}` : "",
-      extendedProps.driver ? `Driver: ${extendedProps.driver}` : "",
-      extendedProps.notes ? `Notes: ${extendedProps.notes}` : "",
+      extendedProps.driverId ? `Driver ID: ${extendedProps.driverId}` : "",
+      extendedProps.passengerInfo ? `Passenger: ${extendedProps.passengerInfo}` : "",
+      extendedProps.purpose ? `Purpose: ${extendedProps.purpose}` : "",
     ]
       .filter(Boolean)
       .join("\n");
@@ -366,10 +393,12 @@ export default function CalendarView({
     // Status icons
     const getStatusIcon = () => {
       switch (status) {
-        case "confirmed":
+        case "completed":
           return <Check width="12px" height="12px" />;
-        case "cancelled":
+        case "incomplete":
           return <Cross width="12px" height="12px" />;
+        case "in-progress":
+          return null;
         default:
           return null;
       }
