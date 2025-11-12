@@ -5,7 +5,8 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { Box, Text } from "@mantine/core";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMediaQuery } from "@mantine/hooks";
+import { useEffect, useMemo, useRef } from "react";
 import Check from "../../assets/icons/check";
 import Cross from "../../assets/icons/cross";
 import type { CalendarBooking, CalendarEvent } from "../../types/types";
@@ -288,32 +289,14 @@ export default function CalendarView({
   // Transform bookings to FullCalendar events
   const events = useMemo(() => transformBookingsToEvents(bookings), [bookings]);
   const calendarRef = useRef<FullCalendar>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
-  // Detect screen size for responsive view using media query
+  // Notify parent of view state changes
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 767px)");
-
-    const handleMediaChange = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches);
-    };
-
-    // Set initial value
-    const initialIsMobile = mediaQuery.matches;
-    setIsMobile(initialIsMobile);
-
-    // Notify parent of initial view state
     if (setIsDayView) {
-      setIsDayView(initialIsMobile);
+      setIsDayView(isMobile);
     }
-
-    // Listen for changes
-    mediaQuery.addEventListener("change", handleMediaChange);
-
-    return () => {
-      mediaQuery.removeEventListener("change", handleMediaChange);
-    };
-  }, [setIsDayView]);
+  }, [isMobile, setIsDayView]);
 
   // Update calendar date when currentDate prop changes
   useEffect(() => {
