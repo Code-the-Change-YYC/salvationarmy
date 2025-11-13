@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 
-import AgGridTest from "@/app/_components/aggridtest";
+import Schedule from "@/app/_components/agencypage/schedule";
 import ModalTests from "@/app/_components/common/modal/modaltests";
 import FullCalendarTest from "@/app/_components/fullcalendartest";
 import MantineTest from "@/app/_components/mantinetest";
@@ -85,7 +85,7 @@ export default async function Home() {
         </div>
         <div>
           <h1>ag grid test</h1>
-          <AgGridTest />
+          <Schedule />
         </div>
         <div>
           <h1>full calendar test</h1>
