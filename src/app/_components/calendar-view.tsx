@@ -370,8 +370,7 @@ export default function CalendarView({
   // Custom event content renderer
   const renderEventContent = (eventInfo: EventContentArg) => {
     const event = eventInfo.event;
-    const extendedProps = event.extendedProps;
-    const status = extendedProps.status;
+    const status = eventInfo.event.extendedProps.status;
 
     // Status icons
     const getStatusIcon = () => {
