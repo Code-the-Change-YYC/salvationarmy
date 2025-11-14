@@ -4,7 +4,6 @@ import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
 import { ViewController } from "@/app/_components/agencycomponents/view-controller";
 import Modal from "@/app/_components/common/modal/modal";
 import { notify } from "@/lib/notifications";
-import { api } from "@/trpc/react";
 import { ViewMode } from "@/types/types";
 import { Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -22,10 +21,6 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
   const [loading, setLoading] = useState<boolean>(false);
   const [googleScriptLoaded, setInitialLoad] = useState<boolean>(false); //Initially, the script has not loaded
   const [validationAddressGood, setValidationAddressGood] = useState<boolean>(false);
-  const [googleAutocompleteLoaded, setAutocompleteLoaded] = useState<boolean>(false); //Used only because google's auto complete library takes too long to load
-
-  //Define backend endpoint
-  const validateDestinationAddressAPI = api.form.validateDestinationAddress.useMutation();
 
   //Define a variable that react will reassign its value on runtime
   //Starts off as null but will equal (through inputElement.current) an HTML input element when assigned at runtime
@@ -75,20 +70,30 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
     },
   });
 
-  //Run the following once, after the google maps places api has loaded
-  if (
-    googleScriptLoaded === true &&
-    google.maps.places &&
-    googleAutocompleteLoaded === false &&
-    inputElement.current !== null
-  ) {
+  //Run the following every time inputElement.current gets a new value (occurs whenever destinationAddress field changes in mantine form)
+  // biome-ignore lint: inputElement.current does change and needs to be changed in order for useEffect() to run
+  useEffect(() => {
+    //Do not run the code within the useEffect if the api or mantine form hasn't fully loaded
+    if (
+      googleScriptLoaded === false ||
+      google.maps.places === null ||
+      inputElement.current === null
+    ) {
+      return;
+    }
+
     //Make the google auto complete element and attach it to inputElement (requires an HTML input element to mount to)
     const googleAutoCompleteElement = new google.maps.places.Autocomplete(inputElement.current, {
-      types: ["geocode"], //Ensures that the list of suggested addresses are addresses and not businesses
+      types: ["address"],
+    });
+
+    //Places bounds on what locations google will suggest
+    googleAutoCompleteElement.setComponentRestrictions({
+      country: ["ca"], //Only show places in Canada
     });
 
     //Specifies which values we want to grab when the user makes an API call
-    googleAutoCompleteElement.setFields(["formatted_address", "geometry"]);
+    googleAutoCompleteElement.setFields(["geometry"]);
 
     //Attaches an event listener whenever the element's field changes
     googleAutoCompleteElement.addListener("place_changed", () => {
@@ -96,10 +101,6 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
 
       if (value.geometry) {
         //The value is one of google's suggested locations. Geometry field is set if picked location is valid
-        form.setFieldValue(
-          "destinationAddress",
-          value.formatted_address || inputElement.current?.value || "",
-        ); //The || exists in case address is valid but google cannot make a formatted address for it (happens sometimes)
         setValidationAddressGood(true);
       } else {
         //Google maps api could not figure out what the user gave it
@@ -108,35 +109,22 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
     });
 
     //Adds an event to inputElement.current (now that it's not null)
-    inputElement.current.addEventListener("input", () => {
+    function inputElementOnInput() {
       setValidationAddressGood(false); //User started typing, assume input is invalid
-    });
+    }
+    inputElement.current.addEventListener("input", inputElementOnInput);
 
-    setAutocompleteLoaded(true); //Sets this variable true so this function never runs again
-  }
+    //When inputElement.current changes, remove the listeners from old elements to prevent any performance issues
+    return () => {
+      google.maps.event.clearInstanceListeners(googleAutoCompleteElement); //Removes the place_changed event listener to the old element
+      inputElement.current?.removeEventListener("input", inputElementOnInput); //Removes the listener defined as inputElementOnInput from inputElement.current before replacing it
+    };
+  }, [inputElement.current]);
 
   const handleConfirm = async () => {
     setLoading(true);
 
     const validation = form.validate();
-
-    if (validationAddressGood) {
-      //Destination address passes front-end checks
-      //Call the backend
-      //---TEMP RIGHT NOW VV
-      const result = await validateDestinationAddressAPI.mutateAsync({
-        regionCode: "US",
-        destinationAddress: ["1600 Amphitheatre Pkwy", "Mountain View, CA, 94043"],
-      });
-      console.log(result);
-      //----END OF TEMP CODE
-
-      //Evaluate the result from the back-end
-      if (result === false) {
-        //Manually adds an error field to the mantine form
-        form.setFieldError("destinationAddress", "Destination address is invalid");
-      }
-    }
 
     const hasErrors = Object.keys(validation.errors).length > 0;
 
@@ -150,6 +138,32 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
     console.log("submit", values);
 
     // enter an actual api call here like a tanstack mutation
+    // when calling the backend to verify form and update the db, must manually pass the destination address
+    // do NOT use the mantine field form as it will not contain the destination address
+    // use instead -> [inputElement.current?.value || ""]
+    // see the below code for a sample usage of calling the backend to verify destination address
+    /*
+      //Define backend endpoint (if you need to directly call this api - probably won't though, put at the top of the file, under useStates)
+      const validateDestinationAddressAPI = api.form.validateDestinationAddress.useMutation();
+
+      if (validationAddressGood) {
+        //Call the backend
+        const result = await validateDestinationAddressAPI.mutateAsync({
+          regionCode: "ca",
+          destinationAddress: [inputElement.current?.value || ""],
+        });
+
+        //Evaluate the result from the back-end
+        if (result === false) {
+          //Manually adds an error field to the mantine form
+          form.setFieldError("destinationAddress", "Destination address is too vague");
+        } else{
+          // use -> result passed from funct call as address that goes into db
+          // update db with result var
+          console.log("Backend is happy with input");
+        }
+      }
+    */
 
     setTimeout(() => {
       setLoading(false);
