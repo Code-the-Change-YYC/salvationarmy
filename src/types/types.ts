@@ -30,7 +30,11 @@ export enum ViewMode {
 
 export type { ViewMode as IViewMode };
 
-export type BookingStatus = "incomplete" | "completed" | "in-progress";
+export enum BookingStatus {
+  INCOMPLETE = "incomplete",
+  COMPLETED = "completed",
+  IN_PROGRESS = "in-progress",
+}
 
 export interface Booking {
   id: string;
@@ -64,7 +68,7 @@ export interface CalendarEvent {
     dropoffLocation: string;
     purpose?: string;
     passengerInfo: string;
-    status: "incomplete" | "completed" | "in-progress";
+    status: BookingStatus;
     agencyId: string;
     driverId?: string;
     createdAt?: Date | string;

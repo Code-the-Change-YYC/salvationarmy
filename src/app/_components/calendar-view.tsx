@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef } from "react";
 import Check from "../../assets/icons/check";
 import Cross from "../../assets/icons/cross";
 import type { CalendarBooking, CalendarEvent } from "../../types/types";
+import { BookingStatus } from "../../types/types";
 import styles from "./calendar-view.module.scss";
 
 // Get color based on event date: past = grey, today = red, future = blue
@@ -58,7 +59,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "456 Main St",
     passengerInfo: "John Doe",
-    status: "completed",
+    status: BookingStatus.COMPLETED,
     agencyId: "agency-1",
     driverId: "driver-1",
     purpose: "Regular pickup",
@@ -71,7 +72,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "789 Oak Ave",
     passengerInfo: "Jane Smith",
-    status: "completed",
+    status: BookingStatus.COMPLETED,
     agencyId: "agency-1",
     driverId: "driver-2",
     purpose: "Large donation pickup",
@@ -84,7 +85,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "321 Elm St",
     passengerInfo: "Mike Johnson",
-    status: "incomplete",
+    status: BookingStatus.INCOMPLETE,
     agencyId: "agency-1",
     driverId: "driver-3",
     purpose: "Cancelled by donor",
@@ -97,7 +98,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "654 Pine Rd",
     passengerInfo: "Sarah Wilson",
-    status: "completed",
+    status: BookingStatus.COMPLETED,
     agencyId: "agency-1",
     driverId: "driver-4",
     purpose: "Furniture pickup",
@@ -110,7 +111,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "987 Maple Dr",
     passengerInfo: "Tom Brown",
-    status: "completed",
+    status: BookingStatus.COMPLETED,
     agencyId: "agency-1",
     driverId: "driver-5",
     purpose: "Clothing donation",
@@ -123,7 +124,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "147 Cedar Ln",
     passengerInfo: "Lisa Davis",
-    status: "completed",
+    status: BookingStatus.COMPLETED,
     agencyId: "agency-1",
     driverId: "driver-6",
     purpose: "Household items",
@@ -136,7 +137,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "258 Birch Way",
     passengerInfo: "Robert Taylor",
-    status: "completed",
+    status: BookingStatus.COMPLETED,
     agencyId: "agency-2",
     driverId: "driver-7",
     purpose: "Electronics pickup",
@@ -149,7 +150,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "369 Spruce Ct",
     passengerInfo: "Emily Clark",
-    status: "completed",
+    status: BookingStatus.COMPLETED,
     agencyId: "agency-2",
     driverId: "driver-8",
     purpose: "Books and media",
@@ -162,7 +163,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "741 Willow St",
     passengerInfo: "David Miller",
-    status: "in-progress",
+    status: BookingStatus.IN_PROGRESS,
     agencyId: "agency-2",
     driverId: "driver-9",
     purpose: "Large furniture",
@@ -175,7 +176,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "852 Ash Blvd",
     passengerInfo: "Anna Garcia",
-    status: "incomplete",
+    status: BookingStatus.INCOMPLETE,
     agencyId: "agency-3",
     driverId: "driver-10",
     purpose: "Kitchen items",
@@ -188,7 +189,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "963 Poplar Ave",
     passengerInfo: "Chris Lee",
-    status: "completed",
+    status: BookingStatus.COMPLETED,
     agencyId: "agency-3",
     driverId: "driver-11",
     purpose: "Small appliances",
@@ -201,7 +202,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "159 Fir St",
     passengerInfo: "Maria Rodriguez",
-    status: "completed",
+    status: BookingStatus.COMPLETED,
     agencyId: "agency-3",
     driverId: "driver-12",
     purpose: "Bedding and linens",
@@ -214,7 +215,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "357 Hemlock Rd",
     passengerInfo: "James Wilson",
-    status: "in-progress",
+    status: BookingStatus.IN_PROGRESS,
     agencyId: "agency-3",
     driverId: "driver-13",
     purpose: "Toys and games",
@@ -227,7 +228,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "468 Juniper Dr",
     passengerInfo: "Jennifer Martinez",
-    status: "in-progress",
+    status: BookingStatus.IN_PROGRESS,
     agencyId: "agency-3",
     driverId: "driver-14",
     purpose: "Early morning pickup",
@@ -240,7 +241,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "579 Cypress Ln",
     passengerInfo: "Kevin Thompson",
-    status: "in-progress",
+    status: BookingStatus.IN_PROGRESS,
     agencyId: "agency-3",
     driverId: "driver-15",
     purpose: "Office supplies",
@@ -253,7 +254,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "680 Redwood Way",
     passengerInfo: "Rachel Green",
-    status: "in-progress",
+    status: BookingStatus.IN_PROGRESS,
     agencyId: "agency-3",
     driverId: "driver-16",
     purpose: "Art and decorations",
@@ -266,7 +267,7 @@ const sampleBookings: CalendarBooking[] = [
     pickupLocation: "123 Somestreet SW",
     dropoffLocation: "791 Sequoia Ct",
     passengerInfo: "Mark Johnson",
-    status: "in-progress",
+    status: BookingStatus.IN_PROGRESS,
     agencyId: "agency-3",
     driverId: "driver-17",
     purpose: "Large donation - multiple items",
@@ -372,19 +373,12 @@ export default function CalendarView({
     const event = eventInfo.event;
     const status = eventInfo.event.extendedProps.status;
 
-    // Status icons
-    const getStatusIcon = () => {
-      switch (status) {
-        case "completed":
-          return <Check width="12px" height="12px" />;
-        case "incomplete":
-          return <Cross width="12px" height="12px" />;
-        case "in-progress":
-          return null;
-        default:
-          return null;
-      }
-    };
+    const statusIcon =
+      status === BookingStatus.COMPLETED ? (
+        <Check width="12px" height="12px" />
+      ) : status === BookingStatus.INCOMPLETE ? (
+        <Cross width="12px" height="12px" />
+      ) : null;
 
     return (
       <Box p="0.25rem">
@@ -402,7 +396,7 @@ export default function CalendarView({
             </Text>
             {eventInfo.timeText && <Text size="xs">{eventInfo.timeText}</Text>}
           </Box>
-          <Box>{getStatusIcon()}</Box>
+          <Box>{statusIcon}</Box>
         </Box>
       </Box>
     );
