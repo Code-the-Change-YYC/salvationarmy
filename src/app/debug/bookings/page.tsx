@@ -9,17 +9,38 @@ export default function BookingDebugPage() {
     "completed",
   );
 
-  const bookingQuery = api.bookings.getById.useQuery(
-    { id: bookingId },
-    { enabled: false }, // only fetch manually
-  );
+  const utils = api.useUtils();
 
+  // Single booking (manual fetch)
+  const bookingQuery = api.bookings.getById.useQuery({ id: bookingId }, { enabled: false });
+
+  // Mutations: on success, refresh both single + list
   const updateMutation = api.bookings.update.useMutation({
-    onSuccess: () => bookingQuery.refetch(),
+    onSuccess: async () => {
+      await Promise.all([
+        utils.bookings.getById.invalidate({ id: bookingId }),
+        utils.bookings.getAll.invalidate(),
+      ]);
+      bookingQuery.refetch();
+      allBookingsQuery.refetch();
+    },
   });
 
   const cancelMutation = api.bookings.cancel.useMutation({
-    onSuccess: () => bookingQuery.refetch(),
+    onSuccess: async () => {
+      await Promise.all([
+        utils.bookings.getById.invalidate({ id: bookingId }),
+        utils.bookings.getAll.invalidate(),
+      ]);
+      bookingQuery.refetch();
+      allBookingsQuery.refetch();
+    },
+  });
+
+  // All bookings (manual fetch)
+  const allBookingsQuery = api.bookings.getAll.useQuery(undefined, {
+    enabled: false,
+    staleTime: 0,
   });
 
   return (
@@ -80,18 +101,55 @@ export default function BookingDebugPage() {
 
       <hr style={{ margin: "1.5rem 0" }} />
 
-      <h2>📦 API Response</h2>
-      <pre
-        style={{
-          background: "#111",
-          color: "#0f0",
-          padding: "1rem",
-          borderRadius: "8px",
-          overflowX: "auto",
-        }}
-      >
-        {bookingQuery.data ? JSON.stringify(bookingQuery.data, null, 2) : "No data yet"}
-      </pre>
+      <div style={{ display: "grid", gap: "1.5rem" }}>
+        {/* Single booking panel */}
+        <section>
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <h2 style={{ margin: 0 }}>📦 Single Booking</h2>
+            {bookingQuery.isFetching && <small>loading…</small>}
+            {bookingQuery.error && (
+              <small style={{ color: "tomato" }}>error: {bookingQuery.error.message}</small>
+            )}
+          </div>
+          <pre
+            style={{
+              background: "#111",
+              color: "#0f0",
+              padding: "1rem",
+              borderRadius: "8px",
+              overflowX: "auto",
+            }}
+          >
+            {bookingQuery.data ? JSON.stringify(bookingQuery.data, null, 2) : "No data yet"}
+          </pre>
+        </section>
+
+        {/* All bookings panel */}
+        <section>
+          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+            <h2 style={{ margin: 0 }}>📚 All Bookings</h2>
+            <button type="button" onClick={() => allBookingsQuery.refetch()}>
+              Fetch All Bookings
+            </button>
+            {allBookingsQuery.isFetching && <small>loading…</small>}
+            {allBookingsQuery.error && (
+              <small style={{ color: "tomato" }}>error: {allBookingsQuery.error.message}</small>
+            )}
+          </div>
+          <pre
+            style={{
+              background: "#111",
+              color: "#0ff",
+              padding: "1rem",
+              borderRadius: "8px",
+              overflowX: "auto",
+              marginTop: "0.75rem",
+            }}
+          >
+            {allBookingsQuery.data ? JSON.stringify(allBookingsQuery.data, null, 2) : "No data yet"}
+          </pre>
+        </section>
+      </div>
     </div>
   );
 }

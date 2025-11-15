@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { bookings } from "../../db/booking-schema";
 import { createTRPCRouter, publicProcedure } from "../trpc";
@@ -14,6 +14,12 @@ export const bookingsRouter = createTRPCRouter({
       throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
     }
     return row; // return single object instead of [row]
+  }),
+
+  // GET /bookings
+  getAll: publicProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db.select().from(bookings).orderBy(desc(bookings.createdAt));
+    return rows;
   }),
 
   // PATCH /bookings/:id
