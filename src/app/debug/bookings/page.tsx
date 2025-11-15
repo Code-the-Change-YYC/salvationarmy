@@ -5,7 +5,7 @@ import { useState } from "react";
 
 export default function BookingDebugPage() {
   const [bookingId, setBookingId] = useState<number>(1);
-  const [status, setStatus] = useState<"completed" | "incomplete" | "in-progress" | "canceled">(
+  const [status, setStatus] = useState<"completed" | "incomplete" | "in-progress" | "cancelled">(
     "completed",
   );
 
@@ -72,14 +72,14 @@ export default function BookingDebugPage() {
         <select
           value={status}
           onChange={(e) =>
-            setStatus(e.target.value as "completed" | "incomplete" | "in-progress" | "canceled")
+            setStatus(e.target.value as "completed" | "incomplete" | "in-progress" | "cancelled")
           }
           style={{ marginLeft: "0.5rem" }}
         >
           <option value="incomplete">Incomplete</option>
           <option value="in-progress">In Progress</option>
           <option value="completed">Completed</option>
-          <option value="canceled">Canceled</option>
+          <option value="cancelled">Cancelled</option>
         </select>
       </label>
 

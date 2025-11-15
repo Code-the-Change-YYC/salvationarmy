@@ -9,7 +9,7 @@ export const bookings = pgTable("bookings", {
   dropoffLocation: text("dropoff_location").notNull(),
   purpose: text("purpose"),
   passengerInfo: text("passengerInfo").notNull(),
-  status: text("status", { enum: ["incomplete", "completed", "in-progress", "canceled"] })
+  status: text("status", { enum: ["incomplete", "completed", "in-progress", "cancelled"] })
     .notNull()
     .default("incomplete"),
   // the agency that created the booking
