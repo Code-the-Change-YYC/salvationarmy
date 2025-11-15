@@ -1,6 +1,7 @@
+import { bookingsRouter } from "@/server/api/routers/bookings";
 import { formRouter } from "@/server/api/routers/form";
-import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { tripRouter } from "./routers/trip";
+import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
 /**
  * This is the primary router for your server.
@@ -10,6 +11,7 @@ import { tripRouter } from "./routers/trip";
 export const appRouter = createTRPCRouter({
   form: formRouter,
   trip: tripRouter,
+  bookings: bookingsRouter,
 });
 
 // export type definition of API
