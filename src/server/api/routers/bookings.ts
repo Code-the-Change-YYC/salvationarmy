@@ -33,7 +33,7 @@ export const bookingsRouter = createTRPCRouter({
         purpose: z.string().optional(),
         passengerInfo: z.string().optional(),
         driverId: z.string().optional().nullable(),
-        status: z.enum(["incomplete", "completed", "in-progress", "canceled"]).optional(),
+        status: z.enum(["incomplete", "completed", "in-progress", "cancelled"]).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -53,7 +53,7 @@ export const bookingsRouter = createTRPCRouter({
   cancel: publicProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
     const res = await ctx.db
       .update(bookings)
-      .set({ status: "canceled" })
+      .set({ status: "cancelled" })
       .where(eq(bookings.id, input.id));
 
     return res;
