@@ -1,8 +1,8 @@
 import { env } from "@/env";
 import * as authSchema from "@/server/db/auth-schema";
 import * as bookingSchema from "@/server/db/booking-schema";
+import * as postTripSchema from "@/server/db/post-trip-schema";
 import * as schema from "@/server/db/schema";
-import * as tripSchema from "@/server/db/trip-schema";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -18,5 +18,5 @@ const conn = globalForDb.conn ?? postgres(env.DATABASE_URL);
 if (env.NODE_ENV !== "production") globalForDb.conn = conn;
 
 export const db = drizzle(conn, {
-  schema: { ...schema, ...authSchema, ...bookingSchema, ...tripSchema },
+  schema: { ...schema, ...authSchema, ...bookingSchema, ...postTripSchema },
 });
