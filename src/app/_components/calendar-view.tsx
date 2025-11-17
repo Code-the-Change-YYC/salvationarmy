@@ -13,6 +13,20 @@ import type { CalendarBooking, CalendarEvent } from "../../types/types";
 import { BookingStatus } from "../../types/types";
 import styles from "./calendar-view.module.scss";
 
+// Get the initial date, adjusting Sunday to the next Monday
+function getInitialDate(date?: Date): Date {
+  const targetDate = date || new Date();
+  const dateCopy = new Date(targetDate);
+  dateCopy.setHours(0, 0, 0, 0); // Reset to start of day for comparison
+
+  // If the date is Sunday (getDay() === 0), move to next Monday
+  if (dateCopy.getDay() === 0) {
+    dateCopy.setDate(dateCopy.getDate() + 1);
+  }
+
+  return dateCopy;
+}
+
 // Get color based on event date: past = grey, today = red, future = blue
 function getEventColor(startDate: string): string {
   const today = new Date();
@@ -291,6 +305,7 @@ export default function CalendarView({
   const events = useMemo(() => transformBookingsToEvents(bookings), [bookings]);
   const calendarRef = useRef<FullCalendar>(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
+  const initialDate = getInitialDate(currentDate);
 
   // Notify parent of view state changes
   useEffect(() => {
@@ -301,14 +316,14 @@ export default function CalendarView({
 
   // Update calendar date when currentDate prop changes
   useEffect(() => {
-    if (currentDate && calendarRef.current) {
+    if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
       // defer the change date to avoid flushSync error
       setTimeout(() => {
-        calendarApi.gotoDate(currentDate);
+        calendarApi.gotoDate(initialDate);
       }, 0);
     }
-  }, [currentDate]);
+  }, [initialDate]);
 
   // Update calendar view when screen size changes
   useEffect(() => {
@@ -408,7 +423,7 @@ export default function CalendarView({
         ref={calendarRef}
         plugins={[timeGridPlugin, dayGridPlugin]}
         initialView={isMobile ? "timeGridDay" : "timeGridWeek"}
-        initialDate={currentDate}
+        initialDate={initialDate}
         headerToolbar={false}
         events={events}
         eventClick={handleEventClick}
