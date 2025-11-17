@@ -13,6 +13,11 @@ import type { CalendarBooking, CalendarEvent } from "../../types/types";
 import { BookingStatus } from "../../types/types";
 import styles from "./calendar-view.module.scss";
 
+// Event color constants
+const CHERRY_RED = "#A03145"; // Red for current day
+const COBALT_BLUE = "#375A87"; // Blue for future dates
+const LIGHT_GREY = "#BFBFBF"; // Grey for past dates
+
 // Get the initial date, adjusting Sunday to the next Monday
 function getInitialDate(date?: Date): Date {
   const targetDate = date || new Date();
@@ -36,12 +41,12 @@ function getEventColor(startDate: string): string {
   eventDate.setHours(0, 0, 0, 0); // Reset to start of day for comparison
 
   if (eventDate < today) {
-    return "#BFBFBF"; // Grey for past dates
+    return LIGHT_GREY;
   }
   if (eventDate.getTime() === today.getTime()) {
-    return "#A03145"; // Red for current day
+    return CHERRY_RED;
   }
-  return "#375A87"; // Blue for future dates
+  return COBALT_BLUE;
 }
 
 function transformBookingsToEvents(bookings: CalendarBooking[]): CalendarEvent[] {
