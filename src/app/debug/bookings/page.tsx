@@ -45,7 +45,7 @@ export default function BookingDebugPage() {
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1>🔧 Booking API Debug Panel</h1>
+      <h1>Booking API Debug Panel</h1>
 
       <label>
         <strong>Booking ID:</strong>
@@ -105,7 +105,7 @@ export default function BookingDebugPage() {
         {/* Single booking panel */}
         <section>
           <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <h2 style={{ margin: 0 }}>📦 Single Booking</h2>
+            <h2 style={{ margin: 0 }}>Single Booking</h2>
             {bookingQuery.isFetching && <small>loading…</small>}
             {bookingQuery.error && (
               <small style={{ color: "tomato" }}>error: {bookingQuery.error.message}</small>
@@ -127,7 +127,7 @@ export default function BookingDebugPage() {
         {/* All bookings panel */}
         <section>
           <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-            <h2 style={{ margin: 0 }}>📚 All Bookings</h2>
+            <h2 style={{ margin: 0 }}>All Bookings</h2>
             <button type="button" onClick={() => allBookingsQuery.refetch()}>
               Fetch All Bookings
             </button>
