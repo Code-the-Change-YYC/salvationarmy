@@ -1,6 +1,6 @@
 import { bookingsRouter } from "@/server/api/routers/bookings";
 import { formRouter } from "@/server/api/routers/form";
-import { tripRouter } from "./routers/trip";
+import { tripRouter } from "@/server/api/routers/trip";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
 /**
