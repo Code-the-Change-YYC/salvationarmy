@@ -12,6 +12,7 @@ export const tripRouter = createTRPCRouter({
         dropoffLocation: z.string(),
         purpose: z.string(),
         passengerInfo: z.string(),
+        // Requires ISO 8601 String
         scheduledTime: z.string().datetime(),
       }),
     )
