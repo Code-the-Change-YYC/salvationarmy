@@ -12,6 +12,7 @@ export const tripRouter = createTRPCRouter({
         dropoffLocation: z.string(),
         purpose: z.string(),
         passengerInfo: z.string(),
+        scheduledTime: z.string().datetime(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -23,6 +24,7 @@ export const tripRouter = createTRPCRouter({
         agencyId: ctx.session.user.id,
         purpose: input.purpose,
         createdBy: ctx.session.user.id,
+        scheduledTime: input.scheduledTime,
       });
     }),
 });
