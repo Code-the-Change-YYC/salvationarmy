@@ -1,10 +1,50 @@
 import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { bookings } from "../../db/booking-schema";
+import { BOOKING_STATUS, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
+const StatusZ = z.enum(BOOKING_STATUS); // ← uses "cancelled" (double-L)
+
 export const bookingsRouter = createTRPCRouter({
+  // POST /bookings (create)
+  create: publicProcedure
+    .input(
+      z.object({
+        title: z.string().min(1),
+        pickupLocation: z.string().min(1),
+        dropoffLocation: z.string().min(1),
+        purpose: z.string().optional(),
+        passengerInfo: z.string().min(1),
+        agencyId: z.string().min(1),
+        driverId: z.string().nullable().optional(),
+        status: StatusZ.optional(), // defaults to "incomplete"
+        createdBy: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [row] = await ctx.db
+        .insert(bookings)
+        .values({
+          title: input.title,
+          pickupLocation: input.pickupLocation,
+          dropoffLocation: input.dropoffLocation,
+          purpose: input.purpose ?? null,
+          passengerInfo: input.passengerInfo,
+          agencyId: input.agencyId,
+          driverId: input.driverId ?? null,
+          status: input.status ?? "incomplete",
+          createdBy: input.createdBy ?? null,
+          // createdAt/updatedAt use DB defaults
+        })
+        .returning();
+
+      if (!row) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create booking" });
+      }
+      return row;
+    }),
+
   // GET /bookings/:id
   getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
     const rows = await ctx.db.select().from(bookings).where(eq(bookings.id, input.id)).limit(1);
