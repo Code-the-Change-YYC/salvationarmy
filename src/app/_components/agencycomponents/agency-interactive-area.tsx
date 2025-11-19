@@ -154,7 +154,7 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
         });
 
         //Evaluate the result from the back-end
-        if (result === false) {
+        if (result === null) {
           //Manually adds an error field to the mantine form
           form.setFieldError("destinationAddress", "Destination address is too vague");
         } else{
@@ -198,6 +198,7 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
         opened={showBookingModal}
         onClose={() => {
           form.clearErrors();
+          form.setFieldValue("destinationAddress", "");
           setShowBookingModal(false);
         }}
         onConfirm={() => {

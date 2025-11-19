@@ -114,29 +114,46 @@ export const formRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const { regionCode, destinationAddress } = input; //Grab passed variables
 
-      //Make an API call to Google Maps API to validate the inputs
-      const response = await fetch(
-        `https://addressvalidation.googleapis.com/v1:validateAddress?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            address: {
-              regionCode: regionCode,
-              addressLines: destinationAddress,
+      try {
+        //Make an API call to Google Maps API to validate the inputs
+        const response = await fetch(
+          `https://addressvalidation.googleapis.com/v1:validateAddress?key=${process.env.GOOGLE_MAPS_API_KEY}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
             },
-          }),
-        },
-      );
+            body: JSON.stringify({
+              address: {
+                regionCode: regionCode,
+                addressLines: destinationAddress,
+              },
+            }),
+          },
+        );
 
-      //Turn the response object into a JSON to check the result
-      const data = await response.json();
+        //Turn the response object into a JSON to check the result
+        const data = await response.json();
 
-      //If the address is good (addressComplete === true) then return Google's formatted version of the address, else false
-      return data.result.verdict.addressComplete === true
-        ? data.result.address.formattedAddress
-        : false;
+        //Check google's sent data is valid before returning
+        if (!data?.result?.verdict) {
+          throw new Error("Invalid response from Google API");
+        }
+
+        //If the address is good (addressComplete === true) then return Google's formatted version of the address, else null
+        return data.result.verdict.addressComplete === true
+          ? data.result.address.formattedAddress
+          : null;
+      } catch (errorObject) {
+        if (
+          errorObject instanceof Error &&
+          errorObject.message === "Invalid response from Google API"
+        ) {
+          //Runs when API gives bad info
+          throw errorObject;
+        }
+        //Runs when fetch fails
+        throw new Error("Backend validate destination address fetch failed");
+      }
     }),
 });
