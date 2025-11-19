@@ -7,6 +7,7 @@ export default defineConfig({
     "./src/server/db/schema.ts", // data schema
     "./src/server/db/auth-schema.ts", // auth schema
     "./src/server/db/booking-schema.ts", // booking schema
+    "./src/server/db/passenger-schema.ts", // passenger schema
   ],
   dialect: "postgresql",
   dbCredentials: {
