@@ -1,11 +1,10 @@
 "use client";
 
+import Button from "@/app/_components/common/button/Button";
 import SegmentedControl from "@/app/_components/segmentedControl";
 import Calendar from "@/assets/icons/calendar";
-import Grid from "@/assets/icons/grid";
-
-import Button from "@/app/_components/Button";
 import Chevron from "@/assets/icons/chevron";
+import Grid from "@/assets/icons/grid";
 import Plus from "@/assets/icons/plus";
 import type { ViewMode } from "@/types/types";
 import styles from "./view-controller.module.scss";

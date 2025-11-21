@@ -1,27 +1,15 @@
-import { requireRole } from "@/lib/auth-helpers";
-import { HydrateClient, api } from "@/trpc/server";
-import styles from "./index.module.css";
+import { AdminDashboard } from "@/app/_components/admincomponents/admin-dashboard";
+import { api } from "@/trpc/server";
 
 export default async function AdminHome() {
-  const session = await requireRole(["admin"]);
-
   const hello = await api.form.hello({ text: "from tRPC" });
 
-  if (session?.user) {
-    void api.form.getLatest.prefetch();
-  }
+  void api.form.getLatest.prefetch();
 
   return (
-    <HydrateClient>
-      <main className={styles.main}>
-        <div className={styles.container}>
-          <h1 className={styles.title}>Admin home page</h1>
-          <p className={styles.showcaseText}>{hello ? hello.greeting : "Loading tRPC query..."}</p>
-          <p className={styles.showcaseText}>
-            {session && <span>Logged in as {session.user?.name}</span>}
-          </p>
-        </div>
-      </main>
-    </HydrateClient>
+    <>
+      this is the main home page of the admin page
+      <AdminDashboard />
+    </>
   );
 }

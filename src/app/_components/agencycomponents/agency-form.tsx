@@ -1,9 +1,10 @@
 "use client";
 
-import { Divider, Stack, TextInput, Textarea, Title } from "@mantine/core";
+import { Box, Divider, Stack, Textarea, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
 import classes from "./agency-form.module.scss";
+
 interface AgencyBookingForm {
   residentName: string;
   contactInfo: string;
@@ -22,10 +23,9 @@ export const AgencyForm = ({ form }: AgencyFormProps) => {
     <Stack gap="lg">
       {/* Personal Information Section */}
       <Stack gap="md">
-        <Title order={3} size="h4">
+        <Box fw={500} fz="lg">
           Personal Information
-        </Title>
-
+        </Box>
         <div className={classes.formRow}>
           <TextInput
             withAsterisk
@@ -61,9 +61,9 @@ export const AgencyForm = ({ form }: AgencyFormProps) => {
 
       {/* Logistics Section */}
       <Stack gap="md">
-        <Title order={3} size="h4">
+        <Box fw={500} fz="lg">
           Logistics
-        </Title>
+        </Box>
 
         <div className={classes.formRow}>
           <DateTimePicker

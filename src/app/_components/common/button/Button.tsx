@@ -7,7 +7,8 @@ import styles from "./Button.module.scss";
 export type ButtonVariant = "primary" | "secondary";
 
 export interface ButtonProps {
-  text: string;
+  text?: string;
+  type?: "button" | "submit" | "reset";
   variant?: ButtonVariant;
   color?: string;
   width?: string | number;
@@ -17,6 +18,8 @@ export interface ButtonProps {
   onClick?: () => void;
   transparent?: boolean;
   disabled?: boolean;
+  children?: ReactNode;
+  loading?: boolean;
 }
 
 function getButtonStyles(variant: ButtonVariant, disabled: boolean, transparent: boolean) {
@@ -37,6 +40,7 @@ function getButtonStyles(variant: ButtonVariant, disabled: boolean, transparent:
 
 export default function Button({
   text,
+  type = "button",
   variant = "primary",
   color,
   width,
@@ -46,14 +50,17 @@ export default function Button({
   onClick,
   transparent = false,
   disabled = false,
+  children,
+  loading,
 }: ButtonProps) {
   return (
     <MantineButton
-      type="button"
+      type={type}
       onClick={onClick}
       disabled={disabled}
       variant={transparent ? "transparent" : "filled"}
       leftSection={icon}
+      loading={loading}
       classNames={{
         root: getButtonStyles(variant, disabled, transparent),
       }}
@@ -67,7 +74,7 @@ export default function Button({
         },
       }}
     >
-      {text}
+      {children ?? text}
     </MantineButton>
   );
 }

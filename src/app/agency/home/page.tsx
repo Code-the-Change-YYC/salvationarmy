@@ -1,10 +1,6 @@
-import Bell from "@/assets/icons/bell";
-import Face from "@/assets/icons/face";
-import Home from "@/assets/icons/home";
-
 import { AgencyInteractiveArea } from "@/app/_components/agencycomponents/agency-interactive-area";
 import Navbar from "@/app/_components/navbar";
-import { HydrateClient, api } from "@/trpc/server";
+import { api, HydrateClient } from "@/trpc/server";
 import { ViewMode } from "@/types/types";
 import styles from "./agency-page.module.scss";
 

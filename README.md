@@ -109,6 +109,12 @@ We are able to:
 - automatically generate migrations when this schema changes
 - sync these migrations with our db
 
+To generate the schema required by Better Auth, run the following command:
+
+```bash
+npx @better-auth/cli@latest generate
+```
+
 ### Difference between environments
 
 | Environment | Purpose                                        | Database                      | Env File     |
@@ -135,10 +141,10 @@ There are three workflows when working on a feature that involves changing the s
 ```bash
 # 1. Make schema changes in src/db/schema.ts
 # 2. Generate migration
-yarn db:generate:local
+yarn db:generate
 
 # 3. Apply migration to your personal Supabase database
-yarn db:migrate:local
+yarn db:migrate
 
 # 4. Run your app and test new DB features locally
 ```
@@ -151,8 +157,8 @@ However:
 - Always finalize your schema and then run:
 
 ```bash
-yarn db:generate:local
-yarn db:migrate:local
+yarn db:generate
+yarn db:migrate
 ```
 
 before committing, so migrations stay in version control.
@@ -163,14 +169,14 @@ Never run push or drop on the shared dev or prod databases because **those comma
 
 ```bash
 git pull
-yarn db:migrate:dev
+yarn db:migrate
 ```
 
 - Deploying confirmed changes to prod
 
 ```bash
 # only after these changes have been verified to be good
-yarn db:migrate:prod
+yarn db:migrate
 ```
 
 ## Enabling typesense for SCSS modules

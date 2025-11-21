@@ -9,7 +9,7 @@ import SegmentedControlTest from "@/app/_components/segmentedControlTest";
 import { LatestForm } from "@/app/_components/testform";
 import { TestNotificationButton } from "@/app/_components/testnotificationbutton";
 import { auth } from "@/lib/auth";
-import { HydrateClient, api } from "@/trpc/server";
+import { api, HydrateClient } from "@/trpc/server";
 import styles from "./index.module.css";
 
 export default async function Home() {

@@ -1,6 +1,18 @@
-export type Role = "admin" | "driver" | "agency";
+export enum Role {
+  ADMIN = "admin",
+  DRIVER = "driver",
+  AGENCY = "agency",
+}
 
-export const ADMIN_PROCEDURE_ROLES = ["admin", "agency"];
+export enum OrganizationRole {
+  MEMBER = "member",
+  ADMIN = "admin",
+  OWNER = "owner",
+}
+
+export const ADMIN_PROCEDURE_ROLES = [Role.ADMIN, Role.AGENCY];
+
+export const ALL_ROLES: Role[] = [Role.ADMIN, Role.DRIVER, Role.AGENCY];
 
 export const ROLE_PERMISSIONS = {
   admin: {

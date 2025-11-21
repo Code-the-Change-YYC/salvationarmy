@@ -1,11 +1,11 @@
 "use client";
 
+import { Divider, Group, Stack, Title } from "@mantine/core";
 import Chevron from "@/assets/icons/chevron";
 import Face from "@/assets/icons/face";
 import Location from "@/assets/icons/location";
 import Plus from "@/assets/icons/plus";
-import { Divider, Group, Stack, Title } from "@mantine/core";
-import Button from "../_components/Button";
+import Button from "../_components/common/button/Button";
 import IconButton from "../_components/IconButton";
 
 export default function StylesPage() {

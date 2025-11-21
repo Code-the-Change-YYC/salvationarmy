@@ -1,6 +1,6 @@
 "use client";
 
-import { Box } from "@mantine/core";
+import { Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import React, { useState } from "react";
 import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
@@ -8,13 +8,13 @@ import { ViewController } from "@/app/_components/agencycomponents/view-controll
 import Modal from "@/app/_components/common/modal/modal";
 import { notify } from "@/lib/notifications";
 import { ViewMode } from "@/types/types";
-import styles from "./agency-interactive-area.module.scss";
+import styles from "./admin-interactive-area.module.scss";
 
 interface Props {
   initialViewMode?: ViewMode;
 }
 
-export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
+export const AdminInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
   // eventually this loading state will be replacted with a tanstack mutation loading state
@@ -80,28 +80,6 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
           <div>ag grid table will be here</div>
         )}
       </div>
-
-      <Modal
-        opened={showBookingModal}
-        onClose={() => {
-          form.clearErrors();
-          setShowBookingModal(false);
-        }}
-        onConfirm={() => {
-          handleConfirm();
-        }}
-        title={
-          <Box fw={600} fz="xl">
-            Add a booking
-          </Box>
-        }
-        size="xl"
-        showDefaultFooter
-        confirmText="Confirm Booking"
-        loading={loading}
-      >
-        <AgencyForm form={form} />
-      </Modal>
     </>
   );
 };

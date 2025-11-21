@@ -1,10 +1,11 @@
 "use client";
 
+import { Group, Text } from "@mantine/core";
+import Link from "next/link";
 import Bell from "@/assets/icons/bell";
 import Home from "@/assets/icons/home";
 import User from "@/assets/icons/user";
-import { Group, Text } from "@mantine/core";
-import Button from "./Button";
+import Button from "./common/button/Button";
 
 type NavbarView = "admin" | "agency" | "driver";
 
@@ -29,9 +30,15 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
 
       {view === "admin" && (
         <Group gap={20}>
-          <Button text="Rider Logs" variant="secondary" />
-          <Button text="Vehicle Log" variant="secondary" />
-          <Button text="Schedule" variant="secondary" />
+          <Link href="/admin/rider-logs">
+            <Button text="Rider Logs" variant="secondary" />
+          </Link>
+          <Link href="/admin/vehicle-logs">
+            <Button text="Vehicle Log" variant="secondary" />
+          </Link>
+          <Link href="/admin/schedule">
+            <Button text="Schedule" variant="secondary" />
+          </Link>
           <User />
         </Group>
       )}
