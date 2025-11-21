@@ -7,8 +7,6 @@ import styles from "./admin-layout.module.scss";
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await requireRole([Role.ADMIN]);
 
-  console.log(session?.user);
-
   return (
     <HydrateClient>
       <Navbar view="admin" />

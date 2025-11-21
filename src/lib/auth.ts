@@ -44,7 +44,7 @@ export const auth = betterAuth({
         }
 
         try {
-          resend.emails.send({
+          await resend.emails.send({
             from: `Salvation Army Navigation Center <no-reply@notifications.burtonjong.dev>`,
             to: user.email,
             subject: "Reset your password",

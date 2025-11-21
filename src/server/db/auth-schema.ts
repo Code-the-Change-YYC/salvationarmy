@@ -1,4 +1,4 @@
-import { type InferModel, relations } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { bookings } from "./booking-schema";
 
@@ -74,8 +74,6 @@ export const organization = pgTable("organization", {
   createdAt: timestamp("created_at").notNull(),
   metadata: text("metadata"),
 });
-
-export type Organization = InferModel<typeof organization>;
 
 export const member = pgTable("member", {
   id: text("id").primaryKey(),

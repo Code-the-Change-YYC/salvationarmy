@@ -1,14 +1,14 @@
 "use client";
 import { Box, Divider, Select, Stack, TextInput } from "@mantine/core";
 import type { UseFormReturnType } from "@mantine/form";
-import type { Organization } from "@/server/db/auth-schema";
-import { ALL_ROLES, Role } from "@/types/types";
+import type { Organization } from "better-auth/plugins/organization";
+import { ALL_ORGANIZATION_ROLES, type OrganizationRole } from "@/types/types";
 import classes from "./invite-user-form.module.scss";
 
 interface InviteUserForm {
   email: string;
-  role: Role;
-  agencyId: string;
+  organizationRole: OrganizationRole;
+  organizationId: string;
 }
 
 interface InviteUserFormProps {
@@ -16,14 +16,7 @@ interface InviteUserFormProps {
   organizations: Organization[];
 }
 
-export const InviteUserForm = ({ form, organizations }: InviteUserFormProps) => {
-  const filteredOrganizations = organizations
-    .filter((org: Organization) => org.name !== "Admins" && org.name !== "Drivers")
-    .map((org: Organization) => ({ value: org.id, label: org.name }));
-
-  const selectedRole = form.values.role;
-  const showAgencyDropdown = selectedRole === Role.AGENCY;
-
+export const InviteUserForm = ({ form }: InviteUserFormProps) => {
   return (
     <Stack gap="lg">
       <Stack gap="md">
@@ -44,25 +37,23 @@ export const InviteUserForm = ({ form, organizations }: InviteUserFormProps) => 
       <div className={classes.formRow}>
         <Select
           withAsterisk
-          label="Role"
-          placeholder="Pick an organization to invite the user to"
-          data={ALL_ROLES}
-          key={form.key("role")}
-          {...form.getInputProps("role")}
+          label="Organization Role"
+          placeholder="Pick an organization role for the user"
+          data={ALL_ORGANIZATION_ROLES}
+          key={form.key("organizationRole")}
+          {...form.getInputProps("organizationRole")}
         />
       </div>
-      {showAgencyDropdown && (
-        <div className={classes.formRow}>
-          <Select
-            withAsterisk
-            label="Agency"
-            placeholder="Pick an agency"
-            data={filteredOrganizations}
-            key={form.key("agencyId")}
-            {...form.getInputProps("agencyId")}
-          />
-        </div>
-      )}
+      <div className={classes.formRow}>
+        <Select
+          withAsterisk
+          label="Organization"
+          placeholder="Pick an organization to invite the user to"
+          data={ALL_ORGANIZATION_ROLES}
+          key={form.key("organizationId")}
+          {...form.getInputProps("organizationId")}
+        />
+      </div>
     </Stack>
   );
 };

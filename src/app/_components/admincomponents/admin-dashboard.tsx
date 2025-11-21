@@ -8,16 +8,13 @@ import { CreateOrgsButton } from "@/app/_components/admincomponents/test/adminbu
 import Button from "@/app/_components/common/button/Button";
 import Modal from "@/app/_components/common/modal/modal";
 import { notify } from "@/lib/notifications";
-import type { Organization } from "@/server/db/auth-schema";
 import { api } from "@/trpc/react";
-import { OrganizationRole, Role } from "@/types/types";
+import { OrganizationRole } from "@/types/types";
 
 export const AdminDashboard = () => {
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
 
-  const organizations = api.organization.getAll.useQuery() as {
-    data: Organization[];
-  };
+  const organizations = api.organization.getAll.useQuery();
 
   const inviteUserMutation = api.organization.inviteUser.useMutation({
     onSuccess: (data) => {
@@ -34,19 +31,13 @@ export const AdminDashboard = () => {
     mode: "uncontrolled",
     initialValues: {
       email: "",
-      role: Role.DRIVER,
-      agencyId: "",
+      organizationRole: OrganizationRole.MEMBER,
+      organizationId: "",
     },
     validate: {
       email: (value) => (value.trim().length > 0 ? null : "Email is required"),
-      role: (value) => (value.trim().length > 0 ? null : "Role is required"),
-      agencyId: (value, values) => {
-        // Only validate agencyId if role is AGENCY
-        if (values.role === Role.AGENCY && value.trim().length === 0) {
-          return "Agency is required for agency role";
-        }
-        return null;
-      },
+      organizationRole: (value) => (value.trim().length > 0 ? null : "Role is required"),
+      organizationId: (value) => (value.trim().length > 0 ? null : "Organization is required"),
     },
   });
 
@@ -58,31 +49,10 @@ export const AdminDashboard = () => {
       return;
     }
 
-    const values = form.values;
-
-    // Determine the organization based on role
-    let organizationId = values.agencyId;
-
-    if (values.role === Role.ADMIN) {
-      // Find the "Admins" organization
-      const adminOrg = organizations.data?.find((org) => org.name === "Admins");
-      organizationId = adminOrg?.id || "";
-    } else if (values.role === Role.DRIVER) {
-      // Find the "Drivers" organization
-      const driverOrg = organizations.data?.find((org) => org.name === "Drivers");
-      organizationId = driverOrg?.id || "";
-    }
-
     // todo: handle case where admin permissions are given within the organization
-    const submissionData = {
-      ...values,
-      organizationId: organizationId,
-      role: OrganizationRole.MEMBER,
-    };
+    console.log("submit", form.values);
 
-    console.log("submit", submissionData);
-
-    inviteUserMutation.mutate(submissionData);
+    inviteUserMutation.mutate(form.values);
   };
 
   return (

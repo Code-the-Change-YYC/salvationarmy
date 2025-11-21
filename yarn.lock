@@ -1272,14 +1272,7 @@
   resolved "https://registry.yarnpkg.com/@trpc/server/-/server-11.7.1.tgz#ce7316dc2871a648b52578d9c7aad7471f4c870c"
   integrity sha512-N3U8LNLIP4g9C7LJ/sLkjuPHwqlvE3bnspzC4DEFVdvx2+usbn70P80E3wj5cjOTLhmhRiwJCSXhlB+MHfGeCw==
 
-"@types/node@^20.14.10":
-  version "20.19.25"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.19.25.tgz#467da94a2fd966b57cc39c357247d68047611190"
-  integrity sha512-ZsJzA5thDQMSQO788d7IocwwQbI8B5OPzmqNvpf3NY/+MHDAS759Wo0gd2WQeXYt5AAAQjzcrTVC6SKCuYgoCQ==
-  dependencies:
-    undici-types "~6.21.0"
-
-"@types/node@^22.7.5":
+"@types/node@^22.19.1", "@types/node@^22.7.5":
   version "22.19.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-22.19.1.tgz#1188f1ddc9f46b4cc3aec76749050b4e1f459b7b"
   integrity sha512-LCCV0HdSZZZb34qifBsyWlUmok6W7ouER+oQIGBScS8EsZsQbrtFTUrDX4hOl+CS6p7cnNC4td+qrSVGSCTUfQ==
@@ -1588,13 +1581,6 @@ drizzle-orm@^0.41.0:
   version "0.41.0"
   resolved "https://registry.yarnpkg.com/drizzle-orm/-/drizzle-orm-0.41.0.tgz#61b55ef3bf5983222deaaeed848b8c58c4aa3e0a"
   integrity sha512-7A4ZxhHk9gdlXmTdPj/lREtP+3u8KvZ4yEN6MYVxBzZGex5Wtdc+CWSbu7btgF6TB0N+MNPrvW7RKBbxJchs/Q==
-
-drizzle-seed@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/drizzle-seed/-/drizzle-seed-0.3.1.tgz#06866f05baf6470855d58ad7ff630435259552ba"
-  integrity sha512-F/0lgvfOAsqlYoHM/QAGut4xXIOXoE5VoAdv2FIl7DpGYVXlAzKuJO+IphkKUFK3Dz+rFlOsQLnMNrvoQ0cx7g==
-  dependencies:
-    pure-rand "^6.1.0"
 
 electron-to-chromium@^1.5.249:
   version "1.5.259"
@@ -2395,11 +2381,6 @@ prr@~1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/prr/-/prr-1.0.1.tgz#d3fc114ba06995a45ec6893f484ceb1d78f5f476"
   integrity sha512-yPw4Sng1gWghHQWj0B3ZggWUm4qVbPwPFcRG8KyxiU7J2OHFSoEHKS+EZ3fv5l1t9CyCiop6l/ZYeWbrgoQejw==
-
-pure-rand@^6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/pure-rand/-/pure-rand-6.1.0.tgz#d173cf23258231976ccbdb05247c9787957604f2"
-  integrity sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==
 
 pvtsutils@^1.3.6:
   version "1.3.6"

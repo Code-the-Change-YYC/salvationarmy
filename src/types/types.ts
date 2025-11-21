@@ -14,6 +14,12 @@ export const ADMIN_PROCEDURE_ROLES = [Role.ADMIN, Role.AGENCY];
 
 export const ALL_ROLES: Role[] = [Role.ADMIN, Role.DRIVER, Role.AGENCY];
 
+export const ALL_ORGANIZATION_ROLES: OrganizationRole[] = [
+  OrganizationRole.MEMBER,
+  OrganizationRole.ADMIN,
+  OrganizationRole.OWNER,
+];
+
 export const ROLE_PERMISSIONS = {
   admin: {
     canAccessAdmin: true,

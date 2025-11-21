@@ -1,9 +1,12 @@
 import { TRPCError } from "@trpc/server";
+import type { Organization } from "better-auth/plugins/organization";
 import { headers } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { OrganizationRole } from "@/types/types";
+import { passwordSchema } from "@/types/validation";
 
 export const organizationRouter = createTRPCRouter({
   getAll: adminProcedure.query(async () => {
@@ -12,7 +15,8 @@ export const organizationRouter = createTRPCRouter({
         headers: await headers(),
       });
 
-      return organizations;
+      // for some reason typescript the type is lost when passed back
+      return organizations as Organization[];
     } catch (error) {
       throw new TRPCError({
         cause: error,
@@ -24,11 +28,12 @@ export const organizationRouter = createTRPCRouter({
     .input(
       z.object({
         email: z.string().email(),
-        role: z.enum(["member", "admin", "owner"]),
+        organizationRole: z.nativeEnum(OrganizationRole),
         organizationId: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      // hopefully this never happens but members should only be part of one org, so find first could change
       const currentUserMember = await ctx.db.query.member.findFirst({
         where: (member, { eq }) => eq(member.userId, ctx.session.user.id),
       });
@@ -64,7 +69,7 @@ export const organizationRouter = createTRPCRouter({
           body: {
             userId: newUser.user.id,
             organizationId: input.organizationId,
-            role: input.role,
+            role: input.organizationRole,
           },
         });
 
@@ -173,7 +178,7 @@ export const organizationRouter = createTRPCRouter({
     .input(
       z.object({
         token: z.string(),
-        newPassword: z.string().min(8),
+        newPassword: passwordSchema,
       }),
     )
     .mutation(async ({ input }) => {

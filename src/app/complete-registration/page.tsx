@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
+import { passwordSchema } from "@/types/validation";
+import styles from "./page.module.scss";
 
 function CompleteRegistrationContent() {
   const searchParams = useSearchParams();
@@ -17,7 +19,6 @@ function CompleteRegistrationContent() {
     data: userEmail,
     isLoading,
     isError,
-    isFetched,
   } = api.organization.verifyTokenAndReturnUserEmail.useQuery(
     { token: token ?? "" },
     {
@@ -46,11 +47,8 @@ function CompleteRegistrationContent() {
     },
     validate: {
       password: (value) => {
-        if (value.length < 8) return "Password must be at least 8 characters";
-        if (!/[A-Z]/.test(value)) return "Password must contain at least one uppercase letter";
-        if (!/[a-z]/.test(value)) return "Password must contain at least one lowercase letter";
-        if (!/[0-9]/.test(value)) return "Password must contain at least one number";
-        return null;
+        const res = passwordSchema.safeParse(value);
+        return res.success ? null : res.error.message;
       },
       confirmPassword: (value, values) =>
         value === values.password ? null : "Passwords do not match",
@@ -71,7 +69,7 @@ function CompleteRegistrationContent() {
 
   if (!token) {
     return (
-      <div style={{ textAlign: "center", padding: "2rem" }}>
+      <div className={styles.center}>
         <Title order={2}>Invalid Invitation Link</Title>
         <Text mt="md">
           No invitation token provided. Please contact your administrator for a new invitation.
@@ -80,20 +78,9 @@ function CompleteRegistrationContent() {
     );
   }
 
-  if (!userEmail && isFetched) {
-    return (
-      <div style={{ textAlign: "center", padding: "2rem" }}>
-        <Title order={2}>Invalid Invitation Link</Title>
-        <Text mt="md">
-          No invitation email provided. Please contact your administrator for a new invitation.
-        </Text>
-      </div>
-    );
-  }
-
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "2rem" }}>
+      <div className={styles.center}>
         <Text>Verifying your invitation...</Text>
       </div>
     );
@@ -101,7 +88,7 @@ function CompleteRegistrationContent() {
 
   if (isError || !userEmail) {
     return (
-      <div style={{ textAlign: "center", padding: "2rem" }}>
+      <div className={styles.center}>
         <Title order={2}>Invalid Invitation Link</Title>
         <Text mt="md">
           This invitation link is invalid or has expired. Please contact your administrator for a
@@ -112,45 +99,47 @@ function CompleteRegistrationContent() {
   }
 
   return (
-    <div style={{ maxWidth: "500px", margin: "2rem auto", padding: "0 1rem" }}>
-      <Paper shadow="sm" p="xl" radius="md">
-        <Title order={1} mb="md">
-          Complete Your Registration
-        </Title>
-        <Text c="dimmed" mb="xl">
-          Welcome! Please set up your account to get started.
-        </Text>
+    <div className={styles.container}>
+      <div className={styles.paperWrapper}>
+        <Paper shadow="sm" p="xl" radius="md">
+          <Title order={1} className={styles.title}>
+            Complete Your Registration
+          </Title>
+          <Text c="dimmed" className={styles.dimmedText}>
+            Welcome! Please set up your account to get started.
+          </Text>
 
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Stack gap="md">
-            <TextInput
-              label="Email"
-              value={userEmail ? userEmail : "Loading..."}
-              disabled
-              description="This is the email address you were invited with"
-            />
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Stack gap="md" className={styles.formStack}>
+              <TextInput
+                label="Email"
+                value={userEmail ?? "Loading..."}
+                disabled
+                description="This is the email address you were invited with"
+              />
 
-            <PasswordInput
-              label="Password"
-              placeholder="Create a strong password"
-              required
-              description="Must be at least 8 characters with uppercase, lowercase, and numbers"
-              {...form.getInputProps("password")}
-            />
+              <PasswordInput
+                label="Password"
+                placeholder="Create a strong password"
+                required
+                description="Must be at least 8 characters with uppercase, lowercase, and numbers"
+                {...form.getInputProps("password")}
+              />
 
-            <PasswordInput
-              label="Confirm Password"
-              placeholder="Re-enter your password"
-              required
-              {...form.getInputProps("confirmPassword")}
-            />
+              <PasswordInput
+                label="Confirm Password"
+                placeholder="Re-enter your password"
+                required
+                {...form.getInputProps("confirmPassword")}
+              />
 
-            <Button type="submit" fullWidth loading={resetPasswordMutation.isPending} mt="md">
-              Complete Registration
-            </Button>
-          </Stack>
-        </form>
-      </Paper>
+              <Button type="submit" fullWidth loading={resetPasswordMutation.isPending} mt="md">
+                Complete Registration
+              </Button>
+            </Stack>
+          </form>
+        </Paper>
+      </div>
     </div>
   );
 }
