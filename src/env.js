@@ -10,7 +10,7 @@ export const env = createEnv({
     BETTER_AUTH_URL: process.env.NODE_ENV === "production" ? z.string() : z.string().optional(),
     BETTER_AUTH_SECRET: process.env.NODE_ENV === "production" ? z.string() : z.string().optional(),
     DATABASE_URL: z.string().url(),
-    RESEND_API_KEY: process.env.NODE_ENV === "production" ? z.string() : z.string().optional(),
+    RESEND_API_KEY: z.string(),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   },
 

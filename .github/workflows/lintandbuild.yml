@@ -30,7 +30,4 @@ jobs:
       - name: Build
         run: yarn build
         env:
-          DATABASE_URL: postgres://postgres:password@localhost:5432/test
-          BETTER_AUTH_URL: http://localhost:3000
-          BETTER_AUTH_SECRET: test_secret
-          RESEND_API_KEY: test_resend_api_key
+          SKIP_ENV_VALIDATION: true
