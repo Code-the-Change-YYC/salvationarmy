@@ -31,4 +31,3 @@ jobs:
         run: yarn build
         env:
           SKIP_ENV_VALIDATION: "true"
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}

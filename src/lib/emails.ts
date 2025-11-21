@@ -1,4 +1,4 @@
 import { Resend } from "resend";
 import { env } from "@/env";
 
-export const resend = new Resend(env.RESEND_API_KEY as string);
+export const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
