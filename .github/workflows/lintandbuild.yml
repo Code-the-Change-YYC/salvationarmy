@@ -30,4 +30,8 @@ jobs:
       - name: Build
         run: yarn build
         env:
-          SKIP_ENV_VALIDATION: true
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NEXT_PUBLIC_APP_URL: ${{ variables.NEXT_PUBLIC_APP_URL }}
