@@ -445,27 +445,9 @@ export default function CalendarView({
           day: "numeric",
         }}
         dayHeaderContent={(arg) => (
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontSize: "12px",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                marginTop: "2px",
-              }}
-            >
-              {arg.text.split(" ")[1]}
-            </div>
-            <div
-              style={{
-                fontSize: "20px",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-              }}
-            >
-              {arg.text.split(" ")[0]}
-            </div>
+          <div className={styles.dayHeaderContainer}>
+            <div className={styles.dayHeaderWeekday}>{arg.text.split(" ")[1]}</div>
+            <div className={styles.dayHeaderDay}>{arg.text.split(" ")[0]}</div>
           </div>
         )}
         allDaySlot={false}

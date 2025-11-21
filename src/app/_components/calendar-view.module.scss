@@ -41,3 +41,23 @@
     cursor: pointer !important;
   }
 }
+
+.dayHeaderContainer {
+  text-align: center;
+}
+
+.dayHeaderWeekday {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.dayHeaderDay {
+  font-size: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+
