@@ -8,7 +8,7 @@ export const bookings = pgTable("bookings", {
   pickupLocation: text("pickup_location").notNull(),
   dropoffLocation: text("dropoff_location").notNull(),
   purpose: text("purpose"),
-  passengerInfo: text("passengerInfo").notNull(),
+  passengerInfo: text("passenger_info").notNull(),
   status: text("status", { enum: ["incomplete", "completed", "in-progress"] })
     .notNull()
     .default("incomplete"),
@@ -16,7 +16,14 @@ export const bookings = pgTable("bookings", {
   agencyId: text("agency_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-
+  startTime: timestamp("start_time", {
+    mode: "string",
+    withTimezone: true,
+  }).notNull(),
+  endTime: timestamp("end_time", {
+    mode: "string",
+    withTimezone: true,
+  }).notNull(),
   driverId: text("driver_id").references(() => user.id, {
     onDelete: "set null",
   }),
