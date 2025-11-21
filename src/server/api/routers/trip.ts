@@ -13,7 +13,8 @@ export const tripRouter = createTRPCRouter({
         purpose: z.string(),
         passengerInfo: z.string(),
         // Requires ISO 8601 String
-        scheduledTime: z.string().datetime(),
+        startTime: z.string().datetime(),
+        endTime: z.string().datetime(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -25,7 +26,8 @@ export const tripRouter = createTRPCRouter({
         agencyId: ctx.session.user.id,
         purpose: input.purpose,
         createdBy: ctx.session.user.id,
-        scheduledTime: input.scheduledTime,
+        startTime: input.startTime,
+        endTime: input.endTime,
       });
     }),
 });

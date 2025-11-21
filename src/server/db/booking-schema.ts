@@ -16,7 +16,11 @@ export const bookings = pgTable("bookings", {
   agencyId: text("agency_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  scheduledTime: timestamp("scheduled_time", {
+  startTime: timestamp("start_time", {
+    mode: "string",
+    withTimezone: true,
+  }).notNull(),
+  endTime: timestamp("end_time", {
     mode: "string",
     withTimezone: true,
   }).notNull(),
