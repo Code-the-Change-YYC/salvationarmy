@@ -38,6 +38,11 @@ export const auth = betterAuth({
       const isInvitation = url.includes("complete-registration");
 
       if (isInvitation) {
+        if (!resend) {
+          console.warn("Resend API key not configured, skipping email");
+          return;
+        }
+
         try {
           resend.emails.send({
             from: `Salvation Army Navigation Center <no-reply@notifications.burtonjong.dev>`,
