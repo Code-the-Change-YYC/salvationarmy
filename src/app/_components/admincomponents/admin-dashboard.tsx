@@ -2,7 +2,7 @@
 
 import { Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import React, { useState } from "react";
+import { useState } from "react";
 import { InviteUserForm } from "@/app/_components/admincomponents/invite-user-form";
 import { CreateOrgsButton } from "@/app/_components/admincomponents/test/adminbutton";
 import Button from "@/app/_components/common/button/Button";

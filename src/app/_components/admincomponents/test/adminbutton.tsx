@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
 import { notify } from "@/lib/notifications";
@@ -23,9 +22,9 @@ export const CreateOrgsButton = () => {
         });
         console.log(`Created organization: ${org.name}`);
         notify.success(`Created organization: ${org.name}`);
-      } catch (error: any) {
+      } catch (error) {
         console.error(`Failed to create ${org.name}:`, error);
-        notify.error(`Failed to create ${org.name}: ${error?.message ?? "Unknown error"}`);
+        notify.error(`Failed to create ${org.name}`);
       }
     }
   };

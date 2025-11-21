@@ -1,5 +1,5 @@
 "use client";
-import { Box, Divider, Select, Stack, TextInput, Title } from "@mantine/core";
+import { Box, Divider, Select, Stack, TextInput } from "@mantine/core";
 import type { UseFormReturnType } from "@mantine/form";
 import type { Organization } from "@/server/db/auth-schema";
 import { ALL_ROLES, Role } from "@/types/types";

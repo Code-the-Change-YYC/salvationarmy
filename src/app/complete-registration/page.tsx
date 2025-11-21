@@ -19,7 +19,7 @@ function CompleteRegistrationContent() {
     isError,
     isFetched,
   } = api.organization.verifyTokenAndReturnUserEmail.useQuery(
-    { token: token! },
+    { token: token ?? "" },
     {
       enabled: !!token,
     },

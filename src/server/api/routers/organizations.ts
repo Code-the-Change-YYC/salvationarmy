@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 
 export const organizationRouter = createTRPCRouter({
-  getAll: adminProcedure.query(async ({ ctx }) => {
+  getAll: adminProcedure.query(async () => {
     try {
       const organizations = await auth.api.listOrganizations({
         headers: await headers(),
@@ -176,7 +176,7 @@ export const organizationRouter = createTRPCRouter({
         newPassword: z.string().min(8),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input }) => {
       await auth.api.resetPassword({
         body: {
           token: input.token,

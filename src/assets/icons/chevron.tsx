@@ -1,5 +1,5 @@
-import { memo } from "react";
 import type { SVGProps } from "react";
+import { memo } from "react";
 
 type ChevronDirection = "left" | "right" | "up" | "down";
 

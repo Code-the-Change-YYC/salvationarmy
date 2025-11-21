@@ -2,9 +2,5 @@ import { AdminInteractiveArea } from "@/app/_components/admincomponents/admin-in
 import { ViewMode } from "@/types/types";
 
 export default async function SchedulePage() {
-  return (
-    <>
-      <AdminInteractiveArea initialViewMode={ViewMode.CALENDAR} />
-    </>
-  );
+  return <AdminInteractiveArea initialViewMode={ViewMode.CALENDAR} />;
 }

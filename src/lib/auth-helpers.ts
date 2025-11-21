@@ -1,7 +1,7 @@
-import { type Session, auth } from "@/lib/auth";
-import { ROLE_PERMISSIONS, type Role } from "@/types/types";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { auth, type Session } from "@/lib/auth";
+import { ROLE_PERMISSIONS, type Role } from "@/types/types";
 
 // session helpers for server components and API routes
 export async function getSession(): Promise<Session | null> {

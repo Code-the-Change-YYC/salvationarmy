@@ -1,11 +1,8 @@
 "use client";
 
-import { Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import React, { useState } from "react";
-import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
+import { useState } from "react";
 import { ViewController } from "@/app/_components/agencycomponents/view-controller";
-import Modal from "@/app/_components/common/modal/modal";
 import { notify } from "@/lib/notifications";
 import { ViewMode } from "@/types/types";
 import styles from "./admin-interactive-area.module.scss";
@@ -16,9 +13,9 @@ interface Props {
 
 export const AdminInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
-  const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
+  const [_showBookingModal, setShowBookingModal] = useState<boolean>(false);
   // eventually this loading state will be replacted with a tanstack mutation loading state
-  const [loading, setLoading] = useState<boolean>(false);
+  const [_loading, setLoading] = useState<boolean>(false);
 
   const form = useForm({
     mode: "uncontrolled",
@@ -41,6 +38,7 @@ export const AdminInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Pr
     },
   });
 
+  // biome-ignore lint/correctness/noUnusedVariables: will delete when actually used
   const handleConfirm = () => {
     setLoading(true);
     const validation = form.validate();

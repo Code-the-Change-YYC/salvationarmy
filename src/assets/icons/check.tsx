@@ -1,5 +1,5 @@
-import { memo } from "react";
 import type { SVGProps } from "react";
+import { memo } from "react";
 
 const SvgComponent = ({ width = "16px", height = "16px", ...props }: SVGProps<SVGSVGElement>) => (
   <svg

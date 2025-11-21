@@ -2,7 +2,7 @@ import { AdminDashboard } from "@/app/_components/admincomponents/admin-dashboar
 import { api } from "@/trpc/server";
 
 export default async function AdminHome() {
-  const hello = await api.form.hello({ text: "from tRPC" });
+  const _hello = await api.form.hello({ text: "from tRPC" });
 
   void api.form.getLatest.prefetch();
 
