@@ -402,14 +402,7 @@ export default function CalendarView({
 
     return (
       <Box p="0.25rem">
-        <Box
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: "1rem",
-          }}
-        >
+        <Box className={styles.eventContentContainer}>
           <Box>
             <Text fw={600} size="sm" truncate="end">
               {event.title}
