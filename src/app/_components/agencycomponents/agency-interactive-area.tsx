@@ -1,13 +1,13 @@
 "use client";
 
+import { Box } from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { useState } from "react";
 import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
 import { ViewController } from "@/app/_components/agencycomponents/view-controller";
 import Modal from "@/app/_components/common/modal/modal";
 import { notify } from "@/lib/notifications";
 import { ViewMode } from "@/types/types";
-import { Title } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import React, { useState } from "react";
 import CalendarView from "../calendar-view";
 import styles from "./agency-interactive-area.module.scss";
 
@@ -15,7 +15,7 @@ interface Props {
   initialViewMode?: ViewMode;
 }
 
-export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
+export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
   // eventually this loading state will be replacted with a tanstack mutation loading state
@@ -97,9 +97,9 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
           handleConfirm();
         }}
         title={
-          <Title order={3} size="h3">
+          <Box fw={600} fz="xl">
             Add a booking
-          </Title>
+          </Box>
         }
         size="xl"
         showDefaultFooter

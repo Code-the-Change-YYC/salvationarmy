@@ -3,42 +3,6 @@
   padding: 1rem 2rem;
   padding-top: 0;
 
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-
-    .headerLeft {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .headerRight {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .iconPlaceholder {
-      width: 1.25rem;
-      height: 1.25rem;
-
-      &.notification {
-        width: 1.5rem;
-        height: 1.5rem;
-      }
-    }
-
-    .avatarPlaceholder {
-      width: 2rem;
-      height: 2rem;
-      border-radius: 9999px;
-    }
-  }
-
   .title {
     font-size: 1.5rem;
     font-weight: 600;

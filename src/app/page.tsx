@@ -1,6 +1,6 @@
+import { Box } from "@mantine/core";
 import { headers } from "next/headers";
 import Link from "next/link";
-
 import AgGridTest from "@/app/_components/aggridtest";
 import ModalTests from "@/app/_components/common/modal/modaltests";
 import FullCalendarTest from "@/app/_components/fullcalendartest";
@@ -9,9 +9,7 @@ import SegmentedControlTest from "@/app/_components/segmentedControlTest";
 import { LatestForm } from "@/app/_components/testform";
 import { TestNotificationButton } from "@/app/_components/testnotificationbutton";
 import { auth } from "@/lib/auth";
-import { HydrateClient, api } from "@/trpc/server";
-import { Box } from "@mantine/core";
-import CalendarView from "./_components/calendar-view";
+import { api, HydrateClient } from "@/trpc/server";
 
 export default async function Home() {
   const hello = await api.form.hello({ text: "from tRPC" });
