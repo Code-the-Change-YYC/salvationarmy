@@ -3,7 +3,7 @@
 import type { ColDef } from "ag-grid-community";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import React, { useState } from "react";
+import { useState } from "react";
 
 // register community modules for ag grid
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -16,7 +16,7 @@ interface IRow {
 }
 
 const AgGridTest = () => {
-  const [rowData, setRowData] = useState<IRow[]>([
+  const [rowData, _setRowData] = useState<IRow[]>([
     { make: "Tesla", model: "Model Y", price: 64950, electric: true },
     { make: "Ford", model: "F-Series", price: 33850, electric: false },
     { make: "Toyota", model: "Corolla", price: 29600, electric: false },
@@ -25,7 +25,7 @@ const AgGridTest = () => {
     { make: "Nissan", model: "Juke", price: 20675, electric: false },
   ]);
 
-  const [colDefs, setColDefs] = useState<ColDef<IRow>[]>([
+  const [colDefs, _setColDefs] = useState<ColDef<IRow>[]>([
     { field: "make" },
     { field: "model" },
     { field: "price" },

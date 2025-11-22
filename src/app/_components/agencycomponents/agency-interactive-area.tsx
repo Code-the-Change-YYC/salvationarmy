@@ -1,24 +1,27 @@
 "use client";
 
+import { Box } from "@mantine/core";
+import { useForm } from "@mantine/form";
+import React, { useState, useEffect, useRef } from "react";
 import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
 import { ViewController } from "@/app/_components/agencycomponents/view-controller";
 import Modal from "@/app/_components/common/modal/modal";
 import { notify } from "@/lib/notifications";
 import { ViewMode } from "@/types/types";
-import { Title } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import React, { useState, useEffect, useRef } from "react";
+import CalendarView from "../calendar-view";
 import styles from "./agency-interactive-area.module.scss";
 
 interface Props {
   initialViewMode?: ViewMode;
 }
 
-export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
+export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
   // eventually this loading state will be replacted with a tanstack mutation loading state
   const [loading, setLoading] = useState<boolean>(false);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [isDayView, setIsDayView] = useState<boolean>(false);
   const [googleScriptLoaded, setInitialLoad] = useState<boolean>(false); //Initially, the script has not loaded
   const [validationAddressGood, setValidationAddressGood] = useState<boolean>(false);
 
@@ -123,9 +126,7 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
 
   const handleConfirm = async () => {
     setLoading(true);
-
     const validation = form.validate();
-
     const hasErrors = Object.keys(validation.errors).length > 0;
 
     if (hasErrors) {
@@ -184,11 +185,14 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
         setShowBookingModal={setShowBookingModal}
         viewMode={viewMode}
         setViewMode={setViewMode}
+        currentDate={currentDate}
+        onDateChange={setCurrentDate}
+        isDayView={isDayView}
       />
 
       <div className={styles.calendarContainer}>
         {viewMode === ViewMode.CALENDAR ? (
-          <div>calendar will be here</div>
+          <CalendarView currentDate={currentDate} setIsDayView={setIsDayView} />
         ) : (
           <div>ag grid table will be here</div>
         )}
@@ -205,9 +209,9 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
           handleConfirm();
         }}
         title={
-          <Title order={3} size="h3">
+          <Box fw={600} fz="xl">
             Add a booking
-          </Title>
+          </Box>
         }
         size="xl"
         showDefaultFooter

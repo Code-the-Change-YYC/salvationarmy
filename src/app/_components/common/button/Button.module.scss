@@ -1,4 +1,4 @@
-@import "@/styles/variables";
+@use "@/styles/variables" as *;
 
 .primaryButton {
   background-color: $color-primary;
