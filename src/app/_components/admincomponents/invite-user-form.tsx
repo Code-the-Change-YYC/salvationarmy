@@ -16,7 +16,9 @@ interface InviteUserFormProps {
   organizations: Organization[];
 }
 
-export const InviteUserForm = ({ form }: InviteUserFormProps) => {
+const NO_ORGS_DATA = [{ value: "", label: "no organizations available", disabled: true }];
+
+export const InviteUserForm = ({ form, organizations }: InviteUserFormProps) => {
   return (
     <Stack gap="lg">
       <Stack gap="md">
@@ -49,7 +51,7 @@ export const InviteUserForm = ({ form }: InviteUserFormProps) => {
           withAsterisk
           label="Organization"
           placeholder="Pick an organization to invite the user to"
-          data={ALL_ORGANIZATION_ROLES}
+          data={organizations.map((org) => ({ value: org.id, label: org.name })) ?? NO_ORGS_DATA}
           key={form.key("organizationId")}
           {...form.getInputProps("organizationId")}
         />
