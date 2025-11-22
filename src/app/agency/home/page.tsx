@@ -1,4 +1,4 @@
-import { AgencyInteractiveArea } from "@/app/_components/agencycomponents/agency-interactive-area";
+import { BookingInteractiveArea } from "@/app/_components/agencycomponents/agency-interactive-area";
 import Navbar from "@/app/_components/navbar";
 import { api, HydrateClient } from "@/trpc/server";
 import { ViewMode } from "@/types/types";
@@ -14,7 +14,7 @@ export default async function AgencyHome() {
       <main className={styles.schedulePage}>
         <h1 className={styles.title}>This Week's Navigation Schedule</h1>
 
-        <AgencyInteractiveArea initialViewMode={ViewMode.CALENDAR} />
+        <BookingInteractiveArea initialViewMode={ViewMode.CALENDAR} />
       </main>
     </HydrateClient>
   );

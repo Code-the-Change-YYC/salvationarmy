@@ -7,7 +7,6 @@ import Chevron from "@/assets/icons/chevron";
 import Grid from "@/assets/icons/grid";
 import Plus from "@/assets/icons/plus";
 import type { ViewMode } from "@/types/types";
-import IconButton from "../IconButton";
 import styles from "./view-controller.module.scss";
 
 const leftViewOption = {
@@ -23,6 +22,7 @@ const rightViewOption = {
 };
 
 import type React from "react";
+import IconButton from "@/app/_components/common/button/IconButton";
 
 interface ViewControllerProps {
   viewMode: ViewMode;

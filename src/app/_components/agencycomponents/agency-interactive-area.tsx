@@ -15,7 +15,7 @@ interface Props {
   initialViewMode?: ViewMode;
 }
 
-export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
+export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
   // eventually this loading state will be replacted with a tanstack mutation loading state
