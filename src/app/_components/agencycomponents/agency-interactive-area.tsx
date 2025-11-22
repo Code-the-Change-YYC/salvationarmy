@@ -8,6 +8,7 @@ import { ViewController } from "@/app/_components/agencycomponents/view-controll
 import Modal from "@/app/_components/common/modal/modal";
 import { notify } from "@/lib/notifications";
 import { ViewMode } from "@/types/types";
+import CalendarView from "../calendar-view";
 import styles from "./agency-interactive-area.module.scss";
 
 interface Props {
@@ -19,6 +20,8 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
   // eventually this loading state will be replacted with a tanstack mutation loading state
   const [loading, setLoading] = useState<boolean>(false);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [isDayView, setIsDayView] = useState<boolean>(false);
 
   const form = useForm({
     mode: "uncontrolled",
@@ -71,11 +74,14 @@ export const AgencyInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: P
         setShowBookingModal={setShowBookingModal}
         viewMode={viewMode}
         setViewMode={setViewMode}
+        currentDate={currentDate}
+        onDateChange={setCurrentDate}
+        isDayView={isDayView}
       />
 
       <div className={styles.calendarContainer}>
         {viewMode === ViewMode.CALENDAR ? (
-          <div>calendar will be here</div>
+          <CalendarView currentDate={currentDate} setIsDayView={setIsDayView} />
         ) : (
           <div>ag grid table will be here</div>
         )}
