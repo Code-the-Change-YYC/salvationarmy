@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-
+import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { forms } from "@/server/db/schema";
 
@@ -117,7 +117,7 @@ export const formRouter = createTRPCRouter({
       try {
         //Make an API call to Google Maps API to validate the inputs
         const response = await fetch(
-          `https://addressvalidation.googleapis.com/v1:validateAddress?key=${process.env.GOOGLE_MAPS_API_KEY}`,
+          `https://addressvalidation.googleapis.com/v1:validateAddress?key=${env.GOOGLE_MAPS_API_KEY}`,
           {
             method: "POST",
             headers: {

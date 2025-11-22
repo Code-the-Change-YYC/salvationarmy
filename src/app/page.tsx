@@ -31,7 +31,7 @@ export default async function Home() {
   //----Place the following in the main driver page----
   //Will need to change how the script is loaded once actually added to the correct file (useEffect + teardown when it unmounts)
   const googleScript = document.createElement("script");
-  googleScript.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=beta&loading=async`;
+  googleScript.src = `https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=beta&loading=async`;
   googleScript.async = true; //Must wait for a promise before the script can be utilized properly
   document.body.appendChild(googleScript); //Add the script to the HTML body
   //---------------------------------------------------

@@ -2,10 +2,12 @@
 
 import { Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import React, { useState, useEffect, useRef } from "react";
+import { useLoadScript } from "@react-google-maps/api";
+import React, { useEffect, useRef, useState } from "react";
 import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
 import { ViewController } from "@/app/_components/agencycomponents/view-controller";
 import Modal from "@/app/_components/common/modal/modal";
+import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { ViewMode } from "@/types/types";
 import CalendarView from "../calendar-view";
@@ -15,6 +17,8 @@ interface Props {
   initialViewMode?: ViewMode;
 }
 
+const GOOGLE_MAPS_LIBRARIES_ARRAY: any = ["places"] as const; //Add more to this array if you need to import more libraries from the API
+
 export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
@@ -22,7 +26,6 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
   const [loading, setLoading] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [isDayView, setIsDayView] = useState<boolean>(false);
-  const [googleScriptLoaded, setInitialLoad] = useState<boolean>(false); //Initially, the script has not loaded
   const [validationAddressGood, setValidationAddressGood] = useState<boolean>(false);
 
   //Define a variable that react will reassign its value on runtime
@@ -30,23 +33,11 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
   //Will be assigned an HTML input element when the mantine form loads
   const inputElement = useRef<HTMLInputElement | null>(null);
 
-  //Run the following once, after react renders everything
-  useEffect(() => {
-    //Create an HTML script element so that the google maps API is loaded at runtime (needed for billing reasons among others)
-    const googleScript = document.createElement("script");
-    googleScript.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=beta&loading=async`;
-    googleScript.async = true; //Must wait for a promise before the script can be utilized properly
-    googleScript.onload = async () => {
-      //When the script is loaded, refresh the react DOM
-      setInitialLoad(true); //Changes the state, causing a refresh
-    };
-    document.body.appendChild(googleScript); //Add the script to the HTML body
-
-    //Cleanup: When this component is unmounted, remove the script tag to keep things clean
-    return () => {
-      document.body.removeChild(googleScript);
-    };
-  }, []);
+  //Load the Google maps API
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    libraries: GOOGLE_MAPS_LIBRARIES_ARRAY, //Import the places library
+  });
 
   const form = useForm({
     mode: "uncontrolled",
@@ -77,11 +68,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
   // biome-ignore lint: inputElement.current does change and needs to be changed in order for useEffect() to run
   useEffect(() => {
     //Do not run the code within the useEffect if the api or mantine form hasn't fully loaded
-    if (
-      googleScriptLoaded === false ||
-      google.maps.places === null ||
-      inputElement.current === null
-    ) {
+    if (!isLoaded || google.maps.places === null || inputElement.current === null) {
       return;
     }
 
@@ -174,9 +161,9 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
     }, 2000);
   };
 
-  //The google maps API script has not loaded yet
-  if (!googleScriptLoaded) {
-    return <></>; //Return nothing. Wait for the script to load, where it'll refresh the DOM
+  //If the script hasn't loaded yet, don't render anything until it does
+  if (!isLoaded) {
+    return <></>;
   }
 
   return (
