@@ -16,9 +16,10 @@ interface AgencyBookingForm {
 
 interface AgencyFormProps {
   form: UseFormReturnType<AgencyBookingForm>;
+  destinationAddressRef: React.RefObject<HTMLInputElement | null>;
 }
 
-export const AgencyForm = ({ form }: AgencyFormProps) => {
+export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => {
   return (
     <Stack gap="lg">
       {/* Personal Information Section */}
@@ -93,6 +94,7 @@ export const AgencyForm = ({ form }: AgencyFormProps) => {
             placeholder="Enter address"
             key={form.key("destinationAddress")}
             {...form.getInputProps("destinationAddress")}
+            ref={destinationAddressRef}
           />
         </div>
       </Stack>
