@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, jsonb, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 import { bookings } from "./booking-schema";
 
@@ -14,8 +14,6 @@ export const postTripSurveys = pgTable("post_trip_surveys", {
   })
     .notNull()
     .default("completed"),
-  // Survey questions
-  surveyQuestions: jsonb("survey_questions"), // e.g., { question1: "...", question2: "...", etc. }
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -28,10 +26,9 @@ export const driverFeedback = pgTable("driver_feedback", {
   driverId: text("driver_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  rating: integer("rating"),
+  originalLocationChanged: boolean("original_location_changed"),
+  passengerFitRating: integer("passenger_fit_rating"),
   comments: text("comments"),
-  // Answers to survey
-  surveyAnswers: jsonb("survey_answers"), // e.g., { answer1: "...", answer2: "...", etc. }
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -46,11 +43,10 @@ export const odometerReadings = pgTable("odometer_readings", {
     .references(() => user.id, { onDelete: "cascade" }),
   startReading: integer("start_reading").notNull(),
   endReading: integer("end_reading"),
+  timeOfDeparture: timestamp("time_of_departure"),
+  timeOfArrival: timestamp("time_of_arrival"),
+  destinationAddress: text("destination_address"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
 });
 
 // Relations
