@@ -4,6 +4,8 @@ import type { ColDef } from "ag-grid-community";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { useState } from "react";
+import Button from "@/app/_components/common/button/Button";
+import { authClient } from "@/lib/auth-client";
 
 // register community modules for ag grid
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -36,9 +38,19 @@ const AgGridTest = () => {
     flex: 1,
   };
 
+  const handleSignUp = async () => {
+    const result = await authClient.signUp.email({
+      email: "email@domain.com",
+      name: "Test User",
+      password: "testtesttest",
+    });
+    console.log(result);
+  };
+
   return (
     <div style={{ width: "90vw", height: "500px" }}>
       <AgGridReact rowData={rowData} columnDefs={colDefs} defaultColDef={defaultColDef} />
+      <Button onClick={handleSignUp}>Sign up test user </Button>
     </div>
   );
 };

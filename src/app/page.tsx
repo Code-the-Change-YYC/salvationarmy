@@ -49,6 +49,7 @@ export default async function Home() {
             <Link href="/driver/home">Drivers Home Page</Link>
             <h1>Go to button style guide</h1>
             <Link href="/style-guide">Button Style Guide</Link>
+            <h1>Sign up with test user</h1>
           </div>
           <div>
             <h1>ag grid test</h1>

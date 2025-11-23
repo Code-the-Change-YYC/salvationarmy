@@ -1,22 +1,22 @@
 import { TRPCError } from "@trpc/server";
-import type { Organization } from "better-auth/plugins/organization";
-import { headers } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
-import { adminProcedure, createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import {
+  adminProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { OrganizationRole } from "@/types/types";
 import { passwordSchema } from "@/types/validation";
 
 export const organizationRouter = createTRPCRouter({
-  getAll: adminProcedure.query(async () => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     try {
-      const organizations = await auth.api.listOrganizations({
-        headers: await headers(),
-      });
+      const organizations = await ctx.db.query.organization.findMany();
 
-      // for some reason typescript the type is lost when passed back
-      return organizations as Organization[];
+      return organizations;
     } catch (error) {
       throw new TRPCError({
         cause: error,
