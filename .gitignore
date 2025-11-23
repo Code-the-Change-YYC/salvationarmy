@@ -10,6 +10,7 @@
 
 # database
 drizzle/meta 
+/supabase
 
 # next.js
 /.next/
