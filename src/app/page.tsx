@@ -6,13 +6,11 @@ import ModalTests from "@/app/_components/common/modal/modaltests";
 import FullCalendarTest from "@/app/_components/fullcalendartest";
 import MantineTest from "@/app/_components/mantinetest";
 import SegmentedControlTest from "@/app/_components/segmentedControlTest";
-import { LatestForm } from "@/app/_components/testform";
 import { TestNotificationButton } from "@/app/_components/testnotificationbutton";
 import { auth } from "@/lib/auth";
 import { api, HydrateClient } from "@/trpc/server";
 
 export default async function Home() {
-  const hello = await api.form.hello({ text: "from tRPC" });
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -66,21 +64,8 @@ export default async function Home() {
       <main>
         <Box mx="auto" p="4rem">
           <div>
-            <div>
-              <p>{hello ? hello.greeting : "Loading tRPC query..."}</p>
-
-              <div>
-                <p>{session && <span>Logged in as {session.user?.name}</span>}</p>
-                <Link href={session ? "/api/auth/signout" : "/api/auth/signin"}>
-                  {session ? "Sign out" : "Sign in"}
-                </Link>
-              </div>
-            </div>
-
-            {session?.user && <LatestForm />}
-          </div>
-
-          <div>
+            <h1>Go to login page</h1>
+            <Link href="/login">Login Page</Link>
             <h1>Go to agency page</h1>
             <Link href="/agency/home">Agency Home Page</Link>
             <h1>Go to admin page (there is auth here)</h1>
@@ -89,7 +74,6 @@ export default async function Home() {
             <Link href="/driver/home">Drivers Home Page</Link>
             <h1>Go to button style guide</h1>
             <Link href="/style-guide">Button Style Guide</Link>
-            <h1>Sign up with test user</h1>
           </div>
           <div>
             <h1>ag grid test</h1>

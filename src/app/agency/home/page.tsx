@@ -1,5 +1,5 @@
 import { BookingInteractiveArea } from "@/app/_components/agencycomponents/agency-interactive-area";
-import Navbar from "@/app/_components/navbar";
+import Navbar from "@/app/_components/common/navbar";
 import { api, HydrateClient } from "@/trpc/server";
 import { ViewMode } from "@/types/types";
 import styles from "./agency-page.module.scss";

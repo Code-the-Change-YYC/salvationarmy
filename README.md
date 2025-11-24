@@ -8,6 +8,24 @@ This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3
 - [SASS](https://sass-lang.com/)
 - [tRPC](https://trpc.io)
 
+## Seeding the db
+
+First install bun:
+
+```bash
+npm install -g bun
+```
+
+Then run the script:
+
+```bash
+npm run seed
+# or
+yarn seed
+# or
+pnpm run seed
+```
+
 ## TRPC vs. REST APIs
 
 Why even use tRPC?

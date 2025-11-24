@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/app/_components/common/button/Button";
-import SegmentedControl from "@/app/_components/segmentedControl";
+import SegmentedControl from "@/app/_components/common/segmentedControl";
 import Calendar from "@/assets/icons/calendar";
 import Chevron from "@/assets/icons/chevron";
 import Grid from "@/assets/icons/grid";

@@ -2,8 +2,8 @@
 
 import { Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useLoadScript } from "@react-google-maps/api";
-import React, { useEffect, useRef, useState } from "react";
+import { type Libraries, useLoadScript } from "@react-google-maps/api";
+import { useEffect, useRef, useState } from "react";
 import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
 import { ViewController } from "@/app/_components/agencycomponents/view-controller";
 import Modal from "@/app/_components/common/modal/modal";
@@ -17,7 +17,7 @@ interface Props {
   initialViewMode?: ViewMode;
 }
 
-const GOOGLE_MAPS_LIBRARIES_ARRAY: any = ["places"] as const; //Add more to this array if you need to import more libraries from the API
+const GOOGLE_MAPS_LIBRARIES_ARRAY: Libraries = ["places"]; //Add more to this array if you need to import more libraries from the API
 
 export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
@@ -163,7 +163,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
 
   //If the script hasn't loaded yet, don't render anything until it does
   if (!isLoaded) {
-    return <></>;
+    return <div></div>;
   }
 
   return (

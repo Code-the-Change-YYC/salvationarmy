@@ -9,7 +9,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import "./emails.module.scss";
+import "./emails-module.scss";
 
 interface RegisterAccountProps {
   username: string;

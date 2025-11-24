@@ -1,4 +1,4 @@
-import Navbar from "@/app/_components/navbar";
+import Navbar from "@/app/_components/common/navbar";
 import { requireRole } from "@/lib/auth-helpers";
 import { HydrateClient } from "@/trpc/server";
 import { Role } from "@/types/types";
