@@ -8,21 +8,23 @@ export const tripRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string(),
-        pickupLocation: z.string(),
-        dropoffLocation: z.string(),
-        purpose: z.string(),
-        passengerInfo: z.string(),
+        residentName: z.string(),
+        contactInfo: z.string(),
+        additionalInfo: z.string().optional(),
         // Requires ISO 8601 String
         startTime: z.string().datetime(),
         endTime: z.string().datetime(),
+        purpose: z.string(),
+        pickupAddress: z.string(),
+        destinationAddress: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(bookings).values({
         title: input.title,
-        pickupLocation: input.pickupLocation,
-        dropoffLocation: input.dropoffLocation,
-        passengerInfo: input.passengerInfo,
+        pickupLocation: input.pickupAddress,
+        dropoffLocation: input.destinationAddress,
+        passengerInfo: `${input.residentName} ${input.contactInfo} ${input.additionalInfo}`,
         agencyId: ctx.session.user.id,
         purpose: input.purpose,
         createdBy: ctx.session.user.id,

@@ -6,11 +6,13 @@ import type { UseFormReturnType } from "@mantine/form";
 import classes from "./agency-form.module.scss";
 
 interface AgencyBookingForm {
+  title: string;
   residentName: string;
   contactInfo: string;
   additionalInfo: string;
   transportDateTime: string;
   purpose: string;
+  pickupAddress: string;
   destinationAddress: string;
 }
 
@@ -22,6 +24,16 @@ interface AgencyFormProps {
 export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => {
   return (
     <Stack gap="lg">
+      <div className={classes.formRow}>
+        <TextInput
+          withAsterisk
+          label="Booking Name"
+          placeholder="Enter name"
+          key={form.key("title")}
+          {...form.getInputProps("title")}
+        />
+      </div>
+      <Divider />
       {/* Personal Information Section */}
       <Stack gap="md">
         <Box fw={500} fz="lg">
@@ -86,7 +98,15 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             {...form.getInputProps("purpose")}
           />
         </div>
-
+        <div className={classes.formRow}>
+          <TextInput
+            withAsterisk
+            label="Pickup Address"
+            placeholder="Enter address"
+            key={form.key("pickupAddress")}
+            {...form.getInputProps("pickupAddress")}
+          />
+        </div>
         <div className={classes.formRow}>
           <TextInput
             withAsterisk

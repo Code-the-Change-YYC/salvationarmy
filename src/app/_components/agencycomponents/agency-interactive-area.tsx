@@ -42,19 +42,23 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
   const form = useForm({
     mode: "uncontrolled",
     initialValues: {
+      title: "",
       residentName: "",
       contactInfo: "",
       additionalInfo: "",
       transportDateTime: "",
       purpose: "",
+      pickupAddress: "",
       destinationAddress: "",
     },
 
     validate: {
+      title: (value) => (value.trim().length > 0 ? null : "Title is required"),
       residentName: (value) => (value.trim().length > 0 ? null : "Resident name is required"),
       contactInfo: (value) => (value.trim().length > 0 ? null : "Contact info is required"),
       transportDateTime: (value) => (value.trim().length > 0 ? null : "Date and time is required"),
       purpose: (value) => (value.trim().length > 0 ? null : "Purpose is required"),
+      pickupAddress: (value) => (value.trim().length > 0 ? null : "Pickup address is required"),
       destinationAddress: (value) =>
         value.trim().length > 0
           ? validationAddressGood
