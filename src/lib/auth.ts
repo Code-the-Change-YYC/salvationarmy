@@ -33,17 +33,16 @@ export const auth = betterAuth({
     autoSignIn: false, // need this to be false so they can accept and fill out fields first
     requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
-      // invite flow to check if the user is being invited or resetting their password
+      // check if Resend is configured
+      if (!resend) {
+        console.warn("Resend API key not configured, skipping email");
+        return;
+      }
 
+      // invite flow to check if the user is being invited or resetting their password
       // 1. if the user is being invited
       const isInvitation = url.includes("complete-registration");
-
       if (isInvitation) {
-        if (!resend) {
-          console.warn("Resend API key not configured, skipping email");
-          return;
-        }
-
         try {
           await resend.emails.send({
             from: `Salvation Army Navigation Center <no-reply@notifications.burtonjong.dev>`,
@@ -60,11 +59,6 @@ export const auth = betterAuth({
         }
       } else {
         // 2. todo: handle normal password reset
-        if (!resend) {
-          console.warn("Resend API key not configured, skipping email");
-          return;
-        }
-
         try {
           await resend.emails.send({
             from: `Salvation Army Navigation Center <no-reply@notifications.burtonjong.dev>`,

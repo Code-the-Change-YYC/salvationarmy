@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
+import { passwordSchema } from "@/types/validation";
 
 export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -20,7 +21,10 @@ export default function ResetPasswordPage() {
       confirmPassword: "",
     },
     validate: {
-      password: (value) => (value.length > 0 ? null : "Password is required"),
+      password: (value) => {
+        const res = passwordSchema.safeParse(value);
+        return res.success ? null : res.error.message;
+      },
       confirmPassword: (value, values) =>
         value === values.password ? null : "Passwords do not match",
     },
