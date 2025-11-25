@@ -3,15 +3,19 @@
 import { Anchor, Paper, PasswordInput, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
 import { emailRegex } from "@/types/validation";
+import type { AuthUser } from "@/types/types";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const { data: session, isPending: sessionLoading } = authClient.useSession();
+  // const { data: activeOrganization, isPending: orgLoading } = authClient.useActiveOrganization();
 
   const form = useForm({
     initialValues: {
@@ -28,19 +32,50 @@ export default function LoginPage() {
   // todo2: we need to evaluate what org they are a part of to redirect them properly
   // todo3: after we handle the above, we need to make it so that this redirects them IF they
   // are already logged in to their proper dashboard
+
+  const redirectToHomePage = useCallback(
+    (role: string) => {
+      switch (role) {
+        case "admin":
+          router.push("/admin/home");
+          break;
+        case "agency":
+          router.push("/agency/home");
+          break;
+        case "driver":
+          router.push("/driver/home");
+          break;
+        default:
+          router.push("/");
+          break;
+      }
+    },
+    [router],
+  );
+
+  useEffect(() => {
+    if (sessionLoading) return;
+
+    if (session?.user) {
+      const userWithRole = session.user as AuthUser;
+      redirectToHomePage(userWithRole.role);
+    }
+  }, [session, sessionLoading, redirectToHomePage]);
+
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
 
     try {
-      const { error } = await authClient.signIn.email({
+      const { data, error } = await authClient.signIn.email({
         email: values.email,
         password: values.password,
       });
 
       if (error) {
         alert(error.message || "Failed to sign in");
-      } else {
-        router.push("/dashboard");
+      } else if (data?.user) {
+        const userWithRole = data.user as AuthUser;
+        redirectToHomePage(userWithRole.role);
       }
     } catch (error) {
       console.error("Sign in error:", error);

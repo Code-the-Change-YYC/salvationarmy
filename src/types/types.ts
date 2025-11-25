@@ -106,6 +106,17 @@ export interface CalendarEvent {
   };
 }
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  image?: string | null;
+  emailVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ScheduleInformation {
   CREATED_AT: string; // string or date type?
   CLIENT_NAME: string;
