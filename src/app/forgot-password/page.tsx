@@ -2,7 +2,6 @@
 
 import { Anchor, Paper, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { success } from "better-auth";
 import { useState } from "react";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
@@ -49,8 +48,7 @@ export default function ForgotPasswordPage() {
 
           <Stack gap="md">
             <Text size="sm">
-              We've sent a password reset link to
-              <strong>{form.values.email}</strong>.
+              We've sent a password reset link to <strong>{form.values.email}</strong>.
             </Text>
 
             <Text size="sm" c="dimmed">
