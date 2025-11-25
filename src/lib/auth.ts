@@ -3,6 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { organization } from "better-auth/plugins";
 import RegisterAccountEmailTemplate from "@/app/_components/common/emails/register-account";
+import ResetPasswordEmailTemplate from "@/app/_components/common/emails/reset-password";
 import { resend } from "@/lib/emails";
 import { db } from "@/server/db";
 
@@ -59,6 +60,25 @@ export const auth = betterAuth({
         }
       } else {
         // 2. todo: handle normal password reset
+        if (!resend) {
+          console.warn("Resend API key not configured, skipping email");
+          return;
+        }
+
+        try {
+          await resend.emails.send({
+            from: `Salvation Army Navigation Center <no-reply@notifications.burtonjong.dev>`,
+            to: user.email,
+            subject: "Reset your password",
+            react: ResetPasswordEmailTemplate({
+              resetUrl: url,
+              userEmail: user.email,
+              username: user.name,
+            }),
+          });
+        } catch (error) {
+          console.error("Error sending password reset email:", error);
+        }
       }
     },
   },
