@@ -375,7 +375,7 @@ export default function CalendarView({
     const alertMessage = [
       `Title: ${event.title}`,
       `Time: ${startTime} - ${endTime}`,
-      extendedProps.pickupLocation ? `Pickup: ${extendedProps.pickupLocation}` : "",
+      extendedProps.pickupAddress ? `Pickup: ${extendedProps.pickupAddress}` : "",
       extendedProps.destinationAddress ? `Dropoff: ${extendedProps.destinationAddress}` : "",
       extendedProps.status ? `Status: ${extendedProps.status}` : "",
       extendedProps.driverId ? `Driver ID: ${extendedProps.driverId}` : "",
