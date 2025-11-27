@@ -7,8 +7,8 @@ export const tripRouter = createTRPCRouter({
   create: adminProcedure
     .input(
       z.object({
-        title: z.string(),
-        residentName: z.string().min(1, "Title is required"),
+        title: z.string().min(1, "Title is required"),
+        residentName: z.string().min(1, "Resident name is required"),
         contactInfo: z.string().min(1, "Contact info is required"),
         additionalInfo: z.string().optional(),
         // Requires ISO 8601 String
@@ -16,7 +16,7 @@ export const tripRouter = createTRPCRouter({
         endTime: z.string().datetime(),
         purpose: z.string().min(1, "Purpose is required"),
         pickupAddress: z.string().min(1, "Pickup address is required"),
-        destinationAddress: z.string().min(1, "destinationAddress is required"),
+        destinationAddress: z.string().min(1, "Destination address is required"),
       }),
     )
     .mutation(async ({ ctx, input }) => {
