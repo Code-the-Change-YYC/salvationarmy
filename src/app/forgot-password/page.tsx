@@ -6,6 +6,7 @@ import { useState } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
+import { emailRegex } from "@/types/validation";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);

@@ -7,6 +7,7 @@ import { useState } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
+import { emailRegex } from "@/types/validation";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,7 @@ export default function LoginPage() {
       password: "",
     },
     validate: {
-      email: (value) => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? null : "Invalid email"),
+      email: (value) => (emailRegex.test(value) ? null : "Invalid email"),
       password: (value) => (value.length > 0 ? null : "Password is required"),
     },
   });
