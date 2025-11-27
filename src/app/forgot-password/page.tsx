@@ -5,6 +5,7 @@ import { useForm } from "@mantine/form";
 import { useState } from "react";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
+import styles from "./page.module.scss";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -40,7 +41,7 @@ export default function ForgotPasswordPage() {
   // After user enters recovery email, they see this message
   if (isSuccess) {
     return (
-      <div style={{ maxWidth: "400px", margin: "4rem auto", padding: "0 1rem" }}>
+      <div className={styles.container}>
         <Paper shadow="sm" p="xl" radius="md">
           <Title order={1} mb="md">
             Check Your Email
@@ -68,7 +69,7 @@ export default function ForgotPasswordPage() {
 
   // Prompt user to enter email for reset-password link
   return (
-    <div style={{ maxWidth: "400px", margin: "4rem auto", padding: "0 1rem" }}>
+    <div className={styles.container}>
       <Paper shadow="sm" p="xl" radius="md">
         <Title order={1} mb="md">
           Forgot Password
