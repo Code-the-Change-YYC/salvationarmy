@@ -22,9 +22,9 @@ export const tripRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(bookings).values({
         title: input.title,
-        pickupLocation: input.pickupAddress,
-        dropoffLocation: input.destinationAddress,
-        passengerInfo: `${input.residentName} ${input.contactInfo} ${input.additionalInfo}`,
+        pickupAddress: input.pickupAddress,
+        destinationAddress: input.destinationAddress,
+        passengerInfo: `${input.residentName} ${input.contactInfo} ${input.additionalInfo ? ` ${input.additionalInfo}` : ""}`,
         agencyId: ctx.session.user.id,
         purpose: input.purpose,
         createdBy: ctx.session.user.id,
