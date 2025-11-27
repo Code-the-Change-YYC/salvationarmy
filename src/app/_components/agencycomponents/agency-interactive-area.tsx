@@ -62,11 +62,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
       purpose: (value) => (value.trim().length > 0 ? null : "Purpose is required"),
       pickupAddress: (value) => (value.trim().length > 0 ? null : "Pickup address is required"),
       destinationAddress: (value) =>
-        value.trim().length > 0
-          ? validationAddressGood
-            ? null
-            : "Destination address is invalid"
-          : "Destination address is required",
+        value.trim().length > 0 ? null : "Destination address is required",
     },
   });
 
