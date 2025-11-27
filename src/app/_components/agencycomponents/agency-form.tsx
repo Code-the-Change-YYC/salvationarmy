@@ -10,7 +10,8 @@ interface AgencyBookingForm {
   residentName: string;
   contactInfo: string;
   additionalInfo: string;
-  transportDateTime: string;
+  startTime: string;
+  endTime: string;
   purpose: string;
   pickupAddress: string;
   destinationAddress: string;
@@ -84,8 +85,19 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             label="Date and time of transport"
             placeholder="Select date and time"
             valueFormat="DD MMM YYYY hh:mm A"
-            key={form.key("transportDateTime")}
-            {...form.getInputProps("transportDateTime")}
+            key={form.key("startTime")}
+            {...form.getInputProps("startTime")}
+          />
+        </div>
+
+        <div className={classes.formRow}>
+          <DateTimePicker
+            withAsterisk
+            label="Date and time of arrival"
+            placeholder="Select date and time"
+            valueFormat="DD MMM YYYY hh:mm A"
+            key={form.key("endTime")}
+            {...form.getInputProps("endTime")}
           />
         </div>
 
