@@ -5,11 +5,11 @@ import { useForm } from "@mantine/form";
 import { useState } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
-import { authClient } from "@/lib/auth-client";
+import { notify } from "@/lib/notifications";
+import { api } from "@/trpc/react";
 import { emailRegex } from "@/types/validation";
 
 export default function ForgotPasswordPage() {
-  const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const form = useForm({
@@ -17,26 +17,24 @@ export default function ForgotPasswordPage() {
       email: "",
     },
     validate: {
-      email: (value) => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? null : "Invalid email"),
+      email: (value) => (emailRegex.test(value) ? null : "Invalid email"),
     },
   });
 
-  const handleSubmit = async (values: typeof form.values) => {
-    setLoading(true);
-
-    try {
-      await authClient.forgetPassword({
-        email: values.email,
-        redirectTo: "/reset-password",
-      });
-
+  const sendResetEmailMutation = api.organization.sendPasswordResetEmail.useMutation({
+    onSuccess: (data) => {
+      notify.success(`Password reset link sent to ${data.email}`);
       setIsSuccess(true);
-    } catch (error) {
-      console.error("Password reset error:", error);
-      alert("Failed to send reset email. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    },
+    onError: (error) => {
+      notify.error(error.message || "Failed to send reset email");
+    },
+  });
+
+  const handleSubmit = (values: typeof form.values) => {
+    sendResetEmailMutation.mutate({
+      email: values.email,
+    });
   };
 
   // After user enters recovery email, they see this message
@@ -90,7 +88,7 @@ export default function ForgotPasswordPage() {
               {...form.getInputProps("email")}
             />
 
-            <Button type="submit" loading={loading}>
+            <Button type="submit" loading={sendResetEmailMutation.isPending}>
               Send Reset Link
             </Button>
 
