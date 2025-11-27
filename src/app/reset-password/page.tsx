@@ -4,6 +4,7 @@ import { Anchor, Paper, PasswordInput, Stack, Text, Title } from "@mantine/core"
 import { useForm } from "@mantine/form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
 import { passwordSchema } from "@/types/validation";
@@ -62,7 +63,7 @@ export default function ResetPasswordPage() {
   // Show error if no token in URL
   if (!token) {
     return (
-      <div style={{ maxWidth: "400px", margin: "4rem auto", padding: "0 1rem" }}>
+      <div className={styles.container}>
         <Paper shadow="sm" p="xl" radius="md">
           <Title order={1} mb="md">
             Invalid Reset Link
@@ -85,7 +86,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div style={{ maxWidth: "400px", margin: "4rem auto", padding: "0 1rem" }}>
+    <div className={styles.container}>
       <Paper shadow="sm" p="xl" radius="md">
         <Title order={1} mb="md">
           Reset Password

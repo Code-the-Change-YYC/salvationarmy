@@ -3,9 +3,9 @@
 import { Anchor, Paper, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
+import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
-import styles from "./page.module.scss";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
