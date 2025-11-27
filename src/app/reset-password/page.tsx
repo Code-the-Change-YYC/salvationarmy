@@ -3,15 +3,13 @@
 import { Anchor, Paper, PasswordInput, Stack, Text, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
-import { authClient } from "@/lib/auth-client";
+import { notify } from "@/lib/notifications";
+import { api } from "@/trpc/react";
 import { passwordSchema } from "@/types/validation";
 
 export default function ResetPasswordPage() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -31,33 +29,26 @@ export default function ResetPasswordPage() {
     },
   });
 
-  const handleSubmit = async (values: typeof form.values) => {
+  const resetPasswordMutation = api.organization.resetPassword.useMutation({
+    onSuccess: () => {
+      notify.success("Password reset successful! Redirecting to login...");
+      router.push("/login");
+    },
+    onError: (error) => {
+      notify.error(error.message || "Failed to reset password");
+    },
+  });
+
+  const handleSubmit = (values: typeof form.values) => {
     if (!token) {
-      setError("Invalid or missing reset token");
+      notify.error("Invalid or missing reset token");
       return;
     }
 
-    setLoading(true);
-    setError("");
-
-    try {
-      const { error } = await authClient.resetPassword({
-        newPassword: values.password,
-        token,
-      });
-
-      if (error) {
-        setError(error.message || "Failed to reset password");
-      } else {
-        alert("Password reset successful! Redirecting to login...");
-        router.push("/login");
-      }
-    } catch (error) {
-      console.error("Reset password error:", error);
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    resetPasswordMutation.mutate({
+      token,
+      newPassword: values.password,
+    });
   };
 
   // Show error if no token in URL
@@ -102,6 +93,7 @@ export default function ResetPasswordPage() {
               label="New Password"
               placeholder="Enter new password"
               required
+              description="Must be at least 8 characters with uppercase, lowercase, and numbers"
               {...form.getInputProps("password")}
             />
 
@@ -109,16 +101,11 @@ export default function ResetPasswordPage() {
               label="Confirm Password"
               placeholder="Confirm new password"
               required
+              description="Must be at least 8 characters with uppercase, lowercase, and numbers"
               {...form.getInputProps("confirmPassword")}
             />
 
-            {error && (
-              <Text size="sm" c="red">
-                {error}
-              </Text>
-            )}
-
-            <Button type="submit" loading={loading}>
+            <Button type="submit" loading={resetPasswordMutation.isPending}>
               Reset Password
             </Button>
 
