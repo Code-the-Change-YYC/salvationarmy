@@ -8,15 +8,15 @@ export const tripRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string(),
-        residentName: z.string(),
-        contactInfo: z.string(),
+        residentName: z.string().min(1, "Title is required"),
+        contactInfo: z.string().min(1, "Contact info is required"),
         additionalInfo: z.string().optional(),
         // Requires ISO 8601 String
         startTime: z.string().datetime(),
         endTime: z.string().datetime(),
-        purpose: z.string(),
-        pickupAddress: z.string(),
-        destinationAddress: z.string(),
+        purpose: z.string().min(1, "Purpose is required"),
+        pickupAddress: z.string().min(1, "Pickup address is required"),
+        destinationAddress: z.string().min(1, "destinationAddress is required"),
       }),
     )
     .mutation(async ({ ctx, input }) => {
