@@ -57,8 +57,8 @@ export enum BookingStatus {
 export interface Booking {
   id: string;
   title: string;
-  pickupLocation: string;
-  dropoffLocation: string;
+  pickupAddress: string;
+  destinationAddress: string;
   purpose?: string;
   passengerInfo: string;
   status: BookingStatus;
@@ -82,8 +82,8 @@ export interface CalendarEvent {
   allDay?: boolean;
   color?: string;
   extendedProps?: {
-    pickupLocation: string;
-    dropoffLocation: string;
+    pickupAddress: string;
+    destinationAddress: string;
     purpose?: string;
     passengerInfo: string;
     status: BookingStatus;
