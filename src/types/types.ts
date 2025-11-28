@@ -50,9 +50,19 @@ export type { ViewMode as IViewMode };
 
 export enum BookingStatus {
   INCOMPLETE = "incomplete",
-  COMPLETED = "completed",
   IN_PROGRESS = "in-progress",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
 }
+
+export const ALL_BOOKING_STATUSES = [
+  BookingStatus.INCOMPLETE,
+  BookingStatus.IN_PROGRESS,
+  BookingStatus.COMPLETED,
+  BookingStatus.CANCELLED,
+] as const;
+
+export type BookingStatusValue = (typeof ALL_BOOKING_STATUSES)[number];
 
 export interface Booking {
   id: string;

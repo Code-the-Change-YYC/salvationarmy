@@ -728,10 +728,10 @@
   resolved "https://registry.yarnpkg.com/@levischuck/tiny-cbor/-/tiny-cbor-0.2.11.tgz#833ddf7f3627dcb62d855d9c184061b4a1a875b3"
   integrity sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow==
 
-"@mantine/core@^8.3.2":
-  version "8.3.8"
-  resolved "https://registry.yarnpkg.com/@mantine/core/-/core-8.3.8.tgz#40b568e27ab7d0cfb3ad832810d33c21173b09e1"
-  integrity sha512-UM3Za7Yl0FzbZ2zPgHwNyCpLgtSqkAi8ku13+gRS/6JB0FjwSkMwibERUqQIpwqAHdR5KNmIohjuqHu8guJowg==
+"@mantine/core@^8.3.9":
+  version "8.3.9"
+  resolved "https://registry.yarnpkg.com/@mantine/core/-/core-8.3.9.tgz#4fa5384fa82ebf53c1e21adc187b97085e5c3544"
+  integrity sha512-ivj0Crn5N521cI2eWZBsBGckg0ZYRqfOJz5vbbvYmfj65bp0EdsyqZuOxXzIcn2aUScQhskfvzyhV5XIUv81PQ==
   dependencies:
     "@floating-ui/react" "^0.27.16"
     clsx "^2.1.1"
@@ -747,10 +747,10 @@
   dependencies:
     clsx "^2.1.1"
 
-"@mantine/form@^8.3.3":
-  version "8.3.8"
-  resolved "https://registry.yarnpkg.com/@mantine/form/-/form-8.3.8.tgz#079a3097f8073f9636c71e152f9fccb1878bc66f"
-  integrity sha512-V9/6Vk56ox9m5/gllmOjU/EEfBqxbABkZufvxrB7dgA+BLvvdSi/iS+t3FvbkRol5YcxiSRe83cN4HZTi9L04Q==
+"@mantine/form@^8.3.9":
+  version "8.3.9"
+  resolved "https://registry.yarnpkg.com/@mantine/form/-/form-8.3.9.tgz#b170c52324967e0dc251844f9b3f60cae232a726"
+  integrity sha512-G7eCo5TEWGcsWHrNGwp/o1yPcCYbaMdLq6SClN+wMhAA+qaEO1ZHf9mX8fSOX78nkaoyIrZHGOhbVXcZ7hmVrQ==
   dependencies:
     fast-deep-equal "^3.1.3"
     klona "^2.0.6"
