@@ -36,21 +36,6 @@ export default function BookingDebugPage() {
     },
   });
 
-  const handleTestSignUp = async () => {
-    try {
-      const result = await authClient.signUp.email({
-        email: "email@domain.com",
-        name: "Test User",
-        password: "testtesttest",
-      });
-      console.log(result);
-      notifications.show({ color: "green", message: "Sign up successful!" });
-    } catch (error) {
-      notifications.show({ color: "red", message: "Sign up failed!" });
-      console.error(error);
-    }
-  };
-
   const utils = api.useUtils();
 
   const bookingQuery = api.bookings.getById.useQuery({ id: bookingId }, { enabled: false });
@@ -108,10 +93,6 @@ export default function BookingDebugPage() {
   return (
     <div className={styles.container}>
       <h1>Booking API Debug Panel</h1>
-
-      <Button mb="md" onClick={handleTestSignUp}>
-        Test Sign Up
-      </Button>
 
       <Group>
         <TextInput

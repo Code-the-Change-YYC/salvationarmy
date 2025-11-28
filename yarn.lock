@@ -731,12 +731,7 @@
   resolved "https://registry.yarnpkg.com/@img/sharp-win32-x64/-/sharp-win32-x64-0.34.5.tgz#a81ffb00e69267cd0a1d626eaedb8a8430b2b2f8"
   integrity sha512-+29YMsqY2/9eFEiW93eqWnuLcWcufowXewwSNIT6UwZdUUCrM3oFjMWH/Z6/TMmb4hlFenmfAVbpWeup2jryCw==
 
-"@levischuck/tiny-cbor@^0.2.2":
-  version "0.2.11"
-  resolved "https://registry.yarnpkg.com/@levischuck/tiny-cbor/-/tiny-cbor-0.2.11.tgz#833ddf7f3627dcb62d855d9c184061b4a1a875b3"
-  integrity sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow==
-
-"@mantine/core@^8.3.9":
+"@mantine/core@8.3.9":
   version "8.3.9"
   resolved "https://registry.yarnpkg.com/@mantine/core/-/core-8.3.9.tgz#4fa5384fa82ebf53c1e21adc187b97085e5c3544"
   integrity sha512-ivj0Crn5N521cI2eWZBsBGckg0ZYRqfOJz5vbbvYmfj65bp0EdsyqZuOxXzIcn2aUScQhskfvzyhV5XIUv81PQ==
@@ -748,14 +743,14 @@
     react-textarea-autosize "8.5.9"
     type-fest "^4.41.0"
 
-"@mantine/dates@^8.3.2":
+"@mantine/dates@8.3.9":
   version "8.3.9"
   resolved "https://registry.yarnpkg.com/@mantine/dates/-/dates-8.3.9.tgz#839fe5bd6801c34f6a0c875a545f8e5a2e62252b"
   integrity sha512-XOoGrY2hydqVrn/eBmhmJnZW6fAIOTOv0TLlN/a+C/sMxAgwNLqk+hqU6Rd3WE4Hm00J1BmbJJt/g/KrvnEpNg==
   dependencies:
     clsx "^2.1.1"
 
-"@mantine/form@^8.3.9":
+"@mantine/form@8.3.9":
   version "8.3.9"
   resolved "https://registry.yarnpkg.com/@mantine/form/-/form-8.3.9.tgz#b170c52324967e0dc251844f9b3f60cae232a726"
   integrity sha512-G7eCo5TEWGcsWHrNGwp/o1yPcCYbaMdLq6SClN+wMhAA+qaEO1ZHf9mX8fSOX78nkaoyIrZHGOhbVXcZ7hmVrQ==
@@ -763,12 +758,12 @@
     fast-deep-equal "^3.1.3"
     klona "^2.0.6"
 
-"@mantine/hooks@^8.3.2":
+"@mantine/hooks@8.3.9":
   version "8.3.9"
   resolved "https://registry.yarnpkg.com/@mantine/hooks/-/hooks-8.3.9.tgz#7ac67668e960e666ea31cb112e1b084ddedb6c2b"
   integrity sha512-Dfz7W0+K1cq4Gb1WFQCZn8tsMXkLH6MV409wZR/ToqsxdNDUMJ/xxbfnwEXWEZjXNJd1wDETHgc+cZG2lTe3Xw==
 
-"@mantine/notifications@^8.3.2":
+"@mantine/notifications@8.3.9":
   version "8.3.9"
   resolved "https://registry.yarnpkg.com/@mantine/notifications/-/notifications-8.3.9.tgz#4eaab25d23f16556ed63fc1b26af12d248bf4cdc"
   integrity sha512-emUdoCyaccf/NuNmJ4fQgloJ7hEod0Pde7XIoD9xUUztVchL143oWRU2gYm6cwqzSyjpjTaqPXfz5UvEBRYjZw==

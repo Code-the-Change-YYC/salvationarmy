@@ -11,7 +11,7 @@ export const bookings = pgTable("bookings", {
   pickupLocation: text("pickup_location").notNull(),
   dropoffLocation: text("dropoff_location").notNull(),
   purpose: text("purpose"),
-  passengerInfo: text("passengerInfo").notNull(),
+  passengerInfo: text("passenger_info").notNull(),
   status: text("status", { enum: BOOKING_STATUS }).notNull().default("incomplete"),
   // the agency that created the booking
   agencyId: text("agency_id")

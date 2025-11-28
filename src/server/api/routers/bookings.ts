@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, or } from "drizzle-orm";
 import { z } from "zod";
 import { BOOKING_STATUS, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -57,7 +57,6 @@ export const bookingsRouter = createTRPCRouter({
       return row;
     }),
 
-  // GET /bookings/:id
   getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
     const row = await ctx.db
       .select()
@@ -68,13 +67,44 @@ export const bookingsRouter = createTRPCRouter({
 
     if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
 
+    const userId = ctx.session.user.id;
+    const role = ctx.session.user.role ?? "user"; // default safety
+
+    const allowed =
+      role === "admin" ||
+      row.createdBy === userId ||
+      row.agencyId === userId ||
+      row.driverId === userId;
+
+    if (!allowed) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "You don’t have permission to view this booking.",
+      });
+    }
+
     return row;
   }),
 
-  // GET /bookings
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    const rows = await ctx.db.select().from(bookings).orderBy(desc(bookings.createdAt));
-    return rows;
+    const userId = ctx.session.user.id;
+    const role = ctx.session.user.role ?? "user";
+
+    if (role === "admin") {
+      return ctx.db.select().from(bookings).orderBy(desc(bookings.createdAt));
+    }
+
+    return ctx.db
+      .select()
+      .from(bookings)
+      .where(
+        or(
+          eq(bookings.createdBy, userId),
+          eq(bookings.agencyId, userId),
+          eq(bookings.driverId, userId),
+        ),
+      )
+      .orderBy(desc(bookings.createdAt));
   }),
 
   // PATCH /bookings/:id
@@ -94,15 +124,70 @@ export const bookingsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, ...updates } = input;
 
-      const res = await ctx.db.update(bookings).set(updates).where(eq(bookings.id, id));
+      // 1) Ensure booking exists
+      const existing = await ctx.db
+        .select()
+        .from(bookings)
+        .where(eq(bookings.id, id))
+        .limit(1)
+        .then((r) => r[0]);
 
-      return res;
+      if (!existing) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+      }
+
+      // 2) Authorization check
+      const userId = ctx.session.user.id;
+      const role = ctx.session.user.role ?? "user";
+
+      const allowed =
+        role === "admin" ||
+        existing.createdBy === userId ||
+        existing.agencyId === userId ||
+        existing.driverId === userId;
+
+      if (!allowed) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "You cannot update this booking." });
+      }
+
+      // 3) Filter only defined updates
+      const updatesToApply = Object.fromEntries(
+        Object.entries(updates).filter(([, v]) => v !== undefined),
+      );
+
+      // 4) Perform update with updatedBy field set
+      const res = await ctx.db
+        .update(bookings)
+        .set({
+          ...updatesToApply,
+          updatedBy: userId,
+        })
+        .where(eq(bookings.id, id))
+        .returning();
+
+      return res[0];
     }),
 
   // PATCH /bookings/:id/cancel
   cancel: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.update(bookings).set({ status: "cancelled" }).where(eq(bookings.id, input.id));
+      const existing = await ctx.db
+        .select()
+        .from(bookings)
+        .where(eq(bookings.id, input.id))
+        .limit(1)
+        .then((r) => r[0]);
+
+      if (!existing) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+      }
+
+      return ctx.db
+        .update(bookings)
+        .set({ status: "cancelled", updatedBy: ctx.session.user.id })
+        .where(eq(bookings.id, input.id))
+        .returning()
+        .then((r) => r[0]);
     }),
 });
