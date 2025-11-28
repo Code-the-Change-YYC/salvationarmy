@@ -54,7 +54,6 @@ export const bookingsRouter = createTRPCRouter({
           message: "Failed to create booking",
         });
       }
-
       return row;
     }),
 
