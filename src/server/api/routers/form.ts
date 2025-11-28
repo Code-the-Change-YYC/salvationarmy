@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-
+import { env } from "@/env";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { forms } from "@/server/db/schema";
 
@@ -107,4 +107,53 @@ export const formRouter = createTRPCRouter({
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
   }),
+
+  //TODO: Change from publicProcedure to protectedProcedure (it is the former for testing until authentication is made)
+  validateDestinationAddress: publicProcedure
+    .input(z.object({ regionCode: z.string(), destinationAddress: z.array(z.string()) }))
+    .mutation(async ({ input }) => {
+      const { regionCode, destinationAddress } = input; //Grab passed variables
+
+      try {
+        //Make an API call to Google Maps API to validate the inputs
+        const response = await fetch(
+          `https://addressvalidation.googleapis.com/v1:validateAddress?key=${env.GOOGLE_MAPS_API_KEY}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              address: {
+                regionCode: regionCode,
+                addressLines: destinationAddress,
+              },
+            }),
+          },
+        );
+
+        //Turn the response object into a JSON to check the result
+        const data = await response.json();
+
+        //Check google's sent data is valid before returning
+        if (!data?.result?.verdict) {
+          throw new Error("Invalid response from Google API");
+        }
+
+        //If the address is good (addressComplete === true) then return Google's formatted version of the address, else null
+        return data.result.verdict.addressComplete === true
+          ? data.result.address.formattedAddress
+          : null;
+      } catch (errorObject) {
+        if (
+          errorObject instanceof Error &&
+          errorObject.message === "Invalid response from Google API"
+        ) {
+          //Runs when API gives bad info
+          throw errorObject;
+        }
+        //Runs when fetch fails
+        throw new Error("Backend validate destination address fetch failed");
+      }
+    }),
 });

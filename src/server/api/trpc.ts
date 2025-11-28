@@ -133,6 +133,7 @@ export const protectedProcedure = t.procedure.use(timingMiddleware).use(({ ctx, 
 
 export const adminProcedure = t.procedure.use(timingMiddleware).use(({ ctx, next }) => {
   const userRole = ctx.session?.user.role;
+
   // Check if the user is driver
   if (!ctx.session?.user || !userRole || !ADMIN_PROCEDURE_ROLES.includes(userRole as Role)) {
     throw new TRPCError({ code: "UNAUTHORIZED" });

@@ -2,10 +2,10 @@
 
 import { Group, Text } from "@mantine/core";
 import Link from "next/link";
+import Button from "@/app/_components/common/button/Button";
 import Bell from "@/assets/icons/bell";
 import Home from "@/assets/icons/home";
 import User from "@/assets/icons/user";
-import Button from "./common/button/Button";
 
 type NavbarView = "admin" | "agency" | "driver";
 

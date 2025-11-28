@@ -4,7 +4,6 @@ import { Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import { InviteUserForm } from "@/app/_components/admincomponents/invite-user-form";
-import { CreateOrgsButton } from "@/app/_components/admincomponents/test/adminbutton";
 import Button from "@/app/_components/common/button/Button";
 import Modal from "@/app/_components/common/modal/modal";
 import { notify } from "@/lib/notifications";
@@ -58,7 +57,6 @@ export const AdminDashboard = () => {
   return (
     <>
       <Button onClick={() => setShowInviteModal(true)}>Invite New User</Button>
-      <CreateOrgsButton />
       <Modal
         opened={showInviteModal}
         onClose={() => {
