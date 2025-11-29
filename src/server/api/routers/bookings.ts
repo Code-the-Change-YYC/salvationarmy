@@ -183,6 +183,19 @@ export const bookingsRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
       }
 
+      const userId = ctx.session.user.id;
+      const role = ctx.session.user.role ?? "user";
+
+      const allowed =
+        role === "admin" ||
+        existing.createdBy === userId ||
+        existing.agencyId === userId ||
+        existing.driverId === userId;
+
+      if (!allowed) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "You cannot cancel this booking." });
+      }
+
       return ctx.db
         .update(bookings)
         .set({ status: "cancelled", updatedBy: ctx.session.user.id })
