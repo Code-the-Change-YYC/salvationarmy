@@ -33,17 +33,22 @@ export const bookingsRouter = createTRPCRouter({
         }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Use Drizzle's inferred type so TypeScript validates the shape
+      const userId = ctx.session.user.id;
+      const role = ctx.session.user.role ?? "user";
+
+      // Only allow admins to specify agencyId; non-admins use their own ID
+      const agencyId = role === "admin" ? input.agencyId : userId;
+
       const bookingData: typeof bookings.$inferInsert = {
         title: input.title,
         pickupLocation: input.pickupLocation,
         dropoffLocation: input.dropoffLocation,
         passengerInfo: input.passengerInfo,
-        agencyId: input.agencyId,
+        agencyId,
         startTime: input.startTime,
         endTime: input.endTime,
 
-        createdBy: ctx.session.user.id, // grab from session
+        createdBy: userId,
       };
 
       // Only include optional fields if they are actually provided
