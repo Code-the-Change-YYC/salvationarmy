@@ -10,22 +10,27 @@ export const bookingsRouter = createTRPCRouter({
   // POST /bookings (create)
   create: protectedProcedure
     .input(
-      z.object({
-        title: z.string().min(1),
-        pickupLocation: z.string().min(1),
-        dropoffLocation: z.string().min(1),
-        passengerInfo: z.string().min(1),
-        agencyId: z.string().min(1),
+      z
+        .object({
+          title: z.string().min(1),
+          pickupLocation: z.string().min(1),
+          dropoffLocation: z.string().min(1),
+          passengerInfo: z.string().min(1),
+          agencyId: z.string().min(1),
 
-        // Required because DB has .notNull()
-        startTime: z.string().datetime(),
-        endTime: z.string().datetime(),
+          // Required because DB has .notNull()
+          startTime: z.string().datetime(),
+          endTime: z.string().datetime(),
 
-        // Optional fields
-        purpose: z.string().optional(),
-        driverId: z.string().nullable().optional(),
-        status: StatusZ.optional(),
-      }),
+          // Optional fields
+          purpose: z.string().optional(),
+          driverId: z.string().nullable().optional(),
+          status: StatusZ.optional(),
+        })
+        .refine((data) => new Date(data.endTime) > new Date(data.startTime), {
+          message: "endTime must be after startTime",
+          path: ["endTime"],
+        }),
     )
     .mutation(async ({ ctx, input }) => {
       // Use Drizzle's inferred type so TypeScript validates the shape
