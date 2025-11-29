@@ -202,7 +202,10 @@ yarn db:migrate
 Before running the seed script, ensure the following setup is complete:
 - Bun installed and available in your terminal
 - Local Supabase instance running
-- Database migrations have been applied using: ```yarn db:migrate```
+- Database migrations have been applied. Run:
+```bash
+yarn db:migrate
+```
 
 Once your database schema is up to date, run the seed script to create a default administrator user:
 ``` bash
