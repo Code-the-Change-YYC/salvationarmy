@@ -80,11 +80,7 @@ export const bookingsRouter = createTRPCRouter({
     const userId = ctx.session.user.id;
     const role = ctx.session.user.role ?? "user"; // default safety
 
-    const allowed =
-      role === "admin" ||
-      row.createdBy === userId ||
-      row.agencyId === userId ||
-      row.driverId === userId;
+    const allowed = role === "admin" || row.agencyId === userId;
 
     if (!allowed) {
       throw new TRPCError({
@@ -150,11 +146,7 @@ export const bookingsRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const role = ctx.session.user.role ?? "user";
 
-      const allowed =
-        role === "admin" ||
-        existing.createdBy === userId ||
-        existing.agencyId === userId ||
-        existing.driverId === userId;
+      const allowed = role === "admin" || existing.agencyId === userId;
 
       if (!allowed) {
         throw new TRPCError({ code: "FORBIDDEN", message: "You cannot update this booking." });
@@ -196,11 +188,7 @@ export const bookingsRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const role = ctx.session.user.role ?? "user";
 
-      const allowed =
-        role === "admin" ||
-        existing.createdBy === userId ||
-        existing.agencyId === userId ||
-        existing.driverId === userId;
+      const allowed = role === "admin" || existing.agencyId === userId;
 
       if (!allowed) {
         throw new TRPCError({ code: "FORBIDDEN", message: "You cannot cancel this booking." });
