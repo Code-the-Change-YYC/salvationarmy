@@ -13,8 +13,8 @@ export const bookingsRouter = createTRPCRouter({
       z
         .object({
           title: z.string().min(1),
-          pickupLocation: z.string().min(1),
-          dropoffLocation: z.string().min(1),
+          pickupAddress: z.string().min(1),
+          destinationAddress: z.string().min(1),
           passengerInfo: z.string().min(1),
           agencyId: z.string().min(1),
 
@@ -41,8 +41,8 @@ export const bookingsRouter = createTRPCRouter({
 
       const bookingData: typeof bookings.$inferInsert = {
         title: input.title,
-        pickupLocation: input.pickupLocation,
-        dropoffLocation: input.dropoffLocation,
+        pickupAddress: input.pickupAddress,
+        destinationAddress: input.destinationAddress,
         passengerInfo: input.passengerInfo,
         agencyId,
         startTime: input.startTime,
@@ -119,8 +119,8 @@ export const bookingsRouter = createTRPCRouter({
       z.object({
         id: z.number(),
         title: z.string().optional(),
-        pickupLocation: z.string().optional(),
-        dropoffLocation: z.string().optional(),
+        pickupAddress: z.string().optional(),
+        destinationAddress: z.string().optional(),
         purpose: z.string().optional(),
         passengerInfo: z.string().optional(),
         driverId: z.string().optional().nullable(),
