@@ -197,6 +197,27 @@ yarn db:migrate
 yarn db:migrate
 ```
 
+## Initializing an Admin Account
+
+Before running the seed script, ensure the following setup is complete:
+- Bun installed and available in your terminal
+- Local Supabase instance running
+- Database migrations have been applied. Run:
+```bash
+yarn db:migrate
+```
+
+Once your database schema is up to date, run the seed script to create a default administrator user:
+``` bash
+yarn seed
+```
+
+After running the script, the terminal will output a generated admin email and password.
+Use these credentials on the `/login` page to sign in.
+
+Once logged in, the session persists across the app, allowing you to test authentication, protected routes, and role-based access during development.
+
+
 ## Enabling typesense for SCSS modules
 
 I've added a plugin `typescript-plugin-css-modules` but you also might have to follow this tutorial [here](https://www.npmjs.com/package/typescript-plugin-css-modules#visual-studio-code) and add it to your VSCode settings.
