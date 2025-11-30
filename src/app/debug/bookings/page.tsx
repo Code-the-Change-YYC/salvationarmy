@@ -15,8 +15,8 @@ export default function BookingDebugPage() {
   const form = useForm({
     initialValues: {
       title: "",
-      pickupLocation: "",
-      dropoffLocation: "",
+      pickupAddress: "",
+      destinationAddress: "",
       passengerInfo: "",
       start: "",
       end: "",
@@ -27,8 +27,8 @@ export default function BookingDebugPage() {
     },
     validate: {
       title: (v) => (!v.trim() ? "Title is required" : null),
-      pickupLocation: (v) => (!v.trim() ? "Pickup required" : null),
-      dropoffLocation: (v) => (!v.trim() ? "Dropoff required" : null),
+      pickupAddress: (v) => (!v.trim() ? "Pickup required" : null),
+      destinationAddress: (v) => (!v.trim() ? "Dropoff required" : null),
       passengerInfo: (v) => (!v.trim() ? "Passenger info required" : null),
       agencyId: (v) => (!v.trim() ? "Agency ID required" : null),
       start: (v) => (!v.trim() ? "Start date/time required" : null),
@@ -135,8 +135,8 @@ export default function BookingDebugPage() {
         onSubmit={form.onSubmit((values) =>
           createMutation.mutate({
             title: values.title,
-            pickupLocation: values.pickupLocation,
-            dropoffLocation: values.dropoffLocation,
+            pickupAddress: values.pickupAddress,
+            destinationAddress: values.destinationAddress,
             passengerInfo: values.passengerInfo,
             agencyId: values.agencyId,
             startTime: values.start,
@@ -149,11 +149,11 @@ export default function BookingDebugPage() {
         className={styles.formGrid}
       >
         <TextInput withAsterisk label="Title" {...form.getInputProps("title")} />
-        <TextInput withAsterisk label="Pickup Location" {...form.getInputProps("pickupLocation")} />
+        <TextInput withAsterisk label="Pickup Address" {...form.getInputProps("pickupAddress")} />
         <TextInput
           withAsterisk
-          label="Dropoff Location"
-          {...form.getInputProps("dropoffLocation")}
+          label="Destination Address"
+          {...form.getInputProps("destinationAddress")}
         />
         <Textarea withAsterisk label="Passenger Info" {...form.getInputProps("passengerInfo")} />
         <TextInput withAsterisk label="Agency ID" {...form.getInputProps("agencyId")} />
