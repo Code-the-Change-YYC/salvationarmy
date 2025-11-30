@@ -4,10 +4,10 @@ import { Button, Paper, PasswordInput, Stack, Text, TextInput, Title } from "@ma
 import { useForm } from "@mantine/form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import styles from "@/app/_components/common/auth-layout.module.scss";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { passwordSchema } from "@/types/validation";
-import styles from "./page.module.scss";
 
 function CompleteRegistrationContent() {
   const searchParams = useSearchParams();
