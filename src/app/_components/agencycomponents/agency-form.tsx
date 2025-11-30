@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, Divider, Stack, Textarea, TextInput } from "@mantine/core";
-import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
+import DatePicker from "@/app/_components/common/datepicker/DatePicker";
 import classes from "./agency-form.module.scss";
 
 interface AgencyBookingForm {
@@ -66,16 +66,13 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
           Logistics
         </Box>
 
-        <div className={classes.formRow}>
-          <DateTimePicker
-            withAsterisk
-            label="Date and time of transport"
-            placeholder="Select date and time"
-            valueFormat="DD MMM YYYY hh:mm A"
-            key={form.key("transportDateTime")}
-            {...form.getInputProps("transportDateTime")}
-          />
-        </div>
+        <DatePicker
+          required
+          label="Date and time of transport"
+          placeholder="Select date and time"
+          key={form.key("transportDateTime")}
+          {...form.getInputProps("transportDateTime")}
+        />
 
         <div className={classes.formRow}>
           <TextInput
