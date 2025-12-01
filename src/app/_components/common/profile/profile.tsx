@@ -1,10 +1,11 @@
 "use client";
 
-import { ActionIcon, Menu } from "@mantine/core";
+import { Menu } from "@mantine/core";
 import { useRouter } from "next/navigation";
 import Logout from "@/assets/icons/logout";
 import User from "@/assets/icons/user";
 import { useSession } from "@/lib/auth-client";
+import IconButton from "../button/IconButton";
 
 export default function Profile() {
   const { data: session } = useSession();
@@ -15,9 +16,7 @@ export default function Profile() {
   return (
     <Menu shadow="md" width={250}>
       <Menu.Target>
-        <ActionIcon variant="transparent" style={{ padding: 0, zIndex: 1 }}>
-          <User />
-        </ActionIcon>
+        <IconButton ariaLabel="Button" icon={<User />} color="blue" transparent={true}></IconButton>
       </Menu.Target>
 
       <Menu.Dropdown>
