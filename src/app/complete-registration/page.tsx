@@ -1,9 +1,10 @@
 "use client";
 
-import { Button, Paper, PasswordInput, Stack, Text, TextInput, Title } from "@mantine/core";
+import { Paper, PasswordInput, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import Button from "@/app/_components/common/button/Button";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { passwordSchema } from "@/types/validation";
@@ -133,7 +134,7 @@ function CompleteRegistrationContent() {
                 {...form.getInputProps("confirmPassword")}
               />
 
-              <Button type="submit" fullWidth loading={resetPasswordMutation.isPending} mt="md">
+              <Button type="submit" width="100%" loading={resetPasswordMutation.isPending}>
                 Complete Registration
               </Button>
             </Stack>
