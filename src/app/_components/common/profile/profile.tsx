@@ -4,14 +4,22 @@ import { Menu } from "@mantine/core";
 import { useRouter } from "next/navigation";
 import Logout from "@/assets/icons/logout";
 import User from "@/assets/icons/user";
-import { useSession } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import IconButton from "../button/IconButton";
 
 export default function Profile() {
   const { data: session } = useSession();
   const router = useRouter();
   function logout() {
-    router.push("/logout");
+    authClient
+      .signOut()
+      .then(() => {
+        router.push("/login");
+      })
+      .catch((err) => {
+        console.error("Logout failed:", err);
+        alert("An error occurred during sign out");
+      });
   }
   return (
     <Menu shadow="md" width={250}>
