@@ -4,7 +4,7 @@ import type { EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { Box, Text } from "@mantine/core";
+import { Alert, Box, Loader, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo, useRef } from "react";
 import type { bookings } from "@/server/db/booking-schema";
@@ -79,7 +79,7 @@ interface CalendarViewProps {
 }
 
 export default function CalendarView({ currentDate, setIsDayView }: CalendarViewProps) {
-  const { data: dbBookings } = api.bookings.getAll.useQuery();
+  const { data: dbBookings, isLoading, isError } = api.bookings.getAll.useQuery();
 
   const events = useMemo(() => transformBookingsToEvents(dbBookings ?? []), [dbBookings]);
   const calendarRef = useRef<FullCalendar>(null);
@@ -189,8 +189,26 @@ export default function CalendarView({ currentDate, setIsDayView }: CalendarView
     );
   };
 
+  if (isLoading) {
+    return (
+      <Box className={`${styles.calendarWrapper} ${styles.loadingContainer}`}>
+        <Loader color={CHERRY_RED} type="dots" />
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Box className={`${styles.calendarWrapper} ${styles.errorContainer}`}>
+        <Alert variant="light" color="red" title="Error">
+          Failed to load bookings. Please try again later.
+        </Alert>
+      </Box>
+    );
+  }
+
   return (
-    <div className={styles.calendarWrapper}>
+    <Box className={styles.calendarWrapper}>
       <FullCalendar
         ref={calendarRef}
         plugins={[timeGridPlugin, dayGridPlugin]}
@@ -212,10 +230,10 @@ export default function CalendarView({ currentDate, setIsDayView }: CalendarView
           day: "numeric",
         }}
         dayHeaderContent={(arg) => (
-          <div className={styles.dayHeaderContainer}>
-            <div className={styles.dayHeaderWeekday}>{arg.text.split(" ")[1]}</div>
-            <div className={styles.dayHeaderDay}>{arg.text.split(" ")[0]}</div>
-          </div>
+          <Box className={styles.dayHeaderContainer}>
+            <Box className={styles.dayHeaderWeekday}>{arg.text.split(" ")[1]}</Box>
+            <Box className={styles.dayHeaderDay}>{arg.text.split(" ")[0]}</Box>
+          </Box>
         )}
         allDaySlot={false}
         expandRows={true}
@@ -225,6 +243,6 @@ export default function CalendarView({ currentDate, setIsDayView }: CalendarView
         height={700}
         weekends={false}
       />
-    </div>
+    </Box>
   );
 }
