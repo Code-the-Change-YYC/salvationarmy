@@ -1,6 +1,6 @@
 "use client";
 
-import { Box } from "@mantine/core";
+import { Alert, Box, Loader } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { type Libraries, useLoadScript } from "@react-google-maps/api";
 import { useEffect, useRef, useState } from "react";
@@ -9,6 +9,7 @@ import { ViewController } from "@/app/_components/agencycomponents/view-controll
 import Modal from "@/app/_components/common/modal/modal";
 import { env } from "@/env";
 import { notify } from "@/lib/notifications";
+import { api } from "@/trpc/react";
 import { ViewMode } from "@/types/types";
 import CalendarView from "../calendar-view";
 import styles from "./agency-interactive-area.module.scss";
@@ -18,6 +19,7 @@ interface Props {
 }
 
 const GOOGLE_MAPS_LIBRARIES_ARRAY: Libraries = ["places"]; //Add more to this array if you need to import more libraries from the API
+const CHERRY_RED = "#A03145";
 
 export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
@@ -27,6 +29,12 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [isDayView, setIsDayView] = useState<boolean>(false);
   const [validationAddressGood, setValidationAddressGood] = useState<boolean>(false);
+
+  const {
+    data: bookings,
+    isLoading: isLoadingBookings,
+    isError: isErrorBookings,
+  } = api.bookings.getAll.useQuery();
 
   //Define a variable that react will reassign its value on runtime
   //Starts off as null but will equal (through inputElement.current) an HTML input element when assigned at runtime
@@ -180,8 +188,22 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
       />
 
       <div className={styles.calendarContainer}>
-        {viewMode === ViewMode.CALENDAR ? (
-          <CalendarView currentDate={currentDate} setIsDayView={setIsDayView} />
+        {isLoadingBookings ? (
+          <Box className={styles.loadingContainer}>
+            <Loader color={CHERRY_RED} type="dots" />
+          </Box>
+        ) : isErrorBookings ? (
+          <Box className={styles.errorContainer}>
+            <Alert variant="light" color="red">
+              Failed to load bookings. Please try again later.
+            </Alert>
+          </Box>
+        ) : viewMode === ViewMode.CALENDAR ? (
+          <CalendarView
+            bookings={bookings ?? []}
+            currentDate={currentDate}
+            setIsDayView={setIsDayView}
+          />
         ) : (
           <div>ag grid table will be here</div>
         )}

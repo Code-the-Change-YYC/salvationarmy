@@ -4,11 +4,10 @@ import type { EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { Alert, Box, Loader, Text } from "@mantine/core";
+import { Box, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo, useRef } from "react";
 import type { bookings } from "@/server/db/booking-schema";
-import { api } from "@/trpc/react";
 import Check from "../../assets/icons/check";
 import Cross from "../../assets/icons/cross";
 import { BookingStatus, type CalendarEvent } from "../../types/types";
@@ -74,14 +73,13 @@ function transformBookingsToEvents(
 }
 
 interface CalendarViewProps {
+  bookings: (typeof bookings.$inferSelect)[];
   currentDate?: Date;
   setIsDayView?: (isDayView: boolean) => void;
 }
 
-export default function CalendarView({ currentDate, setIsDayView }: CalendarViewProps) {
-  const { data: dbBookings, isLoading, isError } = api.bookings.getAll.useQuery();
-
-  const events = useMemo(() => transformBookingsToEvents(dbBookings ?? []), [dbBookings]);
+export default function CalendarView({ bookings, currentDate, setIsDayView }: CalendarViewProps) {
+  const events = useMemo(() => transformBookingsToEvents(bookings ?? []), [bookings]);
   const calendarRef = useRef<FullCalendar>(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
   const initialDate = getInitialDate(currentDate);
@@ -188,24 +186,6 @@ export default function CalendarView({ currentDate, setIsDayView }: CalendarView
       </Box>
     );
   };
-
-  if (isLoading) {
-    return (
-      <Box className={`${styles.calendarWrapper} ${styles.loadingContainer}`}>
-        <Loader color={CHERRY_RED} type="dots" />
-      </Box>
-    );
-  }
-
-  if (isError) {
-    return (
-      <Box className={`${styles.calendarWrapper} ${styles.errorContainer}`}>
-        <Alert variant="light" color="red" title="Error">
-          Failed to load bookings. Please try again later.
-        </Alert>
-      </Box>
-    );
-  }
 
   return (
     <Box className={styles.calendarWrapper}>
