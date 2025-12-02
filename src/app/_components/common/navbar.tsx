@@ -5,7 +5,7 @@ import Link from "next/link";
 import Button from "@/app/_components/common/button/Button";
 import Bell from "@/assets/icons/bell";
 import Home from "@/assets/icons/home";
-import User from "@/assets/icons/user";
+import Profile from "./profile/profile";
 
 type NavbarView = "admin" | "agency" | "driver";
 
@@ -39,20 +39,20 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
           <Link href="/admin/schedule">
             <Button text="Schedule" variant="secondary" />
           </Link>
-          <User />
+          <Profile />
         </Group>
       )}
 
       {view === "agency" && (
         <Group gap={30}>
           <Bell />
-          <User />
+          <Profile />
         </Group>
       )}
 
       {view === "driver" && (
         <Group>
-          <User />
+          <Profile />
         </Group>
       )}
     </Group>
