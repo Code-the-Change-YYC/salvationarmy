@@ -64,26 +64,6 @@ export const ALL_BOOKING_STATUSES = [
 
 export type BookingStatusValue = (typeof ALL_BOOKING_STATUSES)[number];
 
-export interface Booking {
-  id: string;
-  title: string;
-  pickupAddress: string;
-  destinationAddress: string;
-  purpose?: string;
-  passengerInfo: string;
-  status: BookingStatus;
-  agencyId: string;
-  driverId?: string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-}
-
-// The booking schema does not include start and end times, so we need to add them here
-export interface CalendarBooking extends Booking {
-  start: string;
-  end?: string;
-}
-
 export interface CalendarEvent {
   id: string;
   title: string;
