@@ -105,3 +105,14 @@ export interface CalendarEvent {
     updatedBy?: string;
   };
 }
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  image?: string | null;
+  emailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
