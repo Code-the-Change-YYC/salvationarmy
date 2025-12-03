@@ -24,7 +24,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   const { data: session, isPending: sessionLoading } = authClient.useSession();
-  // const { data: activeOrganization, isPending: orgLoading } = authClient.useActiveOrganization();
+  const { data: activeOrganization, isPending: orgLoading } = authClient.useActiveOrganization();
 
   const form = useForm({
     initialValues: {
@@ -43,13 +43,13 @@ export default function LoginPage() {
   // are already logged in to their proper dashboard
 
   const redirectToHomePage = useCallback(
-    (role: Role) => {
+    (role: Role, slug?: string) => {
       switch (role) {
         case Role.ADMIN:
           router.push("/admin/home");
           break;
         case Role.AGENCY:
-          router.push("/agency/home");
+          router.push(`/agency/home/${slug}`);
           break;
         case Role.DRIVER:
           router.push("/driver/home");
@@ -63,12 +63,12 @@ export default function LoginPage() {
   );
 
   useEffect(() => {
-    if (sessionLoading) return;
+    if (sessionLoading || orgLoading) return;
 
     if (session?.user && isAuthUser(session.user)) {
-      redirectToHomePage(session.user.role);
+      redirectToHomePage(session.user.role, activeOrganization?.slug);
     }
-  }, [session, sessionLoading, redirectToHomePage]);
+  }, [session, activeOrganization, sessionLoading, orgLoading, redirectToHomePage]);
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
@@ -82,7 +82,7 @@ export default function LoginPage() {
       if (error) {
         alert(error.message || "Failed to sign in");
       } else if (data?.user && isAuthUser(data.user)) {
-        redirectToHomePage(data.user.role);
+        redirectToHomePage(data.user.role, activeOrganization?.slug);
       }
     } catch (error) {
       console.error("Sign in error:", error);
