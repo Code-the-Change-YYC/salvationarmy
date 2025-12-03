@@ -10,6 +10,15 @@ import { authClient } from "@/lib/auth-client";
 import { emailRegex } from "@/types/validation";
 import { type AuthUser, Role } from "@/types/types";
 
+function isAuthUser(user: unknown): user is AuthUser {
+  return (
+    typeof user === "object" &&
+    user !== null &&
+    "role" in user &&
+    typeof (user as AuthUser).role === "string"
+  );
+}
+
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -56,9 +65,8 @@ export default function LoginPage() {
   useEffect(() => {
     if (sessionLoading) return;
 
-    if (session?.user) {
-      const userWithRole = session.user as AuthUser;
-      redirectToHomePage(userWithRole.role);
+    if (session?.user && isAuthUser(session.user)) {
+      redirectToHomePage(session.user.role);
     }
   }, [session, sessionLoading, redirectToHomePage]);
 
@@ -73,9 +81,8 @@ export default function LoginPage() {
 
       if (error) {
         alert(error.message || "Failed to sign in");
-      } else if (data?.user) {
-        const userWithRole = data.user as AuthUser;
-        redirectToHomePage(userWithRole.role);
+      } else if (data?.user && isAuthUser(data.user)) {
+        redirectToHomePage(data.user.role);
       }
     } catch (error) {
       console.error("Sign in error:", error);
