@@ -68,7 +68,7 @@ export default function LoginPage() {
     if (sessionLoading || orgLoading) return;
 
     if (session?.user && isAuthUser(session.user)) {
-      redirectToHomePage(session.user.role as Role, activeOrganization?.slug);
+      redirectToHomePage(session.user.role, activeOrganization?.slug);
     }
   }, [session, activeOrganization, sessionLoading, orgLoading, redirectToHomePage]);
 
@@ -83,6 +83,8 @@ export default function LoginPage() {
 
       if (error) {
         notify.error(error.message || "Failed to sign in");
+      } else if (data?.user && isAuthUser(data.user)) {
+        redirectToHomePage(data.user.role, activeOrganization?.slug);
       }
     } catch (error) {
       console.error("Sign in error:", error);
