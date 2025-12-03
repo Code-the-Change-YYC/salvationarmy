@@ -117,5 +117,3 @@ export const authSchema = {
   member,
   invitation,
 };
-
-export type User = InferSelectModel<typeof user>;
