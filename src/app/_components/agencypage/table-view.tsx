@@ -2,7 +2,7 @@
 import type { ColDef } from "ag-grid-community";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   COLUMN_IDS,
   createColumnDef,
@@ -13,9 +13,9 @@ import type { ScheduleInformation } from "@/types/types";
 // register community modules for ag grid
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const Schedule = () => {
+const TableView = () => {
   // fake data for now
-  const [rowData, setRowData] = useState<ScheduleInformation[]>([
+  const [rowData] = useState<ScheduleInformation[]>([
     {
       CREATED_AT: "2023-10-01T10:00:00Z",
       CLIENT_NAME: "John Doe",
@@ -69,7 +69,7 @@ const Schedule = () => {
   };
 
   return (
-    <div className="ag-theme-quartz" style={{ width: "90vw", height: "500px" }}>
+    <div className="ag-theme-quartz" style={{ width: "100%", height: "500px" }}>
       <AgGridReact
         rowData={rowData}
         columnDefs={columnDefs}
@@ -83,4 +83,4 @@ const Schedule = () => {
   );
 };
 
-export default Schedule;
+export default TableView;
