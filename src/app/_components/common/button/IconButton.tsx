@@ -2,6 +2,7 @@
 
 import { ActionIcon } from "@mantine/core";
 import type { ReactNode } from "react";
+import { forwardRef } from "react";
 import styles from "./Button.module.scss";
 
 export interface IconButtonProps {
@@ -27,19 +28,23 @@ function getIconButtonStyles(disabled: boolean, transparent: boolean) {
   return classes.join(" ");
 }
 
-export default function IconButton({
-  icon,
-  onClick,
-  ariaLabel,
-  color,
-  width,
-  height,
-  size = "md",
-  transparent = false,
-  disabled = false,
-}: IconButtonProps) {
-  return (
+const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
+  (
+    {
+      icon,
+      onClick,
+      ariaLabel,
+      color,
+      width,
+      height,
+      size = "md",
+      transparent = false,
+      disabled = false,
+    }: IconButtonProps,
+    ref,
+  ) => (
     <ActionIcon
+      ref={ref}
       onClick={onClick}
       aria-label={ariaLabel}
       color={color}
@@ -54,5 +59,7 @@ export default function IconButton({
     >
       {icon}
     </ActionIcon>
-  );
-}
+  ),
+);
+
+export default IconButton;

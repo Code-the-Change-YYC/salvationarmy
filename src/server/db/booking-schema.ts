@@ -2,16 +2,17 @@ import { relations } from "drizzle-orm";
 import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
+export const BOOKING_STATUS = ["incomplete", "completed", "in-progress", "cancelled"] as const;
+export type BookingStatus = (typeof BOOKING_STATUS)[number];
+
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
-  pickupLocation: text("pickup_location").notNull(),
-  dropoffLocation: text("dropoff_location").notNull(),
+  pickupAddress: text("pickup_address").notNull(),
+  destinationAddress: text("destination_address").notNull(),
   purpose: text("purpose"),
   passengerInfo: text("passenger_info").notNull(),
-  status: text("status", { enum: ["incomplete", "completed", "in-progress"] })
-    .notNull()
-    .default("incomplete"),
+  status: text("status", { enum: BOOKING_STATUS }).notNull().default("incomplete"),
   // the agency that created the booking
   agencyId: text("agency_id")
     .notNull()
