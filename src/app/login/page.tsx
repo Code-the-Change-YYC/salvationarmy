@@ -9,14 +9,15 @@ import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
 import { notify } from "@/lib/notifications";
 import { emailRegex } from "@/types/validation";
-import { type AuthUser, Role } from "@/types/types";
+import type { User } from "@/server/db/auth-schema";
+import { Role } from "@/types/types";
 
-function isAuthUser(user: unknown): user is AuthUser {
+function isAuthUser(user: unknown): user is User {
   return (
     typeof user === "object" &&
     user !== null &&
     "role" in user &&
-    typeof (user as AuthUser).role === "string"
+    typeof (user as User).role === "string"
   );
 }
 
@@ -67,7 +68,7 @@ export default function LoginPage() {
     if (sessionLoading || orgLoading) return;
 
     if (session?.user && isAuthUser(session.user)) {
-      redirectToHomePage(session.user.role, activeOrganization?.slug);
+      redirectToHomePage(session.user.role as Role, activeOrganization?.slug);
     }
   }, [session, activeOrganization, sessionLoading, orgLoading, redirectToHomePage]);
 
@@ -82,8 +83,6 @@ export default function LoginPage() {
 
       if (error) {
         notify.error(error.message || "Failed to sign in");
-      } else if (data?.user && isAuthUser(data.user)) {
-        redirectToHomePage(data.user.role, activeOrganization?.slug);
       }
     } catch (error) {
       console.error("Sign in error:", error);
