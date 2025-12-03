@@ -1,14 +1,14 @@
 "use client";
-import {
-  COLUMN_IDS,
-  DEFAULT_COLUMN_WIDTH,
-  createColumnDef,
-} from "@/constants/TableScheduleConstants";
-import type { ScheduleInformation } from "@/types/types";
 import type { ColDef } from "ag-grid-community";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import React, { useState } from "react";
+import {
+  COLUMN_IDS,
+  createColumnDef,
+  DEFAULT_COLUMN_WIDTH,
+} from "@/constants/TableScheduleConstants";
+import type { ScheduleInformation } from "@/types/types";
 
 // register community modules for ag grid
 ModuleRegistry.registerModules([AllCommunityModule]);
