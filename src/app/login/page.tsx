@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
+import { notify } from "@/lib/notifications";
 import { emailRegex } from "@/types/validation";
 import { type AuthUser, Role } from "@/types/types";
 
@@ -80,13 +81,13 @@ export default function LoginPage() {
       });
 
       if (error) {
-        alert(error.message || "Failed to sign in");
+        notify.error(error.message || "Failed to sign in");
       } else if (data?.user && isAuthUser(data.user)) {
         redirectToHomePage(data.user.role, activeOrganization?.slug);
       }
     } catch (error) {
       console.error("Sign in error:", error);
-      alert("An error occurred during sign in");
+      notify.error("An error occurred during sign in");
     } finally {
       setLoading(false);
     }
