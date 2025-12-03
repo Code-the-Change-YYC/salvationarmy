@@ -7,12 +7,12 @@
  * need to use are documented accordingly near the end.
  */
 
-import { TRPCError, initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
-
 import { auth } from "@/lib/auth";
 import { db } from "@/server/db";
+import { ADMIN_PROCEDURE_ROLES, type Role } from "@/types/types";
 
 /**
  * 1. CONTEXT
@@ -126,6 +126,20 @@ export const protectedProcedure = t.procedure.use(timingMiddleware).use(({ ctx, 
   return next({
     ctx: {
       // infers the `session` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
+
+export const adminProcedure = t.procedure.use(timingMiddleware).use(({ ctx, next }) => {
+  const userRole = ctx.session?.user.role;
+
+  // Check if the user is driver
+  if (!ctx.session?.user || !userRole || !ADMIN_PROCEDURE_ROLES.includes(userRole as Role)) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
       session: { ...ctx.session, user: ctx.session.user },
     },
   });

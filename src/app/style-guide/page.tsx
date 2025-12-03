@@ -1,8 +1,12 @@
 "use client";
 
-import Plus from "@/assets/icons/plus";
 import { Divider, Group, Stack, Title } from "@mantine/core";
-import Button from "../_components/Button";
+import Chevron from "@/assets/icons/chevron";
+import Face from "@/assets/icons/face";
+import Location from "@/assets/icons/location";
+import Plus from "@/assets/icons/plus";
+import Button from "../_components/common/button/Button";
+import IconButton from "../_components/common/button/IconButton";
 
 export default function StylesPage() {
   return (
@@ -44,6 +48,23 @@ export default function StylesPage() {
           </Title>
           <Group>
             <Button text="Disabled Button" disabled />
+          </Group>
+        </Stack>
+
+        <Stack gap="sm">
+          <Title order={3} size="h4">
+            Icon Buttons
+          </Title>
+          <Group>
+            <IconButton icon={<Plus />} ariaLabel="plus" size="sm" /> sm
+            <IconButton icon={<Plus />} ariaLabel="plus" size="lg" /> lg
+            <IconButton icon={<Chevron />} ariaLabel="chevron" disabled />
+            disabled
+            <IconButton icon={<Face />} ariaLabel="face" width="200px" />
+            Custom Width
+            <IconButton icon={<Location />} ariaLabel="location" height="50px" />
+            Custom Height
+            <IconButton icon={<Plus />} ariaLabel="plus" transparent /> transparent
           </Group>
         </Stack>
       </Stack>

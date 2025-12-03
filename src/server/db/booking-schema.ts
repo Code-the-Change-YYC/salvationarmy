@@ -2,21 +2,29 @@ import { relations } from "drizzle-orm";
 import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
+export const BOOKING_STATUS = ["incomplete", "completed", "in-progress", "cancelled"] as const;
+export type BookingStatus = (typeof BOOKING_STATUS)[number];
+
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
-  pickupLocation: text("pickup_location").notNull(),
-  dropoffLocation: text("dropoff_location").notNull(),
+  pickupAddress: text("pickup_address").notNull(),
+  destinationAddress: text("destination_address").notNull(),
   purpose: text("purpose"),
-  passengerInfo: text("passengerInfo").notNull(),
-  status: text("status", { enum: ["incomplete", "completed", "in-progress"] })
-    .notNull()
-    .default("incomplete"),
+  passengerInfo: text("passenger_info").notNull(),
+  status: text("status", { enum: BOOKING_STATUS }).notNull().default("incomplete"),
   // the agency that created the booking
   agencyId: text("agency_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-
+  startTime: timestamp("start_time", {
+    mode: "string",
+    withTimezone: true,
+  }).notNull(),
+  endTime: timestamp("end_time", {
+    mode: "string",
+    withTimezone: true,
+  }).notNull(),
   driverId: text("driver_id").references(() => user.id, {
     onDelete: "set null",
   }),

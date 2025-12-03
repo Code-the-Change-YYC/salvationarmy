@@ -8,6 +8,24 @@ This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3
 - [SASS](https://sass-lang.com/)
 - [tRPC](https://trpc.io)
 
+## Seeding the db
+
+First install bun:
+
+```bash
+npm install -g bun
+```
+
+Then run the script:
+
+```bash
+npm run seed
+# or
+yarn seed
+# or
+pnpm run seed
+```
+
 ## TRPC vs. REST APIs
 
 Why even use tRPC?
@@ -109,6 +127,12 @@ We are able to:
 - automatically generate migrations when this schema changes
 - sync these migrations with our db
 
+To generate the schema required by Better Auth, run the following command:
+
+```bash
+npx @better-auth/cli@latest generate
+```
+
 ### Difference between environments
 
 | Environment | Purpose                                        | Database                      | Env File     |
@@ -135,10 +159,10 @@ There are three workflows when working on a feature that involves changing the s
 ```bash
 # 1. Make schema changes in src/db/schema.ts
 # 2. Generate migration
-yarn db:generate:local
+yarn db:generate
 
 # 3. Apply migration to your personal Supabase database
-yarn db:migrate:local
+yarn db:migrate
 
 # 4. Run your app and test new DB features locally
 ```
@@ -151,8 +175,8 @@ However:
 - Always finalize your schema and then run:
 
 ```bash
-yarn db:generate:local
-yarn db:migrate:local
+yarn db:generate
+yarn db:migrate
 ```
 
 before committing, so migrations stay in version control.
@@ -163,15 +187,36 @@ Never run push or drop on the shared dev or prod databases because **those comma
 
 ```bash
 git pull
-yarn db:migrate:dev
+yarn db:migrate
 ```
 
 - Deploying confirmed changes to prod
 
 ```bash
 # only after these changes have been verified to be good
-yarn db:migrate:prod
+yarn db:migrate
 ```
+
+## Initializing an Admin Account
+
+Before running the seed script, ensure the following setup is complete:
+- Bun installed and available in your terminal
+- Local Supabase instance running
+- Database migrations have been applied. Run:
+```bash
+yarn db:migrate
+```
+
+Once your database schema is up to date, run the seed script to create a default administrator user:
+``` bash
+yarn seed
+```
+
+After running the script, the terminal will output a generated admin email and password.
+Use these credentials on the `/login` page to sign in.
+
+Once logged in, the session persists across the app, allowing you to test authentication, protected routes, and role-based access during development.
+
 
 ## Enabling typesense for SCSS modules
 

@@ -5,7 +5,7 @@ import type React from "react";
 import { useState } from "react";
 import Calendar from "../../assets/icons/calendar";
 import Grid from "../../assets/icons/grid";
-import { SegmentedControl } from "./segmentedControl";
+import { SegmentedControl } from "./common/segmentedControl";
 
 export const SegmentedControlTest: React.FC = () => {
   const [viewMode, setViewMode] = useState("calendar");

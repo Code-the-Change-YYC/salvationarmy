@@ -7,7 +7,8 @@ import styles from "./Button.module.scss";
 export type ButtonVariant = "primary" | "secondary";
 
 export interface ButtonProps {
-  text: string;
+  text?: string;
+  type?: "button" | "submit" | "reset";
   variant?: ButtonVariant;
   color?: string;
   width?: string | number;
@@ -15,11 +16,31 @@ export interface ButtonProps {
   fontSize?: string | number;
   icon?: ReactNode;
   onClick?: () => void;
+  transparent?: boolean;
   disabled?: boolean;
+  children?: ReactNode;
+  loading?: boolean;
+}
+
+function getButtonStyles(variant: ButtonVariant, disabled: boolean, transparent: boolean) {
+  const classes = [];
+
+  if (disabled) {
+    classes.push(styles.disabledButton);
+  } else {
+    classes.push(variant === "primary" ? styles.primaryButton : styles.secondaryButton);
+  }
+
+  if (transparent) {
+    classes.push(styles.transparentButton);
+  }
+
+  return classes.join(" ");
 }
 
 export default function Button({
   text,
+  type = "button",
   variant = "primary",
   color,
   width,
@@ -27,23 +48,21 @@ export default function Button({
   fontSize,
   icon,
   onClick,
+  transparent = false,
   disabled = false,
+  children,
+  loading,
 }: ButtonProps) {
-  const isPrimary = variant === "primary";
-
   return (
     <MantineButton
-      type="button"
+      type={type}
       onClick={onClick}
       disabled={disabled}
-      variant={isPrimary ? "filled" : "outline"}
+      variant={transparent ? "transparent" : "filled"}
       leftSection={icon}
+      loading={loading}
       classNames={{
-        root: disabled
-          ? styles.disabledButton
-          : isPrimary
-            ? styles.primaryButton
-            : styles.secondaryButton,
+        root: getButtonStyles(variant, disabled, transparent),
       }}
       styles={{
         root: {
@@ -55,7 +74,7 @@ export default function Button({
         },
       }}
     >
-      {text}
+      {children ?? text}
     </MantineButton>
   );
 }

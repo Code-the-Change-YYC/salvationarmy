@@ -1,0 +1,27 @@
+.container {
+  padding: 2rem;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.formGrid {
+  display: grid;
+  gap: 1rem;
+  max-width: 450px;
+}
+
+.submitButton {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.jsonBlock {
+  background: #111;
+  color: #0ff;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-top: 1rem;
+}

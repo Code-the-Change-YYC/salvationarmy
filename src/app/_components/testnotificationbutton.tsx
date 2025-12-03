@@ -1,7 +1,7 @@
 "use client";
 
-import { notify } from "@/lib/notifications";
 import { Button } from "@mantine/core";
+import { notify } from "@/lib/notifications";
 
 export function TestNotificationButton() {
   return (

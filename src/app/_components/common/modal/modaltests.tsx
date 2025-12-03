@@ -1,7 +1,5 @@
 "use client";
 
-import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
-import Modal from "@/app/_components/common/modal/modal";
 import {
   Alert,
   Badge,
@@ -12,10 +10,11 @@ import {
   Select,
   Stack,
   Text,
-  TextInput,
   Textarea,
+  TextInput,
 } from "@mantine/core";
 import { useState } from "react";
+import Modal from "@/app/_components/common/modal/modal";
 
 export const ModalTests = () => {
   const [simpleOpen, setSimpleOpen] = useState(false);
@@ -24,8 +23,6 @@ export const ModalTests = () => {
 
   const [formOpen, setFormOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "" });
-
-  const [agencyFormOpen, setAgencyFormOpen] = useState(false);
 
   const [largeOpen, setLargeOpen] = useState(false);
 

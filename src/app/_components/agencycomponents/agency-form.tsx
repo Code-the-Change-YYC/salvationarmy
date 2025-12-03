@@ -1,31 +1,45 @@
 "use client";
 
-import { Divider, Stack, TextInput, Textarea, Title } from "@mantine/core";
+import { Box, Divider, Stack, Textarea, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
 import classes from "./agency-form.module.scss";
+
 interface AgencyBookingForm {
+  title: string;
   residentName: string;
   contactInfo: string;
   additionalInfo: string;
-  transportDateTime: string;
+  startTime: string;
+  endTime: string;
   purpose: string;
+  pickupAddress: string;
   destinationAddress: string;
 }
 
 interface AgencyFormProps {
   form: UseFormReturnType<AgencyBookingForm>;
+  destinationAddressRef: React.RefObject<HTMLInputElement | null>;
 }
 
-export const AgencyForm = ({ form }: AgencyFormProps) => {
+export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => {
   return (
     <Stack gap="lg">
+      <div className={classes.formRow}>
+        <TextInput
+          withAsterisk
+          label="Booking Name"
+          placeholder="Enter name"
+          key={form.key("title")}
+          {...form.getInputProps("title")}
+        />
+      </div>
+      <Divider />
       {/* Personal Information Section */}
       <Stack gap="md">
-        <Title order={3} size="h4">
+        <Box fw={500} fz="lg">
           Personal Information
-        </Title>
-
+        </Box>
         <div className={classes.formRow}>
           <TextInput
             withAsterisk
@@ -61,9 +75,9 @@ export const AgencyForm = ({ form }: AgencyFormProps) => {
 
       {/* Logistics Section */}
       <Stack gap="md">
-        <Title order={3} size="h4">
+        <Box fw={500} fz="lg">
           Logistics
-        </Title>
+        </Box>
 
         <div className={classes.formRow}>
           <DateTimePicker
@@ -71,8 +85,19 @@ export const AgencyForm = ({ form }: AgencyFormProps) => {
             label="Date and time of transport"
             placeholder="Select date and time"
             valueFormat="DD MMM YYYY hh:mm A"
-            key={form.key("transportDateTime")}
-            {...form.getInputProps("transportDateTime")}
+            key={form.key("startTime")}
+            {...form.getInputProps("startTime")}
+          />
+        </div>
+
+        <div className={classes.formRow}>
+          <DateTimePicker
+            withAsterisk
+            label="Date and time of arrival"
+            placeholder="Select date and time"
+            valueFormat="DD MMM YYYY hh:mm A"
+            key={form.key("endTime")}
+            {...form.getInputProps("endTime")}
           />
         </div>
 
@@ -85,7 +110,15 @@ export const AgencyForm = ({ form }: AgencyFormProps) => {
             {...form.getInputProps("purpose")}
           />
         </div>
-
+        <div className={classes.formRow}>
+          <TextInput
+            withAsterisk
+            label="Pickup Address"
+            placeholder="Enter address"
+            key={form.key("pickupAddress")}
+            {...form.getInputProps("pickupAddress")}
+          />
+        </div>
         <div className={classes.formRow}>
           <TextInput
             withAsterisk
@@ -93,6 +126,7 @@ export const AgencyForm = ({ form }: AgencyFormProps) => {
             placeholder="Enter address"
             key={form.key("destinationAddress")}
             {...form.getInputProps("destinationAddress")}
+            ref={destinationAddressRef}
           />
         </div>
       </Stack>
