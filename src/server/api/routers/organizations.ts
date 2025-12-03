@@ -189,4 +189,39 @@ export const organizationRouter = createTRPCRouter({
         },
       });
     }),
+
+  sendPasswordResetEmail: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const response = await auth.api.requestPasswordReset({
+          body: {
+            email: input.email,
+            redirectTo: "/reset-password",
+          },
+        });
+
+        if (!response.status) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: response.message || "Failed to send reset email",
+          });
+        }
+
+        return {
+          success: true,
+          email: input.email,
+        };
+      } catch (error) {
+        console.error("Error sending password reset email:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to send password reset email",
+        });
+      }
+    }),
 });
