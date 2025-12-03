@@ -113,6 +113,6 @@ export interface AuthUser {
   role: Role;
   image?: string | null;
   emailVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
