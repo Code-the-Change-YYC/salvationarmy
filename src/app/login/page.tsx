@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
-import type { AuthUser } from "@/types/types";
+import { type AuthUser, Role } from "@/types/types";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -32,15 +32,15 @@ export default function LoginPage() {
   // are already logged in to their proper dashboard
 
   const redirectToHomePage = useCallback(
-    (role: string) => {
+    (role: Role) => {
       switch (role) {
-        case "admin":
+        case Role.ADMIN:
           router.push("/admin/home");
           break;
-        case "agency":
+        case Role.AGENCY:
           router.push("/agency/home");
           break;
-        case "driver":
+        case Role.DRIVER:
           router.push("/driver/home");
           break;
         default:
