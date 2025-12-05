@@ -3,30 +3,27 @@
 import { Anchor, Paper, PasswordInput, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
 import { notify } from "@/lib/notifications";
 import { emailRegex } from "@/types/validation";
-import type { User } from "@/server/db/auth-schema";
-import { Role } from "@/types/types";
-
-function isAuthUser(user: unknown): user is User {
-  return (
-    typeof user === "object" &&
-    user !== null &&
-    "role" in user &&
-    typeof (user as User).role === "string"
-  );
-}
+import { api } from "@/trpc/react";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const { data: session, isPending: sessionLoading } = authClient.useSession();
-  const { data: activeOrganization, isPending: orgLoading } = authClient.useActiveOrganization();
+  const getRedirectMutation = api.organization.redirectToDashboard.useMutation({
+    onSuccess: (data) => {
+      notify.success("Successfully signed in!");
+      router.push(data.redirectUrl);
+    },
+    onError: (error) => {
+      notify.error(error.message || "Failed to get redirect URL");
+    },
+  });
 
   const form = useForm({
     initialValues: {
@@ -44,48 +41,19 @@ export default function LoginPage() {
   // todo3: after we handle the above, we need to make it so that this redirects them IF they
   // are already logged in to their proper dashboard
 
-  const redirectToHomePage = useCallback(
-    (role: Role, slug?: string) => {
-      switch (role) {
-        case Role.ADMIN:
-          router.push("/admin/home");
-          break;
-        case Role.AGENCY:
-          router.push(`/agency/home/${slug}`);
-          break;
-        case Role.DRIVER:
-          router.push("/driver/home");
-          break;
-        default:
-          router.push("/");
-          break;
-      }
-    },
-    [router],
-  );
-
-  useEffect(() => {
-    if (sessionLoading || orgLoading) return;
-
-    if (session?.user && isAuthUser(session.user)) {
-      redirectToHomePage(session.user.role, activeOrganization?.slug);
-    }
-  }, [session, activeOrganization, sessionLoading, orgLoading, redirectToHomePage]);
-
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
 
     try {
-      const { data, error } = await authClient.signIn.email({
+      const { error } = await authClient.signIn.email({
         email: values.email,
         password: values.password,
       });
 
       if (error) {
         notify.error(error.message || "Failed to sign in");
-      } else if (data?.user && isAuthUser(data.user)) {
-        redirectToHomePage(data.user.role, activeOrganization?.slug);
       }
+      getRedirectMutation.mutate();
     } catch (error) {
       console.error("Sign in error:", error);
       notify.error("An error occurred during sign in");
