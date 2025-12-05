@@ -10,7 +10,7 @@ import { useEffect, useMemo, useRef } from "react";
 import type { bookings } from "@/server/db/booking-schema";
 import Check from "../../assets/icons/check";
 import Cross from "../../assets/icons/cross";
-import { BookingStatus, type CalendarEvent } from "../../types/types";
+import { type Booking, BookingStatus, type CalendarEvent } from "../../types/types";
 import styles from "./calendar-view.module.scss";
 
 // Event color constants
@@ -73,7 +73,7 @@ function transformBookingsToEvents(
 }
 
 interface CalendarViewProps {
-  bookings: (typeof bookings.$inferSelect)[];
+  bookings: Booking[];
   currentDate?: Date;
   setIsDayView?: (isDayView: boolean) => void;
 }

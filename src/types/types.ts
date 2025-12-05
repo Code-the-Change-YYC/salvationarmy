@@ -1,3 +1,5 @@
+import type { bookings } from "@/server/db/booking-schema";
+
 export enum Role {
   ADMIN = "admin",
   DRIVER = "driver",
@@ -85,3 +87,5 @@ export interface CalendarEvent {
     updatedBy?: string;
   };
 }
+
+export type Booking = typeof bookings.$inferSelect;
