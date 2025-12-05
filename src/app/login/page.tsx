@@ -6,10 +6,22 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
+import { notify } from "@/lib/notifications";
+import { api } from "@/trpc/react";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const getRedirectMutation = api.organization.redirectToDashboard.useMutation({
+    onSuccess: (data) => {
+      notify.success("Successfully signed in!");
+      router.push(data.redirectUrl);
+    },
+    onError: (error) => {
+      notify.error(error.message || "Failed to get redirect URL");
+    },
+  });
 
   const form = useForm({
     initialValues: {
@@ -26,6 +38,7 @@ export default function LoginPage() {
   // todo2: we need to evaluate what org they are a part of to redirect them properly
   // todo3: after we handle the above, we need to make it so that this redirects them IF they
   // are already logged in to their proper dashboard
+
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
 
@@ -36,13 +49,12 @@ export default function LoginPage() {
       });
 
       if (error) {
-        alert(error.message || "Failed to sign in");
-      } else {
-        router.push("/dashboard");
+        notify.error(error.message || "Failed to sign in");
       }
+      getRedirectMutation.mutate();
     } catch (error) {
       console.error("Sign in error:", error);
-      alert("An error occurred during sign in");
+      notify.error("An error occurred during sign in");
     } finally {
       setLoading(false);
     }
