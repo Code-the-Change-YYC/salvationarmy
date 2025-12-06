@@ -13,21 +13,10 @@ export const COLUMN_IDS = {
 } as const;
 
 export const COLUMN_HEADERS = {
-  [COLUMN_IDS.CREATED_AT]: "Created At",
+  [COLUMN_IDS.CREATED_AT]: "Booked on",
   [COLUMN_IDS.CLIENT_NAME]: "Client Name",
   [COLUMN_IDS.TELEPHONE]: "Telephone",
-  [COLUMN_IDS.DATE_BOOKED]: "Date Booked",
-  [COLUMN_IDS.TIME_BOOKED]: "Time Booked",
-  [COLUMN_IDS.AGENCY]: "Agency",
-  [COLUMN_IDS.LOCATION]: "Location",
-} as const;
-
-//todo, add icons to the column def
-export const COLUMN_ICONS = {
-  [COLUMN_IDS.CREATED_AT]: "Created At",
-  [COLUMN_IDS.CLIENT_NAME]: "Client Name",
-  [COLUMN_IDS.TELEPHONE]: "Telephone",
-  [COLUMN_IDS.DATE_BOOKED]: "Date Booked",
+  [COLUMN_IDS.DATE_BOOKED]: "Date of Transport",
   [COLUMN_IDS.TIME_BOOKED]: "Time Booked",
   [COLUMN_IDS.AGENCY]: "Agency",
   [COLUMN_IDS.LOCATION]: "Location",
