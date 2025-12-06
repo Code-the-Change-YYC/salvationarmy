@@ -187,7 +187,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
         isDayView={isDayView}
       />
 
-      <div className={styles.calendarContainer}>
+      <div className={styles.viewContainer}>
         {isLoadingBookings ? (
           <Box className={styles.loadingContainer}>
             <Loader color={CHERRY_RED} type="dots" />
