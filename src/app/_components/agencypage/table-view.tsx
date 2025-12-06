@@ -1,6 +1,6 @@
 "use client";
 import type { ColDef, IHeaderParams } from "ag-grid-community";
-import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
+import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { useMemo, useState } from "react";
 import Calendar from "@/assets/icons/calendar";
@@ -48,7 +48,7 @@ const HeaderWithIcon = (params: IHeaderParams) => {
   return (
     <div className={styles.headerWithIcon}>
       {getIcon()}
-      <span>{headerName}</span>
+      <span className={styles.headerName}>{headerName}</span>
     </div>
   );
 };
@@ -97,6 +97,17 @@ const formatTime = (timeString: string | undefined): string => {
 };
 
 export default function TableView() {
+  // Custom theme for the table
+  const theme = themeQuartz.withParams({
+    fontFamily: "var(--font-albert-sans), sans-serif",
+    wrapperBorder: false,
+    columnBorder: true,
+    headerBackgroundColor: "transparent",
+    spacing: "8px",
+    cellTextColor: "var(--color-dark-grey)",
+    borderColor: "var(--color-border)",
+  });
+
   // Dummy data for now. Will be replaced with actual bookings data.
   const [rowData] = useState<ScheduleInformation[]>(
     Array.from({ length: 15 }, () => ({
@@ -151,7 +162,7 @@ export default function TableView() {
     flex: 1,
     width: DEFAULT_COLUMN_WIDTH,
     minWidth: MIN_COLUMN_WIDTH,
-    resizable: true,
+    resizable: false,
     sortable: true,
     filter: true,
   };
@@ -159,6 +170,7 @@ export default function TableView() {
   return (
     <div className={`ag-theme-quartz ${styles.tableContainer}`}>
       <AgGridReact
+        theme={theme}
         rowData={rowData}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}

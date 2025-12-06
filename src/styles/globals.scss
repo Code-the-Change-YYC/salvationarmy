@@ -1,5 +1,35 @@
 @use "variables" as *;
 
+:root {
+  // Expose SCSS color variables as CSS custom properties for use in JavaScript/TypeScript
+  --color-cherry-red: #{$color-cherry-red};
+  --color-cobalt-blue: #{$color-cobalt-blue};
+  --color-bubblegum: #{$color-bubblegum};
+  --color-forest-green: #{$color-forest-green};
+  --color-dark-grey: #{$color-dark-grey};
+  --color-light-grey: #{$color-light-grey};
+  --color-white: #{$color-white};
+  --color-black: #{$color-black};
+  --color-text-primary: #{$color-text-primary};
+  --color-background: #{$color-background};
+  --color-primary: #{$color-primary};
+  --color-primary-text: #{$color-primary-text};
+  --color-primary-hover: #{$color-primary-hover};
+  --color-primary-hover-text: #{$color-primary-hover-text};
+  --color-secondary: #{$color-secondary};
+  --color-secondary-hover: #{$color-secondary-hover};
+  --color-secondary-text: #{$color-secondary-text};
+  --color-disabled: #{$color-disabled};
+  --color-disabled-text: #{$color-disabled-text};
+  --color-view-selected: #{$color-view-selected};
+  --color-view-selected-text: #{$color-view-selected-text};
+  --color-view-hover: #{$color-view-hover};
+  --color-view-hover-text: #{$color-view-hover-text};
+  --color-view-deselected: #{$color-view-deselected};
+  --color-view-deselected-text: #{$color-view-deselected-text};
+  --color-border: #{$color-border};
+}
+
 body {
   padding: 0;
   margin: 0;

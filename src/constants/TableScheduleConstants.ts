@@ -1,6 +1,6 @@
 import type { ColDef } from "ag-grid-community";
 
-export const DEFAULT_COLUMN_WIDTH = 250;
+export const DEFAULT_COLUMN_WIDTH = 300;
 export const MIN_COLUMN_WIDTH = 175;
 
 export const COLUMN_IDS = {
