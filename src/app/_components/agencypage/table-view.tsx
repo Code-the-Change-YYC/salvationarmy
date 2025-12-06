@@ -14,6 +14,7 @@ import {
   createColumnDef,
   DEFAULT_COLUMN_WIDTH,
   MIN_COLUMN_WIDTH,
+  TABLE_THEME_PARAMS,
 } from "@/constants/TableScheduleConstants";
 import type { ScheduleInformation } from "@/types/types";
 import styles from "./table-view.module.scss";
@@ -98,15 +99,7 @@ const formatTime = (timeString: string | undefined): string => {
 
 export default function TableView() {
   // Custom theme for the table
-  const theme = themeQuartz.withParams({
-    fontFamily: "var(--font-albert-sans), sans-serif",
-    wrapperBorder: false,
-    columnBorder: true,
-    headerBackgroundColor: "transparent",
-    spacing: "8px",
-    cellTextColor: "var(--color-dark-grey)",
-    borderColor: "var(--color-border)",
-  });
+  const theme = themeQuartz.withParams(TABLE_THEME_PARAMS);
 
   // Dummy data for now. Will be replaced with actual bookings data.
   const [rowData] = useState<ScheduleInformation[]>(

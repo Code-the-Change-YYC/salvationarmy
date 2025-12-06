@@ -27,3 +27,14 @@ export const createColumnDef = (columnId: keyof typeof COLUMN_IDS): Partial<ColD
   field: COLUMN_IDS[columnId],
   headerName: COLUMN_HEADERS[COLUMN_IDS[columnId]],
 });
+
+export const TABLE_THEME_PARAMS = {
+  fontFamily: "var(--font-albert-sans), sans-serif",
+  wrapperBorder: false,
+  columnBorder: true,
+  headerBackgroundColor: "transparent",
+  spacing: "8px",
+  headerTextColor: "var(--color-dark-grey)",
+  cellTextColor: "var(--color-dark-grey)",
+  borderColor: "var(--color-border)",
+} as const;
