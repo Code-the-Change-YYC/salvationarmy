@@ -13,6 +13,7 @@ import {
   COLUMN_IDS,
   createColumnDef,
   DEFAULT_COLUMN_WIDTH,
+  MIN_COLUMN_WIDTH,
 } from "@/constants/TableScheduleConstants";
 import type { ScheduleInformation } from "@/types/types";
 import styles from "./table-view.module.scss";
@@ -149,6 +150,7 @@ export default function TableView() {
   const defaultColDef: ColDef = {
     flex: 1,
     width: DEFAULT_COLUMN_WIDTH,
+    minWidth: MIN_COLUMN_WIDTH,
     resizable: true,
     sortable: true,
     filter: true,
