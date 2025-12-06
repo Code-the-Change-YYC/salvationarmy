@@ -7,7 +7,6 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import { Box, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo, useRef } from "react";
-import type { bookings } from "@/server/db/booking-schema";
 import Check from "../../assets/icons/check";
 import Cross from "../../assets/icons/cross";
 import { type Booking, BookingStatus, type CalendarEvent } from "../../types/types";
@@ -49,9 +48,7 @@ function getEventColor(startDate: string): string {
   return COBALT_BLUE;
 }
 
-function transformBookingsToEvents(
-  bookingsList: (typeof bookings.$inferSelect)[],
-): CalendarEvent[] {
+function transformBookingsToEvents(bookingsList: Booking[]): CalendarEvent[] {
   return bookingsList.map((booking) => ({
     id: String(booking.id),
     title: booking.title,
