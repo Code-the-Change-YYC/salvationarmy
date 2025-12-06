@@ -1,7 +1,6 @@
 import { Box } from "@mantine/core";
 import { headers } from "next/headers";
 import Link from "next/link";
-import AgGridTest from "@/app/_components/aggridtest";
 import ModalTests from "@/app/_components/common/modal/modaltests";
 import FullCalendarTest from "@/app/_components/fullcalendartest";
 import MantineTest from "@/app/_components/mantinetest";
@@ -74,10 +73,6 @@ export default async function Home() {
             <Link href="/driver/home">Drivers Home Page</Link>
             <h1>Go to button style guide</h1>
             <Link href="/style-guide">Button Style Guide</Link>
-          </div>
-          <div>
-            <h1>ag grid test</h1>
-            <AgGridTest />
           </div>
           <div>
             <h1>full calendar test</h1>
