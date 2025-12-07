@@ -3,7 +3,7 @@ import type { ColDef, IHeaderParams } from "ag-grid-community";
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Calendar from "@/assets/icons/calendar";
 import Call from "@/assets/icons/call";
 import Clock from "@/assets/icons/clock";
@@ -19,9 +19,6 @@ import {
 } from "@/constants/TableScheduleConstants";
 import type { ScheduleInformation } from "@/types/types";
 import styles from "./table-view.module.scss";
-
-// register community modules for ag grid
-ModuleRegistry.registerModules([AllCommunityModule]);
 
 const HeaderWithIcon = (params: IHeaderParams) => {
   const columnId = params.column?.getColId();
@@ -56,6 +53,11 @@ const HeaderWithIcon = (params: IHeaderParams) => {
 };
 
 export default function TableView() {
+  // register community modules for ag grid
+  useEffect(() => {
+    ModuleRegistry.registerModules([AllCommunityModule]);
+  }, []);
+
   // Custom theme for the table
   const theme = themeQuartz.withParams(TABLE_THEME_PARAMS);
 
@@ -119,13 +121,12 @@ export default function TableView() {
   };
 
   return (
-    <div className={`ag-theme-quartz ${styles.tableContainer}`}>
+    <div className={styles.tableContainer}>
       <AgGridReact
         theme={theme}
         rowData={rowData}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
-        rowSelection="multiple"
         pagination={false}
       />
     </div>
