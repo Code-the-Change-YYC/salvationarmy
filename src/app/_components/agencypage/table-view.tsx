@@ -2,6 +2,7 @@
 import type { ColDef, IHeaderParams } from "ag-grid-community";
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
+import dayjs from "dayjs";
 import { useMemo, useState } from "react";
 import Calendar from "@/assets/icons/calendar";
 import Call from "@/assets/icons/call";
@@ -54,49 +55,6 @@ const HeaderWithIcon = (params: IHeaderParams) => {
   );
 };
 
-// Format date to "Sept 12, 2025" format
-const formatDate = (dateString: string | undefined): string => {
-  if (!dateString) return "";
-  // Handle both ISO date strings and date-only strings (YYYY-MM-DD)
-  const date = dateString.includes("T") ? new Date(dateString) : new Date(dateString + "T00:00:00");
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sept",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const month = months[date.getMonth()];
-  const day = date.getDate();
-  const year = date.getFullYear();
-  return `${month} ${day}, ${year}`;
-};
-
-// Format time to "12:00 PM" format
-const formatTime = (timeString: string | undefined): string => {
-  if (!timeString) return "";
-  // If it's already in HH:MM format, convert it
-  if (timeString.includes(":")) {
-    const parts = timeString.split(":");
-    const hours = parts[0];
-    const minutes = parts[1];
-    if (!hours || !minutes) return timeString;
-    const hour = parseInt(hours, 10);
-    if (Number.isNaN(hour)) return timeString;
-    const ampm = hour >= 12 ? "PM" : "AM";
-    const hour12 = hour % 12 || 12;
-    return `${hour12}:${minutes.padStart(2, "0")} ${ampm}`;
-  }
-  return timeString;
-};
-
 export default function TableView() {
   // Custom theme for the table
   const theme = themeQuartz.withParams(TABLE_THEME_PARAMS);
@@ -107,8 +65,8 @@ export default function TableView() {
       CREATED_AT: "2025-09-12T10:00:00Z",
       CLIENT_NAME: "Jason Thompson",
       TELEPHONE: "403-123-4567",
-      DATE_BOOKED: "2025-09-26",
-      TIME_BOOKED: "12:00",
+      DATE_BOOKED: "2025-09-26T12:00:00",
+      TIME_BOOKED: "2025-09-26T12:00:00",
       AGENCY: "Amazing Agency",
       LOCATION: "123 Something St NW",
     })),
@@ -119,7 +77,7 @@ export default function TableView() {
       {
         ...createColumnDef(COLUMN_IDS.CREATED_AT),
         headerComponent: HeaderWithIcon,
-        valueFormatter: (params) => formatDate(params.value as string | undefined),
+        valueFormatter: (params) => dayjs(params.value).format("MMM D, YYYY"),
       },
       {
         ...createColumnDef(COLUMN_IDS.CLIENT_NAME),
@@ -132,12 +90,12 @@ export default function TableView() {
       {
         ...createColumnDef(COLUMN_IDS.DATE_BOOKED),
         headerComponent: HeaderWithIcon,
-        valueFormatter: (params) => formatDate(params.value as string | undefined),
+        valueFormatter: (params) => dayjs(params.value).format("MMM D, YYYY"),
       },
       {
         ...createColumnDef(COLUMN_IDS.TIME_BOOKED),
         headerComponent: HeaderWithIcon,
-        valueFormatter: (params) => formatTime(params.value as string | undefined),
+        valueFormatter: (params) => dayjs(params.value).format("h:mm A"),
       },
       {
         ...createColumnDef(COLUMN_IDS.AGENCY),
