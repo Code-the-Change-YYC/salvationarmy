@@ -39,16 +39,26 @@ export default function DatePicker({
   ...props
 }: DatePickerProps) {
   // Convert ISO string to Date object for Mantine
-  const mantineValue = value ? new Date(value) : null;
+  let mantineValue = value ? new Date(value) : null;
+
+  // Validate the date
+  if (mantineValue && isNaN(mantineValue.getTime())) {
+    console.warn("Invalid ISO string provided to DatePicker:", value);
+    mantineValue = null;
+  }
 
   // Convert to iso string
-  const handleChange = (mantineValue: string | null) => {
+  const handleChange = (mantineValue: Date | string | null) => {
     if (!mantineValue) {
       onChange?.(null);
       return;
     }
 
-    const isoString = new Date(mantineValue).toISOString();
+    // Handle both Date objects and strings from Mantine
+    const isoString =
+      mantineValue instanceof Date
+        ? mantineValue.toISOString()
+        : new Date(mantineValue).toISOString();
     onChange?.(isoString);
   };
 
@@ -57,6 +67,7 @@ export default function DatePicker({
       <DateTimePicker
         label={label}
         placeholder={placeholder}
+        {...props}
         withAsterisk={required}
         valueFormat={valueFormat}
         error={error}
@@ -66,7 +77,6 @@ export default function DatePicker({
           withDropdown: true,
           popoverProps: { withinPortal: false },
         }}
-        {...props}
       />
     </div>
   );
