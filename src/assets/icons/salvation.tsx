@@ -1,6 +1,5 @@
 import type { SVGProps } from "react";
 import { memo } from "react";
-import salvationImg from "@/assets/images/salvation.png";
 
 const SvgComponent = ({
   width = "56px",
@@ -8,7 +7,7 @@ const SvgComponent = ({
   color = "currentColor",
   ...props
 }: SVGProps<SVGSVGElement>) => (
-  <img src={salvationImg.src} alt="Alberta Logo" width={width} height={height} />
+  <img src={"/images/salvation.png"} alt="Alberta Logo" width={width} height={height} />
 );
 
 const Salvation = memo(SvgComponent);
