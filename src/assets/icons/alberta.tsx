@@ -4,9 +4,7 @@ import { memo } from "react";
 const SvgComponent = ({
   width = "146px",
   height = "57px",
-  color = "currentColor",
-  ...props
-}: SVGProps<SVGSVGElement>) => (
+}: React.ImgHTMLAttributes<HTMLImageElement>) => (
   <img src={"/images/alberta.png"} alt="Alberta Logo" width={width} height={height} />
 );
 
