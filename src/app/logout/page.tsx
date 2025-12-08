@@ -6,7 +6,7 @@ import Alberta from "@/assets/icons/alberta";
 import Salvation from "@/assets/icons/salvation";
 import style from "./Logout.module.scss";
 
-export default function LoginPage() {
+export default function LogoutPage() {
   const router = useRouter();
   function redirectLogin() {
     router.push("/login");
