@@ -1,0 +1,104 @@
+.mainPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  /* login card */
+
+  /* Auto layout */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 32px;
+  gap: 12px;
+
+  position: absolute;
+  width: 526px;
+  height: 297px;
+  left: calc(50% - 526px / 2);
+  top: calc(50% - 297px / 2 + 0.5px);
+
+  background: #ffffff;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+
+  @media (max-width: 420px) {
+    /* login card */
+
+    /* Auto layout */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 32px;
+    gap: 8px;
+
+    position: absolute;
+    width: 353px;
+    height: 279px;
+    left: calc(50% - 353px / 2);
+    top: calc(50% - 279px / 2 - 0px);
+
+    /* White */
+    background: #ffffff;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
+    border-radius: 16px;
+  }
+}
+
+.logoutText {
+  /* You’ve logged out of the Navigation Centre */
+
+  width: 450px;
+  height: 76px;
+
+  /* Heading 1
+
+Large Titles
+*/
+  font-family: "Albert Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 38px;
+  text-align: center;
+
+  /* Dark Grey */
+  color: #424242;
+
+  @media (max-width: 420px) {
+    /* You’ve logged out of the Navigation Centre */
+
+    width: 289px;
+    height: 58px;
+
+    /* Heading 2
+
+Subtitles
+*/
+    font-family: "Albert Sans";
+    font-style: normal;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 29px;
+    text-align: center;
+
+    /* Dark Grey */
+    color: #424242;
+  }
+}
+.icons {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: 353px;
+    height: 279px;
+  }
+}
