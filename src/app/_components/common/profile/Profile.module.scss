@@ -20,19 +20,12 @@
   /* User name */
 
   /* Heading 3 */
-  font-style: normal;
   font-weight: $font-weight-bold;
   line-height: 24px;
   /* identical to box height */
 
   /* Dark Grey */
   color: $color-dark-grey;
-
-  /* Inside auto layout */
-  flex: none;
-  order: 0;
-  align-self: stretch;
-  flex-grow: 0;
 }
 
 .emailText {
@@ -42,7 +35,6 @@
   height: 15px;
 
   /* Regular Copy */
-  font-style: normal;
   font-weight: $font-weight-regular;
   font-size: 12px;
   line-height: 15px;
@@ -50,12 +42,6 @@
 
   /* Dark Grey */
   color: $color-dark-grey;
-
-  /* Inside auto layout */
-  flex: none;
-  order: 1;
-  align-self: stretch;
-  flex-grow: 0;
 }
 
 .profileCard {
