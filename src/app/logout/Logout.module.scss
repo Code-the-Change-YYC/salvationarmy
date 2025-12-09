@@ -9,7 +9,7 @@
 
 .container {
   /* login card */
-
+  overflow: auto;
   /* Auto layout */
   display: flex;
   flex-direction: column;
@@ -17,45 +17,26 @@
   padding: 32px;
   gap: 12px;
 
-  width: 526px;
-  height: 297px;
+  width: 27%;
+  min-width: 353px;
+  min-height: 279px;
 
   background: $color-white;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
   border-radius: 16px;
-
-  @media (max-width: 420px) {
-    /* login card */
-
-    /* Auto layout */
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 32px;
-    gap: 8px;
-
-    width: 353px;
-    height: 279px;
-
-    /* White */
-    background: $color-white;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
-    border-radius: 16px;
-  }
 }
 
 .logoutText {
   /* You’ve logged out of the Navigation Centre */
 
-  width: 450px;
-  height: 76px;
+  height: auto;
 
   /* Heading 1
 
 Large Titles
 */
   font-weight: $font-weight-bold;
-  font-size: 32px;
+  font-size: 2rem;
   line-height: 38px;
   text-align: center;
 
@@ -63,17 +44,7 @@ Large Titles
   color: $color-dark-grey;
 
   @media (max-width: 420px) {
-    /* You’ve logged out of the Navigation Centre */
-
-    width: 289px;
-    height: 58px;
-
-    /* Heading 2
-
-Subtitles
-*/
-    font-weight: $font-weight-bold;
-    font-size: 24px;
+    font-size: 1.5rem;
     line-height: 29px;
     text-align: center;
 
