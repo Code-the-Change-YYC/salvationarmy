@@ -4,8 +4,10 @@ import { Anchor, Paper, PasswordInput, Stack, Text, TextInput, Title } from "@ma
 import { useForm } from "@mantine/form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
+import { emailRegex } from "@/types/validation";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -17,7 +19,7 @@ export default function LoginPage() {
       password: "",
     },
     validate: {
-      email: (value) => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? null : "Invalid email"),
+      email: (value) => (emailRegex.test(value) ? null : "Invalid email"),
       password: (value) => (value.length > 0 ? null : "Password is required"),
     },
   });
@@ -49,7 +51,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "4rem auto", padding: "0 1rem" }}>
+    <div className={styles.container}>
       <Paper shadow="sm" p="xl" radius="md">
         <Title order={1} mb="md">
           Sign In
