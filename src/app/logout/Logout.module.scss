@@ -1,0 +1,69 @@
+@use "@/styles/variables" as *;
+
+.mainPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: url("/images/skyline.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.container {
+  /* login card */
+  overflow: auto;
+  /* Auto layout */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 32px;
+  gap: 12px;
+
+  @media (max-width: 640px) {
+    width: 353px;
+    height: 279px;
+  }
+  @media (min-width: 768px) {
+    width: 526px;
+    height: 297px;
+  }
+
+  background: $color-white;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+}
+
+.logoutText {
+  /* You’ve logged out of the Navigation Centre */
+
+  height: auto;
+
+  /* Heading 1
+
+Large Titles
+*/
+  font-weight: $font-weight-bold;
+  font-size: 2rem;
+  line-height: 38px;
+  text-align: center;
+
+  /* Dark Grey */
+  color: $color-dark-grey;
+
+  @media (max-width: 640px) {
+    font-size: 1.5rem;
+    line-height: 29px;
+    text-align: center;
+
+    /* Dark Grey */
+    color: $color-dark-grey;
+  }
+}
+.icons {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
