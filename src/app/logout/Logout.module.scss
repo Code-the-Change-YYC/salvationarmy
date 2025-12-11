@@ -5,6 +5,10 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
+  background-image: url("/images/skyline.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .container {
@@ -17,9 +21,14 @@
   padding: 32px;
   gap: 12px;
 
-  width: 27%;
-  min-width: 353px;
-  min-height: 279px;
+  @media (max-width: 640px) {
+    width: 353px;
+    height: 279px;
+  }
+  @media (min-width: 768px) {
+    width: 526px;
+    height: 297px;
+  }
 
   background: $color-white;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
@@ -43,7 +52,7 @@ Large Titles
   /* Dark Grey */
   color: $color-dark-grey;
 
-  @media (max-width: 420px) {
+  @media (max-width: 640px) {
     font-size: 1.5rem;
     line-height: 29px;
     text-align: center;

@@ -1,12 +1,11 @@
 "use client";
 
 import { Menu } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import Arrow from "@/assets/icons/arrow";
-import Cross from "@/assets/icons/cross";
 import User from "@/assets/icons/user";
 import { authClient, useSession } from "@/lib/auth-client";
+import { notify } from "@/lib/notifications";
 import Button from "../button/Button";
 import IconButton from "../button/IconButton";
 import styles from "./Profile.module.scss";
@@ -22,16 +21,7 @@ export default function Profile() {
       })
       .catch((err) => {
         console.error("Logout failed:", err);
-        notifications.show({
-          id: "logout-error",
-          position: "bottom-center",
-          withCloseButton: true,
-          autoClose: 5000,
-          title: "Error",
-          message: "Logout Failed",
-          color: "white",
-          icon: <Cross />,
-        });
+        notify.error("Logout Failed");
       });
   }
   return (
