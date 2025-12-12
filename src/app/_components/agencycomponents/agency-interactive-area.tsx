@@ -9,6 +9,7 @@ import { ViewController } from "@/app/_components/agencycomponents/view-controll
 import Modal from "@/app/_components/common/modal/modal";
 import { env } from "@/env";
 import { notify } from "@/lib/notifications";
+import { api } from "@/trpc/react";
 import { ViewMode } from "@/types/types";
 import TableView from "../agencypage/table-view";
 import CalendarView from "../calendar-view";
@@ -23,11 +24,21 @@ const GOOGLE_MAPS_LIBRARIES_ARRAY: Libraries = ["places"]; //Add more to this ar
 export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
-  // eventually this loading state will be replacted with a tanstack mutation loading state
-  const [loading, setLoading] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [isDayView, setIsDayView] = useState<boolean>(false);
   const [validationAddressGood, setValidationAddressGood] = useState<boolean>(false);
+
+  const createBookingMutation = api.trip.create.useMutation({
+    onSuccess: () => {
+      notify.success("Booking successfully created");
+      form.reset();
+      setShowBookingModal(false);
+      setValidationAddressGood(false);
+    },
+    onError: (error) => {
+      notify.error(error.message || "Failed to create a booking");
+    },
+  });
 
   //Define a variable that react will reassign its value on runtime
   //Starts off as null but will equal (through inputElement.current) an HTML input element when assigned at runtime
@@ -114,54 +125,31 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
     };
   }, [inputElement.current]);
 
-  const handleConfirm = async () => {
-    setLoading(true);
+  const handleConfirm = () => {
     const validation = form.validate();
     const hasErrors = Object.keys(validation.errors).length > 0;
 
     if (hasErrors) {
       notify.error("Please fix the errors in the form before submitting");
-      setLoading(false);
       return;
     }
 
-    const values = form.values;
-    console.log("submit", values);
+    if (!validationAddressGood) {
+      form.setFieldError("destinationAddress", "Please select a valid address from the dropdown");
+      return;
+    }
 
-    // enter an actual api call here like a tanstack mutation
-    // when calling the backend to verify form and update the db, must manually pass the destination address
-    // do NOT use the mantine field form as it will not contain the destination address
-    // use instead -> [inputElement.current?.value || ""]
-    // see the below code for a sample usage of calling the backend to verify destination address
-    /*
-      //Define backend endpoint (if you need to directly call this api - probably won't though, put at the top of the file, under useStates)
-      const validateDestinationAddressAPI = api.form.validateDestinationAddress.useMutation();
-
-      if (validationAddressGood) {
-        //Call the backend
-        const result = await validateDestinationAddressAPI.mutateAsync({
-          regionCode: "ca",
-          destinationAddress: [inputElement.current?.value || ""],
-        });
-
-        //Evaluate the result from the back-end
-        if (result === null) {
-          //Manually adds an error field to the mantine form
-          form.setFieldError("destinationAddress", "Destination address is too vague");
-        } else{
-          // use -> result passed from funct call as address that goes into db
-          // update db with result var
-          console.log("Backend is happy with input");
-        }
-      }
-    */
-
-    setTimeout(() => {
-      setLoading(false);
-      setShowBookingModal(false);
-      notify.success("Booking successfully created");
-      form.reset();
-    }, 2000);
+    createBookingMutation.mutate({
+      title: form.values.title,
+      residentName: form.values.residentName,
+      contactInfo: form.values.contactInfo,
+      additionalInfo: form.values.additionalInfo,
+      pickupAddress: form.values.pickupAddress,
+      destinationAddress: inputElement.current?.value || "",
+      startTime: new Date(form.values.startTime).toISOString(),
+      endTime: new Date(form.values.endTime).toISOString(),
+      purpose: form.values.purpose,
+    });
   };
 
   //If the script hasn't loaded yet, don't render anything until it does
@@ -206,7 +194,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
         size="xl"
         showDefaultFooter
         confirmText="Confirm Booking"
-        loading={loading}
+        loading={createBookingMutation.isPending}
       >
         <AgencyForm form={form} destinationAddressRef={inputElement} />
       </Modal>
