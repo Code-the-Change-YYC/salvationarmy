@@ -58,13 +58,13 @@ function transformBookingsToEvents(bookingsList: Booking[]): CalendarEvent[] {
     extendedProps: {
       pickupAddress: booking.pickupAddress,
       destinationAddress: booking.destinationAddress,
-      purpose: booking.purpose ?? undefined,
+      purpose: booking.purpose,
       passengerInfo: booking.passengerInfo,
       status: booking.status as BookingStatus,
       agencyId: booking.agencyId,
-      driverId: booking.driverId ?? undefined,
+      driverId: booking.driverId,
       createdAt: booking.createdAt,
-      updatedAt: booking.updatedAt ?? undefined,
+      updatedAt: booking.updatedAt,
     },
   }));
 }

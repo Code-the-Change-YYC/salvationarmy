@@ -76,13 +76,13 @@ export interface CalendarEvent {
   extendedProps?: {
     pickupAddress: string;
     destinationAddress: string;
-    purpose?: string;
+    purpose?: string | null;
     passengerInfo: string;
     status: BookingStatus;
     agencyId: string;
-    driverId?: string;
+    driverId?: string | null;
     createdAt?: Date | string;
-    updatedAt?: Date | string;
+    updatedAt?: Date | string | null;
     createdBy?: string;
     updatedBy?: string;
   };
