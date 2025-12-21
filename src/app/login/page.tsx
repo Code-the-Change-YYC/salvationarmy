@@ -54,8 +54,6 @@ export default function LoginPage() {
 
       if (error) {
         notify.error(error.message || "Failed to sign in");
-      } else {
-        mutate();
       }
     } catch (error) {
       console.error("Sign in error:", error);
