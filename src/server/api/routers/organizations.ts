@@ -40,14 +40,32 @@ export const organizationRouter = createTRPCRouter({
           orderBy: (session, { desc }) => [desc(session.createdAt)],
         });
 
-        if (userSession?.activeOrganizationId) {
-          const organization = await ctx.db.query.organization.findFirst({
-            where: (org, { eq }) => eq(org.id, userSession.activeOrganizationId!),
+        if (!userSession?.activeOrganizationId) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "No active organization found for this agency user",
           });
-          if (organization?.slug) {
-            redirectUrl = `/agency/home/${organization.slug}`;
-          }
         }
+
+        const organization = await ctx.db.query.organization.findFirst({
+          where: (org, { eq }) => eq(org.id, userSession.activeOrganizationId!),
+        });
+
+        if (!organization) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Organization not found",
+          });
+        }
+
+        if (!organization.slug) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Organization is missing required slug configuration",
+          });
+        }
+
+        redirectUrl = `/agency/home/${organization.slug}`;
         break;
       }
 

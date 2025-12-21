@@ -8,8 +8,8 @@ import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
 import { notify } from "@/lib/notifications";
-import { emailRegex } from "@/types/validation";
 import { api } from "@/trpc/react";
+import { emailRegex } from "@/types/validation";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -54,8 +54,9 @@ export default function LoginPage() {
 
       if (error) {
         notify.error(error.message || "Failed to sign in");
+      } else {
+        mutate();
       }
-      mutate();
     } catch (error) {
       console.error("Sign in error:", error);
       notify.error("An error occurred during sign in");
