@@ -3,7 +3,7 @@
 import { Anchor, Paper, PasswordInput, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
@@ -14,8 +14,9 @@ import { api } from "@/trpc/react";
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { data: session, isPending: sessionLoading } = authClient.useSession();
 
-  const getRedirectMutation = api.organization.redirectToDashboard.useMutation({
+  const { mutate } = api.organization.redirectToDashboard.useMutation({
     onSuccess: (data) => {
       notify.success("Successfully signed in!");
       router.push(data.redirectUrl);
@@ -24,6 +25,12 @@ export default function LoginPage() {
       notify.error(error.message || "Failed to get redirect URL");
     },
   });
+
+  useEffect(() => {
+    if (!sessionLoading && session) {
+      mutate();
+    }
+  }, [session, sessionLoading, mutate]);
 
   const form = useForm({
     initialValues: {
@@ -35,11 +42,6 @@ export default function LoginPage() {
       password: (value) => (value.length > 0 ? null : "Password is required"),
     },
   });
-
-  // todo: change this to a mutation so that we have access to onSuccess and loading handlers
-  // todo2: we need to evaluate what org they are a part of to redirect them properly
-  // todo3: after we handle the above, we need to make it so that this redirects them IF they
-  // are already logged in to their proper dashboard
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
@@ -53,7 +55,7 @@ export default function LoginPage() {
       if (error) {
         notify.error(error.message || "Failed to sign in");
       }
-      getRedirectMutation.mutate();
+      mutate();
     } catch (error) {
       console.error("Sign in error:", error);
       notify.error("An error occurred during sign in");
