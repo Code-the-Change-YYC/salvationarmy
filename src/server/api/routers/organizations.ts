@@ -35,12 +35,9 @@ export const organizationRouter = createTRPCRouter({
         break;
 
       case Role.AGENCY: {
-        const userSession = await ctx.db.query.session.findFirst({
-          where: (session, { eq }) => eq(session.userId, user.id),
-          orderBy: (session, { desc }) => [desc(session.createdAt)],
-        });
+        const activeOrgId = ctx.session.session.activeOrganizationId;
 
-        if (!userSession?.activeOrganizationId) {
+        if (!activeOrgId) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "No active organization found for this agency user",
@@ -48,7 +45,7 @@ export const organizationRouter = createTRPCRouter({
         }
 
         const organization = await ctx.db.query.organization.findFirst({
-          where: (org, { eq }) => eq(org.id, userSession.activeOrganizationId!),
+          where: (org, { eq }) => eq(org.id, activeOrgId),
         });
 
         if (!organization) {
