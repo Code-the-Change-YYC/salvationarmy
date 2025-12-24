@@ -1,6 +1,6 @@
 "use client";
 
-import { Box } from "@mantine/core";
+import { Box, Paper, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { type Libraries, useLoadScript } from "@react-google-maps/api";
 import { useEffect, useRef, useState } from "react";
@@ -166,7 +166,13 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
 
   //If the script hasn't loaded yet, don't render anything until it does
   if (!isLoaded) {
-    return <div></div>;
+    return (
+      <div style={{ maxWidth: "250px", margin: "4rem auto", padding: "0 1rem" }}>
+        <Paper shadow="sm" p="xl" radius="md">
+          <Title>Loading...</Title>
+        </Paper>
+      </div>
+    );
   }
 
   return (

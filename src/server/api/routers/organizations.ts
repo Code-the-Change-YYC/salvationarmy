@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
@@ -8,6 +9,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { user } from "@/server/db/auth-schema";
 import { OrganizationRole } from "@/types/types";
 import { passwordSchema } from "@/types/validation";
 
@@ -221,6 +223,36 @@ export const organizationRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to send password reset email",
+        });
+      }
+    }),
+
+  changeName: protectedProcedure
+    .input(z.object({ newName: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const { newName } = input; //Get the passed variables
+
+      //Alphanumeric regex of length >=3. Allows for exactly 1 space between characters
+      const regex = /^(?!.*\s{2})[A-Za-z0-9][A-Za-z0-9\s]*[A-Za-z0-9][A-Za-z0-9\s]*[A-Za-z0-9]$/;
+      if (!regex.test(newName)) {
+        //User inputted name is not proper
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Invalid Name",
+        });
+      }
+
+      const listOfUpdatedUsers = await ctx.db
+        .update(user)
+        .set({ name: newName })
+        .where(eq(user.id, ctx.session.user.id))
+        .returning(); //Make DB update command to change the user's name
+
+      if (listOfUpdatedUsers.length === 0) {
+        //Drizzle updated no users (something went wrong)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update user's name",
         });
       }
     }),

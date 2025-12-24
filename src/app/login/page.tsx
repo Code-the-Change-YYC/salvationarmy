@@ -9,6 +9,11 @@ import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
 import { emailRegex } from "@/types/validation";
 
+//Custom type declaration fo result.data after logging in.
+//Needed as the better auth hook will return one of two URLs
+//to redirect to.
+type RedirectLink = { newLink: string };
+
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -32,15 +37,15 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { error } = await authClient.signIn.email({
+      const result = await authClient.signIn.email({
         email: values.email,
         password: values.password,
       });
 
-      if (error) {
-        alert(error.message || "Failed to sign in");
+      if (result.error) {
+        alert(result.error.message || "Failed to sign in");
       } else {
-        router.push("/dashboard");
+        router.push((result.data as unknown as RedirectLink).newLink);
       }
     } catch (error) {
       console.error("Sign in error:", error);
