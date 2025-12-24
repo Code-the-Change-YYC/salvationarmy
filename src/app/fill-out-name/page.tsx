@@ -8,7 +8,7 @@ import Button from "@/app/_components/common/button/Button";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 
-export default function LoginPage() {
+export default function FillOutNamePage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -21,7 +21,7 @@ export default function LoginPage() {
   const changeNameMutation = api.organization.changeName.useMutation({
     onSuccess: () => {
       notify.success(`Name successfully set!`);
-
+      //TODO V: change later when we know where to send the user
       router.push("/dashboard");
       setLoading(false);
     },

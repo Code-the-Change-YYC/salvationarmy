@@ -237,7 +237,7 @@ export const organizationRouter = createTRPCRouter({
       if (!regex.test(newName)) {
         //User inputted name is not proper
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+          code: "BAD_REQUEST",
           message: "Invalid Name",
         });
       }
