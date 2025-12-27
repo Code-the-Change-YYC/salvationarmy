@@ -4,6 +4,7 @@ import { Button, Group, Paper, Stack, Table, Text, Title } from "@mantine/core";
 import { useState } from "react";
 import Edit from "@/assets/icons/edit";
 import Grid from "@/assets/icons/grid";
+import Mail from "@/assets/icons/mail";
 import styles from "./agencies.module.scss";
 
 // Mock data
@@ -132,7 +133,7 @@ export default function AgenciesPage() {
                   </Table.Th>
                   <Table.Th>
                     <Group gap="xs">
-                      <span>✉️</span>
+                      <Mail />
                       <Text fw={700}>Member Email Address</Text>
                     </Group>
                   </Table.Th>
