@@ -1,0 +1,23 @@
+@use "@/styles/variables" as *;
+
+.background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: url("/images/skyline.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  @media (max-height: 535px) {
+    height: 535px;
+  }
+}
+
+.logo {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
