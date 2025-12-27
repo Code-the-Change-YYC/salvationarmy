@@ -40,8 +40,56 @@ export default function AgenciesPage() {
   }
 
   const handleExportToCSV = () => {
-    // Mock export function - will be implemented later
-    console.log("Exporting to CSV...");
+    if (!selectedAgency) {
+      alert("No agency selected");
+      return;
+    }
+
+    // Create CSV content with agency information first
+    const csvRows = [
+      // Agency Information Section
+      "Agency Information",
+      `Agency Name,"${selectedAgency.name}"`,
+      `Agency Slug,"${selectedAgency.slug}"`,
+      `Date Joined,"${formatDate(selectedAgency.createdAt)}"`,
+      "", // Empty row for separation
+      // Member Information Section
+      "Member Information",
+      "Member Name,Member Email Address,Role,Date Joined",
+    ];
+
+    // Add member data
+    if (selectedAgency.members && selectedAgency.members.length > 0) {
+      selectedAgency.members.forEach((member) => {
+        const row = [
+          `"${member.user.name || "No name"}"`,
+          `"${member.user.email}"`,
+          `"${member.role}"`,
+          `"${formatDate(member.createdAt)}"`,
+        ];
+        csvRows.push(row.join(","));
+      });
+    } else {
+      csvRows.push("No members found");
+    }
+
+    const csvContent = csvRows.join("\n");
+
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `${selectedAgency.slug}-members-${new Date().toISOString().split("T")[0]}.csv`,
+    );
+    link.style.visibility = "hidden";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
