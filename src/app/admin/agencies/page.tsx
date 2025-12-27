@@ -1,56 +1,43 @@
 "use client";
 
-import { Button, Group, Paper, Stack, Table, Text, Title } from "@mantine/core";
+import { Button, Group, Loader, Paper, Stack, Table, Text, Title } from "@mantine/core";
 import { useState } from "react";
 import Edit from "@/assets/icons/edit";
 import Grid from "@/assets/icons/grid";
 import Mail from "@/assets/icons/mail";
+import { api } from "@/trpc/react";
 import styles from "./agencies.module.scss";
 
-// Mock data
-const mockAgencies = [
-  {
-    id: "1",
-    name: "Amazing Agency",
-    slug: "amazing-agency",
-    dateJoined: "February 25th, 2025",
-  },
-  {
-    id: "2",
-    name: "Fireworks Org",
-    slug: "fireworks-org",
-    dateJoined: "March 10th, 2025",
-  },
-  {
-    id: "3",
-    name: "Star Agency",
-    slug: "star-agency",
-    dateJoined: "January 15th, 2025",
-  },
-  {
-    id: "4",
-    name: "Happy Agency",
-    slug: "happy-agency",
-    dateJoined: "April 5th, 2025",
-  },
-];
-
-const mockMembers = [
-  { id: "1", name: "Patrick Star", email: "patrick@gmail.com" },
-  { id: "2", name: "Patrick Star", email: "patrick@gmail.com" },
-  { id: "3", name: "Patrick Star", email: "patrick@gmail.com" },
-  { id: "4", name: "Patrick Star", email: "patrick@gmail.com" },
-  { id: "5", name: "Patrick Star", email: "patrick@gmail.com" },
-  { id: "6", name: "Patrick Star", email: "patrick@gmail.com" },
-  { id: "7", name: "Patrick Star", email: "patrick@gmail.com" },
-  { id: "8", name: "Patrick Star", email: "patrick@gmail.com" },
-  { id: "9", name: "Patrick Star", email: "patrick@gmail.com" },
-];
-
 export default function AgenciesPage() {
-  const [selectedAgencyId, setSelectedAgencyId] = useState(mockAgencies[0]?.id ?? "1");
+  const { data: organizations, isLoading } = api.organization.getAllWithMembers.useQuery();
 
-  const selectedAgency = mockAgencies.find((agency) => agency.id === selectedAgencyId);
+  const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(null);
+
+  // Set the first agency as selected when data loads
+  const selectedAgency =
+    organizations?.find((org) => org.id === selectedAgencyId) ?? organizations?.[0];
+
+  // Update selected ID when organizations load
+  if (organizations && !selectedAgencyId && organizations.length > 0) {
+    setSelectedAgencyId(organizations[0]?.id ?? null);
+  }
+
+  // Format date helper
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(date));
+  };
+
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <Loader size="lg" />
+      </div>
+    );
+  }
 
   const handleExportToCSV = () => {
     // Mock export function - will be implemented later
@@ -74,15 +61,15 @@ export default function AgenciesPage() {
 
       {/* Agency Tabs */}
       <Group gap="sm" mb="xl">
-        {mockAgencies.map((agency) => (
+        {organizations?.map((org) => (
           <Button
-            key={agency.id}
-            variant={selectedAgencyId === agency.id ? "filled" : "default"}
-            color={selectedAgencyId === agency.id ? "dark" : "gray"}
-            onClick={() => setSelectedAgencyId(agency.id)}
+            key={org.id}
+            variant={selectedAgencyId === org.id ? "filled" : "default"}
+            color={selectedAgencyId === org.id ? "dark" : "gray"}
+            onClick={() => setSelectedAgencyId(org.id)}
             className={styles.agencyTab}
           >
-            {agency.name}
+            {org.name}
           </Button>
         ))}
       </Group>
@@ -100,19 +87,21 @@ export default function AgenciesPage() {
                 <Text fw={700} size="sm" c="dimmed" mb={4}>
                   Agency Name
                 </Text>
-                <Text size="md">{selectedAgency.name}</Text>
+                <Text size="md">{selectedAgency?.name}</Text>
               </div>
               <div>
                 <Text fw={700} size="sm" c="dimmed" mb={4}>
                   Agency Slug
                 </Text>
-                <Text size="md">{selectedAgency.slug}</Text>
+                <Text size="md">{selectedAgency?.slug}</Text>
               </div>
               <div>
                 <Text fw={700} size="sm" c="dimmed" mb={4}>
                   Date Joined
                 </Text>
-                <Text size="md">{selectedAgency.dateJoined}</Text>
+                <Text size="md">
+                  {selectedAgency?.createdAt ? formatDate(selectedAgency.createdAt) : "N/A"}
+                </Text>
               </div>
             </Stack>
           </Paper>
@@ -140,12 +129,22 @@ export default function AgenciesPage() {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {mockMembers.map((member) => (
-                  <Table.Tr key={member.id}>
-                    <Table.Td>{member.name}</Table.Td>
-                    <Table.Td>{member.email}</Table.Td>
+                {selectedAgency?.members && selectedAgency.members.length > 0 ? (
+                  selectedAgency.members.map((member) => (
+                    <Table.Tr key={member.id}>
+                      <Table.Td>{member.user.name || "No name"}</Table.Td>
+                      <Table.Td>{member.user.email}</Table.Td>
+                    </Table.Tr>
+                  ))
+                ) : (
+                  <Table.Tr>
+                    <Table.Td colSpan={2}>
+                      <Text c="dimmed" ta="center">
+                        No members found
+                      </Text>
+                    </Table.Td>
                   </Table.Tr>
-                ))}
+                )}
               </Table.Tbody>
             </Table>
           </Paper>
