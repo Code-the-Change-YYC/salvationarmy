@@ -107,6 +107,22 @@ export const invitation = pgTable("invitation", {
 export const userRelations = relations(user, ({ many }) => ({
   driverBookings: many(bookings, { relationName: "driverBookings" }),
   agencyBookings: many(bookings, { relationName: "agencyBookings" }),
+  memberships: many(member),
+}));
+
+export const organizationRelations = relations(organization, ({ many }) => ({
+  members: many(member),
+}));
+
+export const memberRelations = relations(member, ({ one }) => ({
+  organization: one(organization, {
+    fields: [member.organizationId],
+    references: [organization.id],
+  }),
+  user: one(user, {
+    fields: [member.userId],
+    references: [user.id],
+  }),
   driverLogs: many(logs, { relationName: "driverLogs" }),
 }));
 
