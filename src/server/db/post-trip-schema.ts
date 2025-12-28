@@ -13,7 +13,7 @@ export const postTripSurveys = pgTable(
       .references(() => bookings.id, { onDelete: "cascade" }),
     driverId: text("driver_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "restrict" }),
 
     // Trip completion
     tripCompletionStatus: text("trip_completion_status", {
