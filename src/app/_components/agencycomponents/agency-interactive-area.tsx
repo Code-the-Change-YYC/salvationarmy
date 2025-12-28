@@ -11,6 +11,7 @@ import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { ViewMode } from "@/types/types";
+import { validateStringLength, validateTimeRange } from "@/types/validation";
 import TableView from "../agencypage/table-view";
 import CalendarView from "../calendar-view";
 import styles from "./agency-interactive-area.module.scss";
@@ -75,21 +76,24 @@ export const BookingInteractiveArea = ({
     },
 
     validate: {
-      title: (value) => (value.trim().length > 0 ? null : "Title is required"),
-      residentName: (value) =>
-        value.trim().length > 0 ? null : "Resident name is required",
-      contactInfo: (value) =>
-        value.trim().length > 0 ? null : "Contact info is required",
-      startTime: (value) =>
-        value.trim().length > 0 ? null : "Date and time is required",
-      endTime: (value) =>
-        value.trim().length > 0 ? null : "Date and time is required",
-      purpose: (value) =>
-        value.trim().length > 0 ? null : "Purpose is required",
-      pickupAddress: (value) =>
-        value.trim().length > 0 ? null : "Pickup address is required",
-      destinationAddress: (value) =>
-        value.trim().length > 0 ? null : "Destination address is required",
+      title: (value) => validateStringLength(value, 1, 150, "Booking name"),
+      residentName: (value) => validateStringLength(value, 1, 100, "Resident name"),
+      contactInfo: (value) => validateStringLength(value, 1, 150, "Contact information"),
+      additionalInfo: (value) => {
+        // Optional field, only validate max length if provided
+        if (value.trim().length === 0) return null;
+        return validateStringLength(value, 0, 500, "Additional information");
+      },
+      startTime: (value) => (value.trim().length > 0 ? null : "Date and time is required"),
+      endTime: (value, values) => {
+        // First check if required
+        if (value.trim().length === 0) return "Date and time is required";
+        // Then validate time range
+        return validateTimeRange(values.startTime, value);
+      },
+      purpose: (value) => validateStringLength(value, 1, 500, "Purpose of transport"),
+      pickupAddress: (value) => validateStringLength(value, 1, 300, "Pickup address"),
+      destinationAddress: (value) => validateStringLength(value, 1, 300, "Destination address"),
     },
   });
 
