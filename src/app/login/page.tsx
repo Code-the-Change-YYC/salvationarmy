@@ -3,7 +3,7 @@
 import { Anchor, Paper, PasswordInput, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
@@ -15,19 +15,22 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { data: session, isPending: sessionLoading } = authClient.useSession();
+  const hasRedirected = useRef(false);
 
   const { mutate } = api.organization.redirectToDashboard.useMutation({
     onSuccess: (data) => {
       notify.success("Successfully signed in!");
-      router.push(data.redirectUrl);
+      router.replace(data.redirectUrl);
     },
     onError: (error) => {
       notify.error(error.message || "Failed to get redirect URL");
+      hasRedirected.current = false;
     },
   });
 
   useEffect(() => {
-    if (!sessionLoading && session) {
+    if (!sessionLoading && session && !hasRedirected.current) {
+      hasRedirected.current = true;
       mutate();
     }
   }, [session, sessionLoading, mutate]);
@@ -45,6 +48,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
+    hasRedirected.current = false;
 
     try {
       const { error } = await authClient.signIn.email({
