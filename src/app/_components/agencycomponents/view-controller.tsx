@@ -157,6 +157,15 @@ export const ViewController = ({
             transparent
           />
         </div>
+        <Button
+          text="Export to CSV File"
+          variant="secondary"
+          icon={<Grid />}
+          onClick={() => {
+            console.log("export button pressed");
+            //TODO: add file write code here
+          }}
+        />
         <Button onClick={() => setShowBookingModal(true)} text="Add booking" icon={<Plus />} />
       </div>
     </div>
