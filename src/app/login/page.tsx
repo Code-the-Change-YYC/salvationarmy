@@ -56,13 +56,13 @@ export default function LoginPage() {
   return (
     <div className={ui.background}>
       <div className={styles.container}>
-        <Paper shadow="0px 0px 10px rgba(0, 0, 0, 0.25)" p="xl" radius="md">
+        <Paper className={ui.form}>
           <div className={ui.logo}>
-            <SalvationLogo></SalvationLogo>
-            <AlbertaLogo></AlbertaLogo>
+            <SalvationLogo />
+            <AlbertaLogo />
           </div>
 
-          <Title order={1} size="22px" ta="center" pt="20px" pb="5px" mb="md">
+          <Title order={1} className={ui.title}>
             Log in to the Navigation Centre
           </Title>
 
@@ -83,24 +83,22 @@ export default function LoginPage() {
                 {...form.getInputProps("password")}
               />
 
-              <Text size="sm" c="dimmed" ta="left">
-                <Anchor href="/forgot-password" size="13px">
-                  Forgot your password?
-                </Anchor>
-              </Text>
+              <Anchor href="/forgot-password" className={ui.forgotPass}>
+                Forgot your password?
+              </Anchor>
 
               <Button type="submit" loading={loading}>
                 Log in
               </Button>
 
-              <Text ta="center" lh="1">
-                <Text component="span" size="13px" c="#228BE6">
+              <Text className={ui.bottomText}>
+                <Text component="span" className={ui.dontHaveAcc}>
                   Don't have an account?{" "}
                 </Text>
 
-                <Text component="span" size="13px" c="dimmed" td="underline">
+                <Text component="span" className={ui.contactAdmin}>
                   {/*TODO: CHANGE CONTACT EMAIL TO SALVATION ARMY ONE ONCE KNOWN V*/}
-                  <Anchor href="mailto:changeEmail@AtSomePoint.com" size="13px">
+                  <Anchor href="mailto:changeEmail@AtSomePoint.com" className={ui.contactAdmin}>
                     Contact an administrator
                   </Anchor>
                 </Text>
