@@ -31,7 +31,7 @@ export const logs = pgTable(
   },
   (table) => [
     check("odometer_check", sql`${table.odometerEnd} > ${table.odometerStart}`),
-    check("date_check", sql`${table.arrivalTime} > ${table.departureTime}`),
+    check("time_check", sql`${table.arrivalTime} > ${table.departureTime}`),
   ],
 );
 
