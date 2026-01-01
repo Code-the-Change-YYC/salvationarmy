@@ -17,7 +17,7 @@ export const logs = pgTable(
       .generatedAlwaysAs((): SQL => sql`${logs.odometerEnd} - ${logs.odometerStart}`)
       .notNull(),
     driverId: text("driver_id").references(() => user.id, {
-      onDelete: "set null",
+      onDelete: "restrict",
     }),
     driverName: text("driver_name").notNull(),
     // Name of the vehicle
