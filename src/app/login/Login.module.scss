@@ -40,23 +40,21 @@ $text-line-height: 1;
   line-height: $text-line-height;
 }
 
-.dontHaveAcc {
+.links {
   font-size: $text-size;
   color: $color-cobalt-blue;
   line-height: $text-line-height;
 }
 
 .contactAdmin {
-  @extend .dontHaveAcc;
+  @extend .links;
   text-decoration: underline;
 }
 
 .forgotPass {
-  color: $color-cobalt-blue;
-  font-size: $text-size;
-  padding-top: 3.5px;
-  padding-bottom: 4px;
-  line-height: $text-line-height;
+  @extend .links;
+  width: fit-content;
+  white-space: nowrap;
 }
 
 .form {

@@ -92,16 +92,14 @@ export default function LoginPage() {
               </Button>
 
               <Text className={ui.bottomText}>
-                <Text component="span" className={ui.dontHaveAcc}>
+                <Text component="span" className={ui.links}>
                   Don't have an account?{" "}
                 </Text>
 
-                <Text component="span" className={ui.contactAdmin}>
-                  {/*TODO: CHANGE CONTACT EMAIL TO SALVATION ARMY ONE ONCE KNOWN V*/}
-                  <Anchor href="mailto:changeEmail@AtSomePoint.com" className={ui.contactAdmin}>
-                    Contact an administrator
-                  </Anchor>
-                </Text>
+                {/*TODO: CHANGE CONTACT EMAIL TO SALVATION ARMY ONE ONCE KNOWN V*/}
+                <Anchor href="mailto:changeEmail@AtSomePoint.com" className={ui.contactAdmin}>
+                  Contact an administrator
+                </Anchor>
               </Text>
             </Stack>
           </form>
