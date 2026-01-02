@@ -6,8 +6,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
+import AlbertaLogo from "@/assets/icons/alberta";
+import SalvationLogo from "@/assets/icons/salvation";
 import { authClient } from "@/lib/auth-client";
 import { emailRegex } from "@/types/validation";
+import ui from "./Login.module.scss";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -51,41 +54,57 @@ export default function LoginPage() {
   };
 
   return (
-    <div className={styles.container}>
-      <Paper shadow="sm" p="xl" radius="md">
-        <Title order={1} mb="md">
-          Sign In
-        </Title>
+    <div className={ui.background}>
+      <div className={styles.container}>
+        <Paper className={ui.form}>
+          <div className={ui.logo}>
+            <SalvationLogo />
+            <AlbertaLogo />
+          </div>
 
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Stack gap="md">
-            <TextInput
-              label="Email"
-              placeholder="your@email.com"
-              type="email"
-              required
-              {...form.getInputProps("email")}
-            />
+          <Title order={1} className={ui.title}>
+            Log in to the Navigation Centre
+          </Title>
 
-            <PasswordInput
-              label="Password"
-              placeholder="Your password"
-              required
-              {...form.getInputProps("password")}
-            />
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Stack gap="md">
+              <TextInput
+                label="Email"
+                placeholder="your@email.com"
+                type="email"
+                required
+                {...form.getInputProps("email")}
+              />
 
-            <Button type="submit" loading={loading}>
-              Sign In
-            </Button>
+              <PasswordInput
+                label="Password"
+                placeholder="Your password"
+                required
+                {...form.getInputProps("password")}
+              />
 
-            <Text size="sm" c="dimmed" ta="center">
-              <Anchor href="/forgot-password" size="sm">
+              <Anchor href="/forgot-password" className={ui.forgotPass}>
                 Forgot your password?
               </Anchor>
-            </Text>
-          </Stack>
-        </form>
-      </Paper>
+
+              <Button type="submit" loading={loading}>
+                Log in
+              </Button>
+
+              <Text className={ui.bottomText}>
+                <Text component="span" className={ui.links}>
+                  Don't have an account?{" "}
+                </Text>
+
+                {/*TODO: CHANGE CONTACT EMAIL TO SALVATION ARMY ONE ONCE KNOWN V*/}
+                <Anchor href="mailto:changeEmail@AtSomePoint.com" className={ui.contactAdmin}>
+                  Contact an administrator
+                </Anchor>
+              </Text>
+            </Stack>
+          </form>
+        </Paper>
+      </div>
     </div>
   );
 }
