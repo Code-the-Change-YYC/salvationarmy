@@ -1,14 +1,22 @@
 "use client";
 
 import { Divider, Group, Stack, Title } from "@mantine/core";
+import { useState } from "react";
 import Chevron from "@/assets/icons/chevron";
 import Face from "@/assets/icons/face";
 import Location from "@/assets/icons/location";
 import Plus from "@/assets/icons/plus";
 import Button from "../_components/common/button/Button";
 import IconButton from "../_components/common/button/IconButton";
+import DatePicker from "../_components/common/datepicker/DatePicker";
 
 export default function StylesPage() {
+  const [date, setDate] = useState<string | null>(null);
+
+  const handleDateChange = (value: string | null) => {
+    setDate(value);
+  };
+
   return (
     <Stack p="xl" gap="xl">
       <Title order={1}>Component Style Guide</Title>
@@ -66,6 +74,31 @@ export default function StylesPage() {
             Custom Height
             <IconButton icon={<Plus />} ariaLabel="plus" transparent /> transparent
           </Group>
+        </Stack>
+      </Stack>
+
+      <Divider />
+
+      <Stack gap="md">
+        <Title order={2}>Date Pickers</Title>
+
+        <Stack gap="sm">
+          <Title order={3} size="h4">
+            DatePicker
+          </Title>
+          <Group>
+            <DatePicker
+              label="Departure Time"
+              placeholder="Select date and time"
+              value={date}
+              onChange={handleDateChange}
+            />
+          </Group>
+          {date && (
+            <div>
+              <strong>Selected value:</strong> {date}
+            </div>
+          )}
         </Stack>
       </Stack>
 

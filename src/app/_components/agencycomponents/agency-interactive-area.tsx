@@ -11,6 +11,7 @@ import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { ViewMode } from "@/types/types";
+import TableView from "../agencypage/table-view";
 import CalendarView from "../calendar-view";
 import styles from "./agency-interactive-area.module.scss";
 
@@ -205,7 +206,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
             setIsDayView={setIsDayView}
           />
         ) : (
-          <div>ag grid table will be here</div>
+          <TableView />
         )}
       </div>
 

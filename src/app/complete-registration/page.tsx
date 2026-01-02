@@ -1,14 +1,13 @@
 "use client";
 
-import { Paper, PasswordInput, Stack, Text, TextInput, Title } from "@mantine/core";
+import { Button, Paper, PasswordInput, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import Button from "@/app/_components/common/button/Button";
+import styles from "@/app/_components/common/auth-layout.module.scss";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { passwordSchema } from "@/types/validation";
-import styles from "./page.module.scss";
 
 function CompleteRegistrationContent() {
   const searchParams = useSearchParams();
@@ -134,7 +133,7 @@ function CompleteRegistrationContent() {
                 {...form.getInputProps("confirmPassword")}
               />
 
-              <Button type="submit" width="100%" loading={resetPasswordMutation.isPending}>
+              <Button type="submit" fullWidth loading={resetPasswordMutation.isPending} mt="md">
                 Complete Registration
               </Button>
             </Stack>

@@ -3,6 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { organization } from "better-auth/plugins";
 import RegisterAccountEmailTemplate from "@/app/_components/common/emails/register-account";
+import ResetPasswordEmailTemplate from "@/app/_components/common/emails/reset-password";
 import { resend } from "@/lib/emails";
 import { db } from "@/server/db";
 
@@ -32,17 +33,16 @@ export const auth = betterAuth({
     autoSignIn: false, // need this to be false so they can accept and fill out fields first
     requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
-      // invite flow to check if the user is being invited or resetting their password
+      // check if Resend is configured
+      if (!resend) {
+        console.warn("Resend API key not configured, skipping email");
+        return;
+      }
 
+      // invite flow to check if the user is being invited or resetting their password
       // 1. if the user is being invited
       const isInvitation = url.includes("complete-registration");
-
       if (isInvitation) {
-        if (!resend) {
-          console.warn("Resend API key not configured, skipping email");
-          return;
-        }
-
         try {
           await resend.emails.send({
             from: `Salvation Army Navigation Center <no-reply@notifications.burtonjong.dev>`,
@@ -59,6 +59,20 @@ export const auth = betterAuth({
         }
       } else {
         // 2. todo: handle normal password reset
+        try {
+          await resend.emails.send({
+            from: `Salvation Army Navigation Center <no-reply@notifications.burtonjong.dev>`,
+            to: user.email,
+            subject: "Reset your password",
+            react: ResetPasswordEmailTemplate({
+              resetUrl: url,
+              userEmail: user.email,
+              username: user.name,
+            }),
+          });
+        } catch (error) {
+          console.error("Error sending password reset email:", error);
+        }
       }
     },
   },

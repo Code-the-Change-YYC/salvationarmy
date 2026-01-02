@@ -89,3 +89,13 @@ export interface CalendarEvent {
 }
 
 export type Booking = typeof bookings.$inferSelect;
+
+export interface ScheduleInformation {
+  CREATED_AT: string; // string or date type?
+  CLIENT_NAME: string;
+  TELEPHONE: string;
+  DATE_BOOKED: string; // Eventually this will be a date type
+  TIME_BOOKED: string; // Eventually this will be a time type
+  AGENCY: string; // I think eventually this will be an enumeration
+  LOCATION: string;
+}
