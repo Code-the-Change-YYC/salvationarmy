@@ -1,3 +1,5 @@
+import type { bookings } from "@/server/db/booking-schema";
+
 export enum Role {
   ADMIN = "admin",
   DRIVER = "driver",
@@ -64,26 +66,6 @@ export const ALL_BOOKING_STATUSES = [
 
 export type BookingStatusValue = (typeof ALL_BOOKING_STATUSES)[number];
 
-export interface Booking {
-  id: string;
-  title: string;
-  pickupAddress: string;
-  destinationAddress: string;
-  purpose?: string;
-  passengerInfo: string;
-  status: BookingStatus;
-  agencyId: string;
-  driverId?: string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-}
-
-// The booking schema does not include start and end times, so we need to add them here
-export interface CalendarBooking extends Booking {
-  start: string;
-  end?: string;
-}
-
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -94,17 +76,19 @@ export interface CalendarEvent {
   extendedProps?: {
     pickupAddress: string;
     destinationAddress: string;
-    purpose?: string;
+    purpose?: string | null;
     passengerInfo: string;
     status: BookingStatus;
     agencyId: string;
-    driverId?: string;
+    driverId?: string | null;
     createdAt?: Date | string;
-    updatedAt?: Date | string;
+    updatedAt?: Date | string | null;
     createdBy?: string;
     updatedBy?: string;
   };
 }
+
+export type Booking = typeof bookings.$inferSelect;
 
 export interface ScheduleInformation {
   CREATED_AT: string; // string or date type?
