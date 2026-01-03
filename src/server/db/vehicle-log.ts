@@ -8,8 +8,14 @@ export const logs = pgTable(
     id: serial("id").primaryKey(),
     date: date("date").notNull(),
     travelLocation: text("travel_location").notNull(),
-    departureTime: time("departure_time", { precision: 0 }).notNull(),
-    arrivalTime: time("arrival_time", { precision: 0 }).notNull(),
+    departureTime: timestamp("departure_time", {
+      mode: "string",
+      withTimezone: true,
+    }).notNull(),
+    arrivalTime: timestamp("arrival_time", {
+      mode: "string",
+      withTimezone: true,
+    }).notNull(),
     //odometer readings in KM
     odometerStart: integer("odometer_start").notNull(),
     odometerEnd: integer("odometer_end").notNull(),
@@ -29,10 +35,7 @@ export const logs = pgTable(
     createdBy: text("created_by").references(() => user.id),
     updatedBy: text("updated_by").references(() => user.id),
   },
-  (table) => [
-    check("odometer_check", sql`${table.odometerEnd} > ${table.odometerStart}`),
-    check("time_check", sql`${table.arrivalTime} > ${table.departureTime}`),
-  ],
+  (table) => [check("odometer_check", sql`${table.odometerEnd} > ${table.odometerStart}`)],
 );
 
 export const logsRelations = relations(logs, ({ one }) => ({
