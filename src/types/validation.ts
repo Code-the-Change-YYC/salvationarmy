@@ -51,6 +51,15 @@ export const validateTimeRange = (startTime: string, endTime: string): string | 
   const start = new Date(startTime);
   const end = new Date(endTime);
 
+  // Validate that date parsing succeeded
+  if (isNaN(start.getTime())) {
+    return "Invalid start time format";
+  }
+
+  if (isNaN(end.getTime())) {
+    return "Invalid end time format";
+  }
+
   if (end <= start) {
     return "End time must be after start time";
   }
