@@ -206,7 +206,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
             setIsDayView={setIsDayView}
           />
         ) : (
-          <TableView />
+          <TableView bookings={bookings ?? []} />
         )}
       </div>
 

@@ -3,7 +3,7 @@ import type { ColDef, IHeaderParams } from "ag-grid-community";
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import dayjs from "dayjs";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import Calendar from "@/assets/icons/calendar";
 import Call from "@/assets/icons/call";
 import Clock from "@/assets/icons/clock";
@@ -17,7 +17,7 @@ import {
   MIN_COLUMN_WIDTH,
   TABLE_THEME_PARAMS,
 } from "@/constants/TableScheduleConstants";
-import type { ScheduleInformation } from "@/types/types";
+import type { Booking, ScheduleInformation } from "@/types/types";
 import styles from "./table-view.module.scss";
 
 const HeaderWithIcon = (params: IHeaderParams) => {
@@ -52,7 +52,23 @@ const HeaderWithIcon = (params: IHeaderParams) => {
   );
 };
 
-export default function TableView() {
+interface TableViewProps {
+  bookings: Booking[];
+}
+
+function transformBookingsToScheduleInfo(bookingsList: Booking[]): ScheduleInformation[] {
+  return bookingsList.map((booking) => ({
+    CREATED_AT: booking.createdAt?.toISOString() ?? "",
+    CLIENT_NAME: booking.passengerInfo,
+    TELEPHONE: "unavailable", // There is no phone number in the booking schema
+    DATE_BOOKED: booking.startTime,
+    TIME_BOOKED: booking.startTime,
+    AGENCY: booking.agencyId,
+    LOCATION: booking.destinationAddress,
+  }));
+}
+
+export default function TableView({ bookings }: TableViewProps) {
   // register community modules for ag grid
   useEffect(() => {
     ModuleRegistry.registerModules([AllCommunityModule]);
@@ -61,18 +77,7 @@ export default function TableView() {
   // Custom theme for the table
   const theme = themeQuartz.withParams(TABLE_THEME_PARAMS);
 
-  // Dummy data for now. Will be replaced with actual bookings data.
-  const [rowData] = useState<ScheduleInformation[]>(
-    Array.from({ length: 15 }, () => ({
-      CREATED_AT: "2025-09-12T10:00:00Z",
-      CLIENT_NAME: "Jason Thompson",
-      TELEPHONE: "403-123-4567",
-      DATE_BOOKED: "2025-09-26T12:00:00",
-      TIME_BOOKED: "2025-09-26T12:00:00",
-      AGENCY: "Amazing Agency",
-      LOCATION: "123 Something St NW",
-    })),
-  );
+  const rowData = useMemo(() => transformBookingsToScheduleInfo(bookings ?? []), [bookings]);
 
   const columnDefs: ColDef[] = useMemo(
     () => [
