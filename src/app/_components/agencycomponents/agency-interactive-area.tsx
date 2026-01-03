@@ -23,15 +23,12 @@ interface Props {
 const GOOGLE_MAPS_LIBRARIES_ARRAY: Libraries = ["places"]; //Add more to this array if you need to import more libraries from the API
 const CHERRY_RED = "#A03145";
 
-export const BookingInteractiveArea = ({
-  initialViewMode = ViewMode.CALENDAR,
-}: Props) => {
+export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [isDayView, setIsDayView] = useState<boolean>(false);
-  const [validationAddressGood, setValidationAddressGood] =
-    useState<boolean>(false);
+  const [validationAddressGood, setValidationAddressGood] = useState<boolean>(false);
 
   const {
     data: bookings,
@@ -100,21 +97,14 @@ export const BookingInteractiveArea = ({
   // biome-ignore lint: inputElement.current does change and needs to be changed in order for useEffect() to run
   useEffect(() => {
     //Do not run the code within the useEffect if the api or mantine form hasn't fully loaded
-    if (
-      !isLoaded ||
-      google.maps.places === null ||
-      inputElement.current === null
-    ) {
+    if (!isLoaded || google.maps.places === null || inputElement.current === null) {
       return;
     }
 
     //Make the google auto complete element and attach it to inputElement (requires an HTML input element to mount to)
-    const googleAutoCompleteElement = new google.maps.places.Autocomplete(
-      inputElement.current,
-      {
-        types: ["address"],
-      }
-    );
+    const googleAutoCompleteElement = new google.maps.places.Autocomplete(inputElement.current, {
+      types: ["address"],
+    });
 
     //Places bounds on what locations google will suggest
     googleAutoCompleteElement.setComponentRestrictions({
@@ -160,10 +150,7 @@ export const BookingInteractiveArea = ({
     }
 
     if (!validationAddressGood) {
-      form.setFieldError(
-        "destinationAddress",
-        "Please select a valid address from the dropdown"
-      );
+      form.setFieldError("destinationAddress", "Please select a valid address from the dropdown");
       return;
     }
 

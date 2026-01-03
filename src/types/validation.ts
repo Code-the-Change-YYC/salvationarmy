@@ -52,11 +52,11 @@ export const validateTimeRange = (startTime: string, endTime: string): string | 
   const end = new Date(endTime);
 
   // Validate that date parsing succeeded
-  if (isNaN(start.getTime())) {
+  if (Number.isNaN(start.getTime())) {
     return "Invalid start time format";
   }
 
-  if (isNaN(end.getTime())) {
+  if (Number.isNaN(end.getTime())) {
     return "Invalid end time format";
   }
 
