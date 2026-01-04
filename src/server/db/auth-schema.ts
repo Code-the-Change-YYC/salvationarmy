@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { bookings } from "./booking-schema";
+import { logs } from "./vehicle-log";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -106,6 +107,7 @@ export const invitation = pgTable("invitation", {
 export const userRelations = relations(user, ({ many }) => ({
   driverBookings: many(bookings, { relationName: "driverBookings" }),
   agencyBookings: many(bookings, { relationName: "agencyBookings" }),
+  driverLogs: many(logs, { relationName: "driverLogs" }),
 }));
 
 export const authSchema = {
