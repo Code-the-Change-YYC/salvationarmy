@@ -1,5 +1,5 @@
 import { relations, type SQL, sql } from "drizzle-orm";
-import { check, date, integer, pgTable, serial, text, time, timestamp } from "drizzle-orm/pg-core";
+import { check, date, integer, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
 export const logs = pgTable(
@@ -35,7 +35,10 @@ export const logs = pgTable(
     createdBy: text("created_by").references(() => user.id),
     updatedBy: text("updated_by").references(() => user.id),
   },
-  (table) => [check("odometer_check", sql`${table.odometerEnd} > ${table.odometerStart}`)],
+  (table) => [
+    check("odometer_check", sql`${table.odometerEnd} > ${table.odometerStart}`),
+    check("time_check", sql`${table.arrivalTime} > ${table.departureTime}`),
+  ],
 );
 
 export const logsRelations = relations(logs, ({ one }) => ({
