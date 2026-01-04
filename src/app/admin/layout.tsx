@@ -10,10 +10,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <HydrateClient>
       <Navbar view="admin" />
-      <main className={styles.adminPage}>
-        <h1 className={styles.title}>Hello, {session.user?.name}</h1>
-        {children}
-      </main>
+      <main className={styles.adminPage}>{children}</main>
     </HydrateClient>
   );
 }

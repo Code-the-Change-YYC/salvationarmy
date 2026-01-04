@@ -97,7 +97,7 @@ export const organizationRouter = createTRPCRouter({
     }
   }),
 
-  getAllWithMembers: protectedProcedure.query(async ({ ctx }) => {
+  getAllWithMembers: adminProcedure.query(async ({ ctx }) => {
     try {
       const organizations = await ctx.db.query.organization.findMany({
         with: {

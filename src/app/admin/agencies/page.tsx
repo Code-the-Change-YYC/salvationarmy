@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Group, Loader, Paper, Stack, Table, Text, Title } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Edit from "@/assets/icons/edit";
 import Grid from "@/assets/icons/grid";
 import Mail from "@/assets/icons/mail";
@@ -18,9 +18,11 @@ export default function AgenciesPage() {
     organizations?.find((org) => org.id === selectedAgencyId) ?? organizations?.[0];
 
   // Update selected ID when organizations load
-  if (organizations && !selectedAgencyId && organizations.length > 0) {
-    setSelectedAgencyId(organizations[0]?.id ?? null);
-  }
+  useEffect(() => {
+    if (organizations && organizations.length > 0 && !selectedAgencyId) {
+      setSelectedAgencyId(organizations[0]?.id ?? null);
+    }
+  }, [organizations, selectedAgencyId]);
 
   // Format date helper
   const formatDate = (date: Date) => {
@@ -28,6 +30,7 @@ export default function AgenciesPage() {
       month: "long",
       day: "numeric",
       year: "numeric",
+      timeZone: "UTC",
     }).format(new Date(date));
   };
 
@@ -39,58 +42,16 @@ export default function AgenciesPage() {
     );
   }
 
-  const handleExportToCSV = () => {
-    if (!selectedAgency) {
-      alert("No agency selected");
-      return;
-    }
-
-    // Create CSV content with agency information first
-    const csvRows = [
-      // Agency Information Section
-      "Agency Information",
-      `Agency Name,"${selectedAgency.name}"`,
-      `Agency Slug,"${selectedAgency.slug}"`,
-      `Date Joined,"${formatDate(selectedAgency.createdAt)}"`,
-      "", // Empty row for separation
-      // Member Information Section
-      "Member Information",
-      "Member Name,Member Email Address,Role,Date Joined",
-    ];
-
-    // Add member data
-    if (selectedAgency.members && selectedAgency.members.length > 0) {
-      selectedAgency.members.forEach((member) => {
-        const row = [
-          `"${member.user.name || "No name"}"`,
-          `"${member.user.email}"`,
-          `"${member.role}"`,
-          `"${formatDate(member.createdAt)}"`,
-        ];
-        csvRows.push(row.join(","));
-      });
-    } else {
-      csvRows.push("No members found");
-    }
-
-    const csvContent = csvRows.join("\n");
-
-    // Create and download the file
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `${selectedAgency.slug}-members-${new Date().toISOString().split("T")[0]}.csv`,
+  if (!organizations || organizations.length === 0) {
+    return (
+      <div className={styles.container}>
+        <Title order={2}>View all Agencies</Title>
+        <Text c="dimmed" mt="lg">
+          No agencies found. Create an organization to get started.
+        </Text>
+      </div>
     );
-    link.style.visibility = "hidden";
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  }
 
   return (
     <div className={styles.container}>
@@ -100,7 +61,6 @@ export default function AgenciesPage() {
           variant="outline"
           color="dark"
           leftSection={<Grid />}
-          onClick={handleExportToCSV}
           className={styles.exportButton}
         >
           Export to CSV File
@@ -159,7 +119,7 @@ export default function AgenciesPage() {
             <Title order={3} mb="lg">
               User Information
             </Title>
-            <Table striped highlightOnHover>
+            <Table striped highlightOnHover withColumnBorders>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>
