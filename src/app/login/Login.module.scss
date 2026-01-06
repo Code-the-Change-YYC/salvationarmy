@@ -1,0 +1,64 @@
+@use "@/styles/variables" as *;
+
+/*Variables in this file*/
+$text-size: 13px;
+$text-line-height: 1;
+
+/*Styles*/
+.background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: url("/images/skyline.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  @media (max-height: 535px) {
+    height: 535px;
+  }
+}
+
+.logo {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  text-align: center;
+  font-size: 22px;
+  padding-top: 20px;
+  padding-bottom: 5px;
+  margin-bottom: 16px;
+}
+
+.bottomText {
+  text-align: center;
+  line-height: $text-line-height;
+}
+
+.links {
+  font-size: $text-size;
+  color: $color-cobalt-blue;
+  line-height: $text-line-height;
+}
+
+.contactAdmin {
+  @extend .links;
+  text-decoration: underline;
+}
+
+.forgotPass {
+  @extend .links;
+  width: fit-content;
+  white-space: nowrap;
+}
+
+.form {
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
+  padding: 32px;
+  border-radius: 8px;
+}

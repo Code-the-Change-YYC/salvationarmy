@@ -9,8 +9,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo, useRef } from "react";
 import Check from "../../assets/icons/check";
 import Cross from "../../assets/icons/cross";
-import type { CalendarBooking, CalendarEvent } from "../../types/types";
-import { BookingStatus } from "../../types/types";
+import { type Booking, BookingStatus, type CalendarEvent } from "../../types/types";
 import styles from "./calendar-view.module.scss";
 
 // Event color constants
@@ -49,19 +48,19 @@ function getEventColor(startDate: string): string {
   return COBALT_BLUE;
 }
 
-function transformBookingsToEvents(bookings: CalendarBooking[]): CalendarEvent[] {
-  return bookings.map((booking) => ({
+function transformBookingsToEvents(bookingsList: Booking[]): CalendarEvent[] {
+  return bookingsList.map((booking) => ({
     id: String(booking.id),
     title: booking.title,
-    start: booking.start,
-    end: booking.end,
-    color: getEventColor(booking.start),
+    start: booking.startTime,
+    end: booking.endTime,
+    color: getEventColor(booking.startTime),
     extendedProps: {
       pickupAddress: booking.pickupAddress,
       destinationAddress: booking.destinationAddress,
       purpose: booking.purpose,
       passengerInfo: booking.passengerInfo,
-      status: booking.status,
+      status: booking.status as BookingStatus,
       agencyId: booking.agencyId,
       driverId: booking.driverId,
       createdAt: booking.createdAt,
@@ -70,244 +69,14 @@ function transformBookingsToEvents(bookings: CalendarBooking[]): CalendarEvent[]
   }));
 }
 
-// Sample bookings for demonstration
-const sampleBookings: CalendarBooking[] = [
-  {
-    id: "1",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "456 Main St",
-    passengerInfo: "John Doe",
-    status: BookingStatus.COMPLETED,
-    agencyId: "agency-1",
-    driverId: "driver-1",
-    purpose: "Regular pickup",
-    start: "2025-11-10T09:00:00",
-    end: "2025-11-10T10:00:00",
-  },
-  {
-    id: "2",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "789 Oak Ave",
-    passengerInfo: "Jane Smith",
-    status: BookingStatus.COMPLETED,
-    agencyId: "agency-1",
-    driverId: "driver-2",
-    purpose: "Large donation pickup",
-    start: "2025-11-10T11:45:00",
-    end: "2025-11-10T13:30:00",
-  },
-  {
-    id: "3",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "321 Elm St",
-    passengerInfo: "Mike Johnson",
-    status: BookingStatus.INCOMPLETE,
-    agencyId: "agency-1",
-    driverId: "driver-3",
-    purpose: "Cancelled by donor",
-    start: "2025-11-10T13:00:00",
-    end: "2025-11-10T14:00:00",
-  },
-  {
-    id: "4",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "654 Pine Rd",
-    passengerInfo: "Sarah Wilson",
-    status: BookingStatus.COMPLETED,
-    agencyId: "agency-1",
-    driverId: "driver-4",
-    purpose: "Furniture pickup",
-    start: "2025-11-11T09:30:00",
-    end: "2025-11-11T11:00:00",
-  },
-  {
-    id: "5",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "987 Maple Dr",
-    passengerInfo: "Tom Brown",
-    status: BookingStatus.COMPLETED,
-    agencyId: "agency-1",
-    driverId: "driver-5",
-    purpose: "Clothing donation",
-    start: "2025-11-11T12:30:00",
-    end: "2025-11-11T14:00:00",
-  },
-  {
-    id: "6",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "147 Cedar Ln",
-    passengerInfo: "Lisa Davis",
-    status: BookingStatus.COMPLETED,
-    agencyId: "agency-1",
-    driverId: "driver-6",
-    purpose: "Household items",
-    start: "2025-11-11T14:30:00",
-    end: "2025-11-11T16:00:00",
-  },
-  {
-    id: "7",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "258 Birch Way",
-    passengerInfo: "Robert Taylor",
-    status: BookingStatus.COMPLETED,
-    agencyId: "agency-2",
-    driverId: "driver-7",
-    purpose: "Electronics pickup",
-    start: "2025-11-12T09:30:00",
-    end: "2025-11-12T11:00:00",
-  },
-  {
-    id: "8",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "369 Spruce Ct",
-    passengerInfo: "Emily Clark",
-    status: BookingStatus.COMPLETED,
-    agencyId: "agency-2",
-    driverId: "driver-8",
-    purpose: "Books and media",
-    start: "2025-11-12T11:30:00",
-    end: "2025-11-12T13:00:00",
-  },
-  {
-    id: "9",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "741 Willow St",
-    passengerInfo: "David Miller",
-    status: BookingStatus.IN_PROGRESS,
-    agencyId: "agency-2",
-    driverId: "driver-9",
-    purpose: "Large furniture",
-    start: "2025-11-12T12:30:00",
-    end: "2025-11-12T14:00:00",
-  },
-  {
-    id: "10",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "852 Ash Blvd",
-    passengerInfo: "Anna Garcia",
-    status: BookingStatus.INCOMPLETE,
-    agencyId: "agency-3",
-    driverId: "driver-10",
-    purpose: "Kitchen items",
-    start: "2025-11-13T09:30:00",
-    end: "2025-11-13T11:00:00",
-  },
-  {
-    id: "11",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "963 Poplar Ave",
-    passengerInfo: "Chris Lee",
-    status: BookingStatus.COMPLETED,
-    agencyId: "agency-3",
-    driverId: "driver-11",
-    purpose: "Small appliances",
-    start: "2025-11-13T11:30:00",
-    end: "2025-11-13T12:30:00",
-  },
-  {
-    id: "12",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "159 Fir St",
-    passengerInfo: "Maria Rodriguez",
-    status: BookingStatus.COMPLETED,
-    agencyId: "agency-3",
-    driverId: "driver-12",
-    purpose: "Bedding and linens",
-    start: "2025-11-13T12:30:00",
-    end: "2025-11-13T13:30:00",
-  },
-  {
-    id: "13",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "357 Hemlock Rd",
-    passengerInfo: "James Wilson",
-    status: BookingStatus.IN_PROGRESS,
-    agencyId: "agency-3",
-    driverId: "driver-13",
-    purpose: "Toys and games",
-    start: "2025-11-13T15:00:00",
-    end: "2025-11-13T16:00:00",
-  },
-  {
-    id: "14",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "468 Juniper Dr",
-    passengerInfo: "Jennifer Martinez",
-    status: BookingStatus.IN_PROGRESS,
-    agencyId: "agency-3",
-    driverId: "driver-14",
-    purpose: "Early morning pickup",
-    start: "2025-11-14T08:30:00",
-    end: "2025-11-14T10:00:00",
-  },
-  {
-    id: "15",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "579 Cypress Ln",
-    passengerInfo: "Kevin Thompson",
-    status: BookingStatus.IN_PROGRESS,
-    agencyId: "agency-3",
-    driverId: "driver-15",
-    purpose: "Office supplies",
-    start: "2025-11-14T10:00:00",
-    end: "2025-11-14T11:00:00",
-  },
-  {
-    id: "16",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "680 Redwood Way",
-    passengerInfo: "Rachel Green",
-    status: BookingStatus.IN_PROGRESS,
-    agencyId: "agency-3",
-    driverId: "driver-16",
-    purpose: "Art and decorations",
-    start: "2025-11-14T11:30:00",
-    end: "2025-11-14T12:30:00",
-  },
-  {
-    id: "17",
-    title: "123 Somestreet SW",
-    pickupAddress: "123 Somestreet SW",
-    destinationAddress: "791 Sequoia Ct",
-    passengerInfo: "Mark Johnson",
-    status: BookingStatus.IN_PROGRESS,
-    agencyId: "agency-3",
-    driverId: "driver-17",
-    purpose: "Large donation - multiple items",
-    start: "2025-11-14T13:30:00",
-    end: "2025-11-14T15:00:00",
-  },
-];
-
 interface CalendarViewProps {
-  bookings?: CalendarBooking[];
+  bookings: Booking[];
   currentDate?: Date;
   setIsDayView?: (isDayView: boolean) => void;
 }
 
-export default function CalendarView({
-  bookings = sampleBookings, // Remove this once we have real bookings
-  currentDate,
-  setIsDayView,
-}: CalendarViewProps) {
-  // Transform bookings to FullCalendar events
-  const events = useMemo(() => transformBookingsToEvents(bookings), [bookings]);
+export default function CalendarView({ bookings, currentDate, setIsDayView }: CalendarViewProps) {
+  const events = useMemo(() => transformBookingsToEvents(bookings ?? []), [bookings]);
   const calendarRef = useRef<FullCalendar>(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
   const initialDate = getInitialDate(currentDate);
@@ -416,7 +185,7 @@ export default function CalendarView({
   };
 
   return (
-    <div className={styles.calendarWrapper}>
+    <Box className={styles.calendarWrapper}>
       <FullCalendar
         ref={calendarRef}
         plugins={[timeGridPlugin, dayGridPlugin]}
@@ -438,10 +207,10 @@ export default function CalendarView({
           day: "numeric",
         }}
         dayHeaderContent={(arg) => (
-          <div className={styles.dayHeaderContainer}>
-            <div className={styles.dayHeaderWeekday}>{arg.text.split(" ")[1]}</div>
-            <div className={styles.dayHeaderDay}>{arg.text.split(" ")[0]}</div>
-          </div>
+          <Box className={styles.dayHeaderContainer}>
+            <Box className={styles.dayHeaderWeekday}>{arg.text.split(" ")[1]}</Box>
+            <Box className={styles.dayHeaderDay}>{arg.text.split(" ")[0]}</Box>
+          </Box>
         )}
         allDaySlot={false}
         expandRows={true}
@@ -451,6 +220,6 @@ export default function CalendarView({
         height={700}
         weekends={false}
       />
-    </div>
+    </Box>
   );
 }
