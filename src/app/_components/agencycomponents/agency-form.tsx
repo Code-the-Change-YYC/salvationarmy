@@ -8,7 +8,7 @@ import classes from "./agency-form.module.scss";
 interface AgencyBookingForm {
   title: string;
   residentName: string;
-  contactInfo: string;
+  phoneNumber: string;
   additionalInfo: string;
   startTime: string;
   endTime: string;
@@ -35,7 +35,6 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
         />
       </div>
       <Divider />
-      {/* Personal Information Section */}
       <Stack gap="md">
         <Box fw={500} fz="lg">
           Personal Information
@@ -53,10 +52,10 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
         <div className={classes.formRow}>
           <TextInput
             withAsterisk
-            label="Contact Information"
-            placeholder="Enter a phone number or email address"
-            key={form.key("contactInfo")}
-            {...form.getInputProps("contactInfo")}
+            label="Phone Number"
+            placeholder="Enter phone number"
+            key={form.key("phoneNumber")}
+            {...form.getInputProps("phoneNumber")}
           />
         </div>
 
@@ -73,18 +72,25 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
 
       <Divider />
 
-      {/* Logistics Section */}
       <Stack gap="md">
         <Box fw={500} fz="lg">
           Logistics
         </Box>
 
         <DatePicker
-          required
-          label="Date and time of transport"
-          placeholder="Select date and time"
-          key={form.key("transportDateTime")}
-          {...form.getInputProps("transportDateTime")}
+          withAsterisk
+          label="Start time"
+          placeholder="Select start date and time"
+          key={form.key("startTime")}
+          {...form.getInputProps("startTime")}
+        />
+
+        <DatePicker
+          withAsterisk
+          label="End time"
+          placeholder="Select end date and time"
+          key={form.key("endTime")}
+          {...form.getInputProps("endTime")}
         />
 
         <div className={classes.formRow}>
