@@ -33,7 +33,8 @@ export const logs = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
-      .$onUpdate(() => /* @__PURE__ */ new Date()),
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
     createdBy: text("created_by").references(() => user.id),
     updatedBy: text("updated_by").references(() => user.id),
   },
