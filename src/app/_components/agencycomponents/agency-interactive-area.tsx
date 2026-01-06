@@ -11,8 +11,8 @@ import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { ViewMode } from "@/types/types";
+import CalendarView from "../agencypage/calendar-view";
 import TableView from "../agencypage/table-view";
-import CalendarView from "../calendar-view";
 import styles from "./agency-interactive-area.module.scss";
 
 interface Props {
@@ -49,11 +49,10 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
   });
 
   const form = useForm({
-    mode: "uncontrolled",
     initialValues: {
       title: "",
       residentName: "",
-      contactInfo: "",
+      phoneNumber: "",
       additionalInfo: "",
       startTime: "",
       endTime: "",
@@ -65,7 +64,6 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
     validate: {
       title: (value) => (value.trim().length > 0 ? null : "Title is required"),
       residentName: (value) => (value.trim().length > 0 ? null : "Resident name is required"),
-      contactInfo: (value) => (value.trim().length > 0 ? null : "Contact info is required"),
       startTime: (value) => (value.trim().length > 0 ? null : "Date and time is required"),
       endTime: (value) => (value.trim().length > 0 ? null : "Date and time is required"),
       purpose: (value) => (value.trim().length > 0 ? null : "Purpose is required"),

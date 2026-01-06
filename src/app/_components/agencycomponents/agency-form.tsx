@@ -1,14 +1,14 @@
 "use client";
 
 import { Box, Divider, Stack, Textarea, TextInput } from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
-import DatePicker from "@/app/_components/common/datepicker/DatePicker";
 import classes from "./agency-form.module.scss";
 
 interface AgencyBookingForm {
   title: string;
   residentName: string;
-  contactInfo: string;
+  phoneNumber: string;
   additionalInfo: string;
   startTime: string;
   endTime: string;
@@ -23,6 +23,8 @@ interface AgencyFormProps {
 }
 
 export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => {
+  const now = new Date();
+
   return (
     <Stack gap="lg">
       <div className={classes.formRow}>
@@ -35,7 +37,6 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
         />
       </div>
       <Divider />
-      {/* Personal Information Section */}
       <Stack gap="md">
         <Box fw={500} fz="lg">
           Personal Information
@@ -53,10 +54,10 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
         <div className={classes.formRow}>
           <TextInput
             withAsterisk
-            label="Contact Information"
-            placeholder="Enter a phone number or email address"
-            key={form.key("contactInfo")}
-            {...form.getInputProps("contactInfo")}
+            label="Phone Number"
+            placeholder="Enter phone number"
+            key={form.key("phoneNumber")}
+            {...form.getInputProps("phoneNumber")}
           />
         </div>
 
@@ -73,20 +74,42 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
 
       <Divider />
 
-      {/* Logistics Section */}
       <Stack gap="md">
         <Box fw={500} fz="lg">
           Logistics
         </Box>
 
-        <DatePicker
-          required
-          label="Date and time of transport"
-          placeholder="Select date and time"
-          key={form.key("transportDateTime")}
-          {...form.getInputProps("transportDateTime")}
-        />
+        <div className={classes.formRow}>
+          <DateTimePicker
+            withAsterisk
+            label="Start time"
+            placeholder="Select start date and time"
+            minDate={now}
+            value={form.values.startTime}
+            onChange={(value) => {
+              form.setFieldValue("startTime", value || "");
 
+              // to reset the end time if it's invalid
+              if (value && form.values.endTime && form.values.endTime <= value) {
+                form.setFieldValue("endTime", "");
+              }
+            }}
+            clearable
+          />
+        </div>
+
+        <div className={classes.formRow}>
+          <DateTimePicker
+            withAsterisk
+            label="End time"
+            placeholder="Select end date and time"
+            minDate={form.values.startTime ?? now}
+            value={form.values.endTime}
+            onChange={(value) => form.setFieldValue("endTime", value || "")}
+            disabled={!form.values.startTime}
+            clearable
+          />
+        </div>
         <div className={classes.formRow}>
           <TextInput
             withAsterisk
