@@ -9,11 +9,6 @@ import Button from "@/app/_components/common/button/Button";
 import { authClient } from "@/lib/auth-client";
 import { emailRegex } from "@/types/validation";
 
-//Custom type declaration fo result.data after logging in.
-//Needed as the better auth hook will return one of two URLs
-//to redirect to.
-type RedirectLink = { newLink: string };
-
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -44,8 +39,13 @@ export default function LoginPage() {
 
       if (result.error) {
         alert(result.error.message || "Failed to sign in");
+      } else if (result.data?.user.name === "") {
+        //Logged in user has no name set
+        router.push("/fill-out-name");
       } else {
-        router.push((result.data as unknown as RedirectLink).newLink);
+        //Logged in user has a name set
+        //TODO V: change later when we know where to send the user
+        router.push("/dashboard");
       }
     } catch (error) {
       console.error("Sign in error:", error);

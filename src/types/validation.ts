@@ -8,3 +8,6 @@ export const passwordSchema = z
   .regex(/[0-9]/, "Password must contain at least one number");
 
 export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const nameRegex =
+  /^(?!.*\s{2})[A-Za-z0-9][A-Za-z0-9\s]*[A-Za-z0-9][A-Za-z0-9\s]*[A-Za-z0-9]$/;

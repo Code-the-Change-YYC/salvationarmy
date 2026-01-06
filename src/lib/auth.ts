@@ -1,6 +1,5 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { organization } from "better-auth/plugins";
 import RegisterAccountEmailTemplate from "@/app/_components/common/emails/register-account";
@@ -12,19 +11,6 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
-  hooks: {
-    after: createAuthMiddleware(async (ctx) => {
-      if (ctx.path.startsWith("/sign-in/email")) {
-        const accountName = ctx.context.newSession?.user.name; //Get the account name
-        if (accountName === "") {
-          //Account name not set
-          return { newLink: "/fill-out-name" };
-        }
-        //TODO V: change later when we know where to send the user
-        return { newLink: "/dashboard" };
-      }
-    }),
-  },
   socialProviders: {
     discord: {
       clientId: "", //example

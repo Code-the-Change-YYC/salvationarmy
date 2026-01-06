@@ -3,18 +3,20 @@
 import { Paper, Stack, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import Button from "@/app/_components/common/button/Button";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
+import { nameRegex } from "@/types/validation";
 
 export default function FillOutNamePage() {
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const form = useForm({
     initialValues: {
       name: "",
+    },
+    validate: {
+      name: (value) => (nameRegex.test(value) ? null : "Invalid name"),
     },
   });
 
@@ -23,28 +25,16 @@ export default function FillOutNamePage() {
       notify.success(`Name successfully set!`);
       //TODO V: change later when we know where to send the user
       router.push("/dashboard");
-      setLoading(false);
     },
     onError: (error) => {
       notify.error(error.message);
-      setLoading(false);
     },
   });
 
   const handleSubmit = async (values: typeof form.values) => {
-    setLoading(true);
-    //Alphanumeric regex of length >=3. Allows for exactly 1 space between characters
-    const regex = /^(?!.*\s{2})[A-Za-z0-9][A-Za-z0-9\s]*[A-Za-z0-9][A-Za-z0-9\s]*[A-Za-z0-9]$/;
-    if (!regex.test(values.name)) {
-      //User inputted name is not proper
-      notify.error("Invalid Name");
-      setLoading(false);
-    } else {
-      //User name is proper
-      changeNameMutation.mutate({
-        newName: values.name,
-      });
-    }
+    changeNameMutation.mutate({
+      newName: values.name,
+    });
   };
 
   return (
@@ -64,7 +54,7 @@ export default function FillOutNamePage() {
               {...form.getInputProps("name")}
             />
 
-            <Button type="submit" loading={loading}>
+            <Button type="submit" loading={changeNameMutation.isPending}>
               Continue
             </Button>
           </Stack>
