@@ -4,7 +4,7 @@ import { Role } from "@/types/types";
 import styles from "./index.module.css";
 
 export default async function DriverHome() {
-  const session = await requireRole([Role.ADMIN, Role.AGENCY]);
+  const session = await requireRole([Role.ADMIN, Role.DRIVER]);
   const hello = await api.form.hello({ text: "from tRPC" });
 
   if (session?.user) {
