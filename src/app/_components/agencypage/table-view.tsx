@@ -60,7 +60,7 @@ function transformBookingsToScheduleInfo(bookingsList: Booking[]): ScheduleInfor
   return bookingsList.map((booking) => ({
     CREATED_AT: booking.createdAt?.toISOString() ?? "",
     CLIENT_NAME: booking.passengerInfo,
-    TELEPHONE: "unavailable", // There is no phone number in the booking schema
+    TELEPHONE: booking.phoneNumber ?? "-",
     DATE_BOOKED: booking.startTime,
     TIME_BOOKED: booking.startTime,
     AGENCY: booking.agencyId,
