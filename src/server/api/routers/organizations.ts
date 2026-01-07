@@ -10,10 +10,82 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { user } from "@/server/db/auth-schema";
-import { OrganizationRole } from "@/types/types";
+import { OrganizationRole, Role } from "@/types/types";
 import { passwordSchema } from "@/types/validation";
 
 export const organizationRouter = createTRPCRouter({
+  redirectToDashboard: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    const user = await ctx.db.query.user.findFirst({
+      where: (user, { eq }) => eq(user.id, userId),
+    });
+
+    if (!user) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found in database",
+      });
+    }
+
+    const role = user.role as Role;
+    let redirectUrl = "/";
+
+    switch (role) {
+      case Role.ADMIN:
+        redirectUrl = "/admin/home";
+        break;
+
+      case Role.AGENCY: {
+        const activeOrgId = ctx.session.session.activeOrganizationId;
+
+        if (!activeOrgId) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "No active organization found for this agency user",
+          });
+        }
+
+        const organization = await ctx.db.query.organization.findFirst({
+          where: (org, { eq }) => eq(org.id, activeOrgId),
+        });
+
+        if (!organization) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Organization not found",
+          });
+        }
+
+        if (!organization.slug) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Organization is missing required slug configuration",
+          });
+        }
+
+        redirectUrl = `/agency/home/${organization.slug}`;
+        break;
+      }
+
+      case Role.DRIVER:
+        redirectUrl = "/driver/home";
+        break;
+
+      default:
+        redirectUrl = "/";
+        break;
+    }
+
+    return {
+      redirectUrl,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
+  }),
   getAll: protectedProcedure.query(async ({ ctx }) => {
     try {
       const organizations = await ctx.db.query.organization.findMany();

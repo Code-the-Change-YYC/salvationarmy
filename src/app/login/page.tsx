@@ -3,18 +3,40 @@
 import { Anchor, Paper, PasswordInput, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import Button from "@/app/_components/common/button/Button";
 import AlbertaLogo from "@/assets/icons/alberta";
 import SalvationLogo from "@/assets/icons/salvation";
 import { authClient } from "@/lib/auth-client";
+import { notify } from "@/lib/notifications";
+import { api } from "@/trpc/react";
 import { emailRegex } from "@/types/validation";
 import ui from "./Login.module.scss";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { data: session, isPending: sessionLoading } = authClient.useSession();
+  const hasRedirected = useRef(false);
+
+  const { mutate } = api.organization.redirectToDashboard.useMutation({
+    onSuccess: (data) => {
+      notify.success("Successfully signed in!");
+      router.replace(data.redirectUrl);
+    },
+    onError: (error) => {
+      notify.error(error.message || "Failed to get redirect URL");
+      hasRedirected.current = false;
+    },
+  });
+
+  useEffect(() => {
+    if (!sessionLoading && session && !hasRedirected.current) {
+      hasRedirected.current = true;
+      mutate();
+    }
+  }, [session, sessionLoading, mutate]);
 
   const form = useForm({
     initialValues: {
@@ -27,32 +49,22 @@ export default function LoginPage() {
     },
   });
 
-  // todo: change this to a mutation so that we have access to onSuccess and loading handlers
-  // todo2: we need to evaluate what org they are a part of to redirect them properly
-  // todo3: after we handle the above, we need to make it so that this redirects them IF they
-  // are already logged in to their proper dashboard
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
+    hasRedirected.current = false;
 
     try {
-      const result = await authClient.signIn.email({
+      const { error } = await authClient.signIn.email({
         email: values.email,
         password: values.password,
       });
 
-      if (result.error) {
-        alert(result.error.message || "Failed to sign in");
-      } else if (result.data?.user.name === "") {
-        //Logged in user has no name set
-        router.push("/fill-out-name");
-      } else {
-        //Logged in user has a name set
-        //TODO V: change later when we know where to send the user
-        router.push("/dashboard");
+      if (error) {
+        notify.error(error.message || "Failed to sign in");
       }
     } catch (error) {
       console.error("Sign in error:", error);
-      alert("An error occurred during sign in");
+      notify.error("An error occurred during sign in");
     } finally {
       setLoading(false);
     }
