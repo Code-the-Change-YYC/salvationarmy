@@ -82,11 +82,18 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
         if (value.trim().length === 0) return null;
         return validateStringLength(value, 0, 500, "Additional information");
       },
-      startTime: (value) => (value.trim().length > 0 ? null : "Date and time is required"),
+      startTime: (value) => {
+        // First check if required
+        if (value.trim().length === 0) return "Date and time is required";
+        // Then validate date format
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "Invalid date format";
+        return null;
+      },
       endTime: (value, values) => {
         // First check if required
         if (value.trim().length === 0) return "Date and time is required";
-        // Then validate time range
+        // Then validate time range (this also validates date format)
         return validateTimeRange(values.startTime, value);
       },
       purpose: (value) => validateStringLength(value, 1, 500, "Purpose of transport"),
@@ -156,6 +163,19 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
       return;
     }
 
+    const startDate = new Date(form.values.startTime);
+    const endDate = new Date(form.values.endTime);
+
+    if (Number.isNaN(startDate.getTime())) {
+      form.setFieldError("startTime", "Invalid date format");
+      return;
+    }
+
+    if (Number.isNaN(endDate.getTime())) {
+      form.setFieldError("endTime", "Invalid date format");
+      return;
+    }
+
     createBookingMutation.mutate({
       title: form.values.title,
       residentName: form.values.residentName,
@@ -163,8 +183,8 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
       additionalInfo: form.values.additionalInfo,
       pickupAddress: form.values.pickupAddress,
       destinationAddress: inputElement.current?.value || "",
-      startTime: new Date(form.values.startTime).toISOString(),
-      endTime: new Date(form.values.endTime).toISOString(),
+      startTime: startDate.toISOString(),
+      endTime: endDate.toISOString(),
       purpose: form.values.purpose,
     });
   };
