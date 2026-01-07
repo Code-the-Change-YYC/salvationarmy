@@ -20,11 +20,19 @@ export default function FillOutNamePage() {
     },
   });
 
+  const { mutate } = api.organization.redirectToDashboard.useMutation({
+    onSuccess: (data) => {
+      router.replace(data.redirectUrl);
+    },
+    onError: (error) => {
+      notify.error(error.message || "Failed to get redirect URL");
+    },
+  });
+
   const changeNameMutation = api.organization.changeName.useMutation({
     onSuccess: () => {
       notify.success(`Name successfully set!`);
-      //TODO V: change later when we know where to send the user
-      router.push("/dashboard");
+      mutate();
     },
     onError: (error) => {
       notify.error(error.message);

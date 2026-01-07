@@ -31,50 +31,54 @@ export const organizationRouter = createTRPCRouter({
     const role = user.role as Role;
     let redirectUrl = "/";
 
-    switch (role) {
-      case Role.ADMIN:
-        redirectUrl = "/admin/home";
-        break;
+    if (ctx.session.user.name === "") {
+      redirectUrl = "/fill-out-name";
+    } else {
+      switch (role) {
+        case Role.ADMIN:
+          redirectUrl = "/admin/home";
+          break;
 
-      case Role.AGENCY: {
-        const activeOrgId = ctx.session.session.activeOrganizationId;
+        case Role.AGENCY: {
+          const activeOrgId = ctx.session.session.activeOrganizationId;
 
-        if (!activeOrgId) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "No active organization found for this agency user",
+          if (!activeOrgId) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "No active organization found for this agency user",
+            });
+          }
+
+          const organization = await ctx.db.query.organization.findFirst({
+            where: (org, { eq }) => eq(org.id, activeOrgId),
           });
+
+          if (!organization) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Organization not found",
+            });
+          }
+
+          if (!organization.slug) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Organization is missing required slug configuration",
+            });
+          }
+
+          redirectUrl = `/agency/home/${organization.slug}`;
+          break;
         }
 
-        const organization = await ctx.db.query.organization.findFirst({
-          where: (org, { eq }) => eq(org.id, activeOrgId),
-        });
+        case Role.DRIVER:
+          redirectUrl = "/driver/home";
+          break;
 
-        if (!organization) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Organization not found",
-          });
-        }
-
-        if (!organization.slug) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Organization is missing required slug configuration",
-          });
-        }
-
-        redirectUrl = `/agency/home/${organization.slug}`;
-        break;
+        default:
+          redirectUrl = "/";
+          break;
       }
-
-      case Role.DRIVER:
-        redirectUrl = "/driver/home";
-        break;
-
-      default:
-        redirectUrl = "/";
-        break;
     }
 
     return {
