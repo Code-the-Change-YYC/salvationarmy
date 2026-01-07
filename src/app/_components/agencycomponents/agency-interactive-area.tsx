@@ -30,6 +30,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
   const [isDayView, setIsDayView] = useState<boolean>(false);
   const [validationAddressGood, setValidationAddressGood] = useState<boolean>(false);
 
+  const utils = api.useUtils();
   const {
     data: bookings,
     isLoading: isLoadingBookings,
@@ -41,6 +42,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
       form.reset();
       setShowBookingModal(false);
       setValidationAddressGood(false);
+      void utils.bookings.getAll.invalidate();
     },
     onError: (error) => {
       notify.error(error.message || "Failed to create a booking");
