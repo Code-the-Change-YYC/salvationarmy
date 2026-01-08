@@ -25,9 +25,19 @@ interface AgencyFormProps {
 export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => {
   const now = new Date();
 
-  // Helper function to convert Date to local ISO string (preserves local time, no UTC conversion)
-  const toLocalISOString = (date: Date | null): string => {
-    if (!date) return "";
+  // Helper function to convert Date or string to local ISO string (preserves local time, no UTC conversion)
+  const toLocalISOString = (value: Date | string | null): string => {
+    if (!value) return "";
+
+    // Normalize input to Date object
+    let date: Date;
+    if (typeof value === "string") {
+      date = new Date(value);
+      // Check if the parsed date is invalid
+      if (Number.isNaN(date.getTime())) return "";
+    } else {
+      date = value;
+    }
 
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
