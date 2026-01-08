@@ -12,6 +12,7 @@ import { authClient } from "@/lib/auth-client";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { emailRegex } from "@/types/validation";
+import LoadingScreen from "../_components/common/loadingscreen";
 import ui from "./Login.module.scss";
 
 export default function LoginPage() {
@@ -69,6 +70,10 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  if (sessionLoading || (!sessionLoading && session)) {
+    return <LoadingScreen message="Redirecting..." />;
+  }
 
   return (
     <div className={ui.background}>
