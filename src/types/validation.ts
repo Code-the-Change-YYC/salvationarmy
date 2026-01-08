@@ -8,3 +8,7 @@ export const passwordSchema = z
   .regex(/[0-9]/, "Password must contain at least one number");
 
 export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const isoTimeRegex = /^\+\d{5,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}-07:00$/; //ISO timestamp regex in MST for 5+ digit years
+
+export const isoTimeRegexFourDigitYears = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}-07:00$/; //ISO timestamp regex in MST for 4 digit years
