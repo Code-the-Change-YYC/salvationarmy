@@ -25,6 +25,20 @@ interface AgencyFormProps {
 export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => {
   const now = new Date();
 
+  // Helper function to convert Date to local ISO string (preserves local time, no UTC conversion)
+  const toLocalISOString = (date: Date | null): string => {
+    if (!date) return "";
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  };
+
   return (
     <Stack gap="lg">
       <div className={classes.formRow}>
@@ -85,12 +99,14 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             label="Start time"
             placeholder="Select start date and time"
             minDate={now}
-            value={form.values.startTime}
+            valueFormat="YYYY-MM-DDTHH:mm:ss"
+            value={form.values.startTime ? new Date(form.values.startTime) : null}
             onChange={(value) => {
-              form.setFieldValue("startTime", value || "");
+              const localISOString = toLocalISOString(value);
+              form.setFieldValue("startTime", localISOString);
 
               // to reset the end time if it's invalid
-              if (value && form.values.endTime && form.values.endTime <= value) {
+              if (localISOString && form.values.endTime && form.values.endTime <= localISOString) {
                 form.setFieldValue("endTime", "");
               }
             }}
@@ -108,9 +124,13 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             withAsterisk
             label="End time"
             placeholder="Select end date and time"
-            minDate={form.values.startTime ?? now}
-            value={form.values.endTime}
-            onChange={(value) => form.setFieldValue("endTime", value || "")}
+            minDate={form.values.startTime ? new Date(form.values.startTime) : now}
+            valueFormat="YYYY-MM-DDTHH:mm:ss"
+            value={form.values.endTime ? new Date(form.values.endTime) : null}
+            onChange={(value) => {
+              const localISOString = toLocalISOString(value);
+              form.setFieldValue("endTime", localISOString);
+            }}
             disabled={!form.values.startTime}
             timePickerProps={{
               withDropdown: true,

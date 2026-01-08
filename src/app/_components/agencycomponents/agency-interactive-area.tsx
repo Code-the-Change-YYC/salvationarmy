@@ -11,8 +11,8 @@ import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { ViewMode } from "@/types/types";
-import CalendarView from "../agencypage/calendar-view";
 import { validateStringLength, validateTimeRange } from "@/types/validation";
+import CalendarView from "../agencypage/calendar-view";
 import TableView from "../agencypage/table-view";
 import styles from "./agency-interactive-area.module.scss";
 
@@ -183,8 +183,8 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
       additionalInfo: form.values.additionalInfo,
       pickupAddress: form.values.pickupAddress,
       destinationAddress: inputElement.current?.value || "",
-      startTime: startDate.toISOString(),
-      endTime: endDate.toISOString(),
+      startTime: form.values.startTime,
+      endTime: form.values.endTime,
       purpose: form.values.purpose,
     });
   };
