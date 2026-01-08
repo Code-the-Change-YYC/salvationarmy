@@ -94,6 +94,11 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
                 form.setFieldValue("endTime", "");
               }
             }}
+            timePickerProps={{
+              withDropdown: true,
+              popoverProps: { withinPortal: false },
+              format: "12h",
+            }}
             clearable
           />
         </div>
@@ -107,6 +112,11 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             value={form.values.endTime}
             onChange={(value) => form.setFieldValue("endTime", value || "")}
             disabled={!form.values.startTime}
+            timePickerProps={{
+              withDropdown: true,
+              popoverProps: { withinPortal: false },
+              format: "12h",
+            }}
             clearable
           />
         </div>
