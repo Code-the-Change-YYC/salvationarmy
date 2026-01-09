@@ -20,7 +20,7 @@ export default function FillOutNamePage() {
     },
   });
 
-  const { mutate } = api.organization.redirectToDashboard.useMutation({
+  const redirectUserMutation = api.organization.redirectToDashboard.useMutation({
     onSuccess: (data) => {
       router.replace(data.redirectUrl);
     },
@@ -32,7 +32,7 @@ export default function FillOutNamePage() {
   const changeNameMutation = api.organization.changeName.useMutation({
     onSuccess: () => {
       notify.success(`Name successfully set!`);
-      mutate();
+      redirectUserMutation.mutate();
     },
     onError: (error) => {
       notify.error(error.message);

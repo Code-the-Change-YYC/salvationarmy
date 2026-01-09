@@ -45,7 +45,8 @@ export const organizationRouter = createTRPCRouter({
           if (!activeOrgId) {
             throw new TRPCError({
               code: "NOT_FOUND",
-              message: "No active organization found for this agency user",
+              message:
+                "No active organization found for this agency user. Please contact an administrator for assistance",
             });
           }
 
@@ -63,7 +64,8 @@ export const organizationRouter = createTRPCRouter({
           if (!organization.slug) {
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
-              message: "Organization is missing required slug configuration",
+              message:
+                "Organization is missing required slug configuration. Please contact an administrator for assistance",
             });
           }
 
