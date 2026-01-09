@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
-import { desc, eq, or } from "drizzle-orm";
+import { and, desc, eq, gte, lt, or } from "drizzle-orm";
 import { z } from "zod";
+import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
 import { BOOKING_STATUS, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -92,26 +93,71 @@ export const bookingsRouter = createTRPCRouter({
     return row;
   }),
 
-  getAll: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.session.user.id;
-    const role = ctx.session.user.role ?? "user";
+  getAll: protectedProcedure
+    .input(
+      z
+        .object({
+          startDate: z.string().optional(),
+          endDate: z.string().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const role = ctx.session.user.role ?? "user";
+      const startDate = input?.startDate ?? "1970-01-01T00:00:00.000-07:00";
+      let endDate = input?.endDate ?? "";
 
-    if (role === "admin") {
-      return ctx.db.select().from(bookings).orderBy(desc(bookings.createdAt));
-    }
+      if (input === undefined || input.endDate === undefined) {
+        //No end date given, make one
+        let largeDate = new Date(new Date().getTime() + 31536000000 * 100).toISOString(); //~100 years after the current date
+        largeDate = largeDate.substring(0, largeDate.length - 1); //Remove the UTC timezone to add MST instead
+        largeDate = largeDate + "-07:00"; //Add the MST offset
+        endDate = largeDate; //Assign it to input.endDate
+      }
 
-    return ctx.db
-      .select()
-      .from(bookings)
-      .where(
-        or(
-          eq(bookings.createdBy, userId),
-          eq(bookings.agencyId, userId),
-          eq(bookings.driverId, userId),
-        ),
-      )
-      .orderBy(desc(bookings.createdAt));
-  }),
+      let startAndEndDateErrorMessage = "Invalid: ";
+
+      if (!(isoTimeRegex.test(startDate) || isoTimeRegexFourDigitYears.test(startDate))) {
+        startAndEndDateErrorMessage = startAndEndDateErrorMessage + "Start Date ";
+      }
+
+      if (!(isoTimeRegex.test(endDate) || isoTimeRegexFourDigitYears.test(endDate))) {
+        startAndEndDateErrorMessage = startAndEndDateErrorMessage + "End Date ";
+      }
+
+      if (startAndEndDateErrorMessage !== "Invalid: ") {
+        //Either (or both) dates failed regex check
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: startAndEndDateErrorMessage,
+        });
+      }
+
+      if (role === "admin") {
+        return ctx.db
+          .select()
+          .from(bookings)
+          .where(and(gte(bookings.startTime, startDate), lt(bookings.startTime, endDate)))
+          .orderBy(desc(bookings.createdAt));
+      }
+
+      return ctx.db
+        .select()
+        .from(bookings)
+        .where(
+          and(
+            or(
+              eq(bookings.createdBy, userId),
+              eq(bookings.agencyId, userId),
+              eq(bookings.driverId, userId),
+            ),
+            gte(bookings.startTime, startDate),
+            lt(bookings.startTime, endDate),
+          ),
+        )
+        .orderBy(desc(bookings.createdAt));
+    }),
 
   // PATCH /bookings/:id
   update: protectedProcedure
