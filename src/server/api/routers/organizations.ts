@@ -11,7 +11,7 @@ import {
 } from "@/server/api/trpc";
 import { user } from "@/server/db/auth-schema";
 import { OrganizationRole, Role } from "@/types/types";
-import { passwordSchema } from "@/types/validation";
+import { nameRegex, passwordSchema } from "@/types/validation";
 
 export const organizationRouter = createTRPCRouter({
   redirectToDashboard: protectedProcedure.mutation(async ({ ctx }) => {
@@ -310,9 +310,7 @@ export const organizationRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { newName } = input; //Get the passed variables
 
-      //Alphanumeric regex of length >=3. Allows for exactly 1 space between characters
-      const regex = /^(?!.*\s{2})[A-Za-z0-9][A-Za-z0-9\s]*[A-Za-z0-9][A-Za-z0-9\s]*[A-Za-z0-9]$/;
-      if (!regex.test(newName)) {
+      if (!nameRegex.test(newName)) {
         //User inputted name is not proper
         throw new TRPCError({
           code: "BAD_REQUEST",
