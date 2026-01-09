@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { index, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { index, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
 export const BOOKING_STATUS = ["incomplete", "completed", "in-progress", "cancelled"] as const;
@@ -14,6 +14,7 @@ export const bookings = pgTable(
     destinationAddress: text("destination_address").notNull(),
     purpose: text("purpose"),
     passengerInfo: text("passenger_info").notNull(),
+    phoneNumber: varchar("phone_number", { length: 25 }),
     status: text("status", { enum: BOOKING_STATUS }).notNull().default("incomplete"),
     // the agency that created the booking
     agencyId: text("agency_id")
