@@ -30,8 +30,7 @@ export default function AgenciesPage() {
       month: "long",
       day: "numeric",
       year: "numeric",
-      timeZone: "UTC",
-    }).format(new Date(date));
+    }).format(date);
   };
 
   if (isLoading) {
