@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import Arrow from "@/assets/icons/arrow";
 import Calendar from "@/assets/icons/calendar";
-import CircePause from "@/assets/icons/circle-pause";
+import CirclePause from "@/assets/icons/circle-pause";
 import Clock from "@/assets/icons/clock";
 import Location from "@/assets/icons/location";
 import Play from "@/assets/icons/play";
@@ -47,7 +47,7 @@ const HeaderWithIcon = (params: IHeaderParams) => {
       case COLUMN_IDS.ODOMETER_START:
         return <Play width="16px" height="16px" />;
       case COLUMN_IDS.ODOMETER_END:
-        return <CircePause width="16px" height="16px" />;
+        return <CirclePause width="16px" height="16px" />;
       case COLUMN_IDS.KM_DRIVEN:
         return <Arrow width="16px" height="16px" strokeWidth="3" />;
       case COLUMN_IDS.DRIVER:
