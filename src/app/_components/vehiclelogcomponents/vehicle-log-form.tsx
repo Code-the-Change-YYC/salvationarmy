@@ -1,14 +1,15 @@
 "use client";
 
 import { Stack, TextInput } from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
 import classes from "./vehicle-log-form.module.scss";
 
 interface VehicleLogForm {
-  date: string;
+  date: Date | null;
   travelLocation: string;
-  departureTime: string;
-  arrivalTime: string;
+  departureTime: Date | null;
+  arrivalTime: Date | null;
   odometerStart: string;
   odometerEnd: string;
   kilometersDriven: string;
@@ -20,15 +21,19 @@ interface VehicleLogFormProps {
 }
 
 export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
+  const now = new Date();
+
   return (
     <Stack gap="md">
       <div className={classes.formRow}>
-        <TextInput
+        <DateTimePicker
           withAsterisk
           label="Date"
-          placeholder="Enter date"
-          key={form.key("date")}
-          {...form.getInputProps("date")}
+          placeholder="Select date"
+          minDate={now}
+          value={form.values.date}
+          onChange={(value) => form.setFieldValue("date", value)}
+          clearable
         />
       </div>
       <div className={classes.formRow}>
@@ -41,21 +46,42 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
         />
       </div>
       <div className={classes.formRow}>
-        <TextInput
+        <DateTimePicker
           withAsterisk
           label="Departure Time"
-          placeholder="Enter departure time"
-          key={form.key("departureTime")}
-          {...form.getInputProps("departureTime")}
+          placeholder="Select departure time"
+          minDate={now}
+          value={form.values.departureTime}
+          onChange={(value) => {
+            form.setFieldValue("departureTime", value);
+            // Reset arrival time if it's invalid
+            if (value && form.values.arrivalTime && form.values.arrivalTime <= value) {
+              form.setFieldValue("arrivalTime", null);
+            }
+          }}
+          timePickerProps={{
+            withDropdown: true,
+            popoverProps: { withinPortal: false },
+            format: "12h",
+          }}
+          clearable
         />
       </div>
       <div className={classes.formRow}>
-        <TextInput
+        <DateTimePicker
           withAsterisk
           label="Arrival Time"
-          placeholder="Enter arrival time"
-          key={form.key("arrivalTime")}
-          {...form.getInputProps("arrivalTime")}
+          placeholder="Select arrival time"
+          minDate={form.values.departureTime ?? now}
+          value={form.values.arrivalTime}
+          onChange={(value) => form.setFieldValue("arrivalTime", value)}
+          disabled={!form.values.departureTime}
+          timePickerProps={{
+            withDropdown: true,
+            popoverProps: { withinPortal: false },
+            format: "12h",
+          }}
+          clearable
         />
       </div>
       <div className={classes.formRow}>

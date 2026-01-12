@@ -28,20 +28,20 @@ export default function VehicleLogsPage() {
   const form = useForm({
     mode: "uncontrolled",
     initialValues: {
-      date: "",
+      date: null as Date | null,
       travelLocation: "",
-      departureTime: "",
-      arrivalTime: "",
+      departureTime: null as Date | null,
+      arrivalTime: null as Date | null,
       odometerStart: "",
       odometerEnd: "",
       kilometersDriven: "",
       driverName: "",
     },
     validate: {
-      date: (value) => (value.trim().length > 0 ? null : "Date is required"),
+      date: (value) => (value ? null : "Date is required"),
       travelLocation: (value) => (value.trim().length > 0 ? null : "Travel location is required"),
-      departureTime: (value) => (value.trim().length > 0 ? null : "Departure time is required"),
-      arrivalTime: (value) => (value.trim().length > 0 ? null : "Arrival time is required"),
+      departureTime: (value) => (value ? null : "Departure time is required"),
+      arrivalTime: (value) => (value ? null : "Arrival time is required"),
       odometerStart: (value) => (value.trim().length > 0 ? null : "Odometer start is required"),
       odometerEnd: (value) => (value.trim().length > 0 ? null : "Odometer end is required"),
       kilometersDriven: (value) =>
@@ -59,10 +59,10 @@ export default function VehicleLogsPage() {
   const handleOpenEditModal = (log: VehicleLogData) => {
     setEditingLog(log);
     form.setValues({
-      date: log.DATE,
+      date: new Date(log.DATE),
       travelLocation: log.DESTINATION,
-      departureTime: log.DEPARTURE_TIME,
-      arrivalTime: log.ARRIVAL_TIME,
+      departureTime: new Date(log.DEPARTURE_TIME),
+      arrivalTime: new Date(log.ARRIVAL_TIME),
       odometerStart: log.ODOMETER_START.toString(),
       odometerEnd: log.ODOMETER_END.toString(),
       kilometersDriven: log.KM_DRIVEN.toString(),
