@@ -3,14 +3,25 @@
 import { Button, Divider, Group, Select, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { useMemo, useState } from "react";
+import DatePicker from "@/app/_components/common/datepicker/DatePicker"; // <-- adjust path if needed
 import { api } from "@/trpc/react";
 import { ALL_BOOKING_STATUSES, BookingStatus, type BookingStatusValue } from "@/types/types";
 import styles from "./BookingDebugPage.module.scss";
 
+function isEndAfterStart(start: string, end: string) {
+  const a = new Date(start).getTime();
+  const b = new Date(end).getTime();
+  if (Number.isNaN(a) || Number.isNaN(b)) return true; // let backend/zod handle invalid formats
+  return b > a;
+}
+
 export default function BookingDebugPage() {
   const [bookingId, setBookingId] = useState<number>(1);
+
+  // Keep DatePicker values exactly like the styleguide: string | null
+  const [startPickerValue, setStartPickerValue] = useState<string | null>(null);
+  const [endPickerValue, setEndPickerValue] = useState<string | null>(null);
 
   const form = useForm({
     initialValues: {
@@ -18,8 +29,8 @@ export default function BookingDebugPage() {
       pickupAddress: "",
       destinationAddress: "",
       passengerInfo: "",
-      start: "",
-      end: "",
+      start: "", // will be kept in sync with picker (string)
+      end: "", // will be kept in sync with picker (string)
       agencyId: "",
       purpose: "",
       driverId: "",
@@ -53,6 +64,8 @@ export default function BookingDebugPage() {
       await allBookingsQuery.refetch();
 
       form.reset();
+      setStartPickerValue(null);
+      setEndPickerValue(null);
     },
     onError: (err) => {
       notifications.show({ color: "red", message: err.message });
@@ -89,6 +102,11 @@ export default function BookingDebugPage() {
     value: s,
     label: s.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase()),
   }));
+
+  const endAfterStart = useMemo(() => {
+    if (!form.values.start || !form.values.end) return true;
+    return isEndAfterStart(form.values.start, form.values.end);
+  }, [form.values.start, form.values.end]);
 
   return (
     <div className={styles.container}>
@@ -132,7 +150,16 @@ export default function BookingDebugPage() {
       {/* CREATE FORM */}
       <h2>Create Booking</h2>
       <form
-        onSubmit={form.onSubmit((values) =>
+        onSubmit={form.onSubmit((values) => {
+          // Front-end guard matching backend refine()
+          if (!isEndAfterStart(values.start, values.end)) {
+            notifications.show({
+              color: "red",
+              message: "End time must be after start time.",
+            });
+            return;
+          }
+
           createMutation.mutate({
             title: values.title,
             pickupAddress: values.pickupAddress,
@@ -144,8 +171,8 @@ export default function BookingDebugPage() {
             purpose: values.purpose || undefined,
             driverId: values.driverId || null,
             status: values.status,
-          }),
-        )}
+          });
+        })}
         className={styles.formGrid}
       >
         <TextInput withAsterisk label="Title" {...form.getInputProps("title")} />
@@ -159,18 +186,31 @@ export default function BookingDebugPage() {
         <TextInput withAsterisk label="Agency ID" {...form.getInputProps("agencyId")} />
         <TextInput label="Purpose (optional)" {...form.getInputProps("purpose")} />
         <TextInput label="Driver ID (optional)" {...form.getInputProps("driverId")} />
-        <TextInput
-          withAsterisk
+
+        {/* ✅ Styleguide DatePicker (date + time) */}
+        <DatePicker
           label="Starts"
-          placeholder="2025-01-01T10:00:00Z"
-          {...form.getInputProps("start")}
+          placeholder="Select date and time"
+          value={startPickerValue}
+          onChange={(v) => {
+            setStartPickerValue(v);
+            form.setFieldValue("start", v ?? "");
+          }}
         />
-        <TextInput
-          withAsterisk
+
+        <DatePicker
           label="Ends"
-          placeholder="2025-01-01T12:00:00Z"
-          {...form.getInputProps("end")}
+          placeholder="Select date and time"
+          value={endPickerValue}
+          onChange={(v) => {
+            setEndPickerValue(v);
+            form.setFieldValue("end", v ?? "");
+          }}
         />
+
+        {!endAfterStart && (
+          <p className={styles.errorMessage}>End time must be after start time.</p>
+        )}
 
         <Button type="submit" className={styles.submitButton}>
           Create
