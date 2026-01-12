@@ -3,7 +3,7 @@ import type { ColDef, IHeaderParams } from "ag-grid-community";
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import dayjs from "dayjs";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Arrow from "@/assets/icons/arrow";
 import Calendar from "@/assets/icons/calendar";
 import CirclePause from "@/assets/icons/circle-pause";
@@ -19,6 +19,8 @@ import {
   TABLE_THEME_PARAMS,
 } from "@/constants/VehicleLogTableConstants";
 import styles from "./vehicle-log-table-view.module.scss";
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 interface VehicleLogData {
   DATE: string;
@@ -66,11 +68,6 @@ const HeaderWithIcon = (params: IHeaderParams) => {
 };
 
 export default function VehicleLogTableView() {
-  // register community modules for ag grid
-  useEffect(() => {
-    ModuleRegistry.registerModules([AllCommunityModule]);
-  }, []);
-
   // Custom theme for the table
   const theme = themeQuartz.withParams(TABLE_THEME_PARAMS);
 
