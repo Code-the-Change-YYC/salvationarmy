@@ -10,8 +10,20 @@ import VehicleLogTableView from "@/app/_components/vehiclelogcomponents/vehicle-
 import Grid from "@/assets/icons/grid";
 import Plus from "@/assets/icons/plus";
 
+interface VehicleLogData {
+  DATE: string;
+  DESTINATION: string;
+  DEPARTURE_TIME: string;
+  ARRIVAL_TIME: string;
+  ODOMETER_START: number;
+  ODOMETER_END: number;
+  KM_DRIVEN: number;
+  DRIVER: string;
+}
+
 export default function VehicleLogsPage() {
-  const [showAddLogModal, setShowAddLogModal] = useState<boolean>(false);
+  const [showLogModal, setShowLogModal] = useState<boolean>(false);
+  const [editingLog, setEditingLog] = useState<VehicleLogData | null>(null);
 
   const form = useForm({
     mode: "uncontrolled",
@@ -38,6 +50,27 @@ export default function VehicleLogsPage() {
     },
   });
 
+  const handleOpenCreateModal = () => {
+    setEditingLog(null);
+    form.reset();
+    setShowLogModal(true);
+  };
+
+  const handleOpenEditModal = (log: VehicleLogData) => {
+    setEditingLog(log);
+    form.setValues({
+      date: log.DATE,
+      travelLocation: log.DESTINATION,
+      departureTime: log.DEPARTURE_TIME,
+      arrivalTime: log.ARRIVAL_TIME,
+      odometerStart: log.ODOMETER_START.toString(),
+      odometerEnd: log.ODOMETER_END.toString(),
+      kilometersDriven: log.KM_DRIVEN.toString(),
+      driverName: log.DRIVER,
+    });
+    setShowLogModal(true);
+  };
+
   const handleConfirm = () => {
     const validation = form.validate();
 
@@ -47,10 +80,17 @@ export default function VehicleLogsPage() {
       return;
     }
 
-    // TODO: Add mutation to save vehicle log
-    console.log("submit", form.values);
+    if (editingLog) {
+      // TODO: Add mutation to update vehicle log
+      console.log("update log", form.values);
+    } else {
+      // TODO: Add mutation to create vehicle log
+      console.log("create log", form.values);
+    }
+
     form.reset();
-    setShowAddLogModal(false);
+    setEditingLog(null);
+    setShowLogModal(false);
   };
 
   return (
@@ -71,25 +111,26 @@ export default function VehicleLogsPage() {
             text="Add to Log"
             variant="primary"
             icon={<Plus />}
-            onClick={() => setShowAddLogModal(true)}
+            onClick={handleOpenCreateModal}
           />
         </Group>
       </Group>
 
       {/* Table Section */}
-      <VehicleLogTableView />
+      <VehicleLogTableView onRowClick={handleOpenEditModal} />
 
-      {/* Add Log Modal */}
+      {/* Add/Edit Log Modal */}
       <Modal
-        opened={showAddLogModal}
+        opened={showLogModal}
         onClose={() => {
           form.clearErrors();
-          setShowAddLogModal(false);
+          setEditingLog(null);
+          setShowLogModal(false);
         }}
         onConfirm={handleConfirm}
         title={
           <Box fw={600} fz="xl">
-            Add a trip to the log
+            {editingLog ? "View/Edit Drive Log" : "Add a trip to the log"}
           </Box>
         }
         size="lg"

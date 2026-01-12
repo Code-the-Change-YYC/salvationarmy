@@ -33,6 +33,10 @@ interface VehicleLogData {
   DRIVER: string;
 }
 
+interface VehicleLogTableViewProps {
+  onRowClick?: (log: VehicleLogData) => void;
+}
+
 const HeaderWithIcon = (params: IHeaderParams) => {
   const columnId = params.column?.getColId();
   const headerName = params.displayName || "";
@@ -67,7 +71,7 @@ const HeaderWithIcon = (params: IHeaderParams) => {
   );
 };
 
-export default function VehicleLogTableView() {
+export default function VehicleLogTableView({ onRowClick }: VehicleLogTableViewProps = {}) {
   // Custom theme for the table
   const theme = themeQuartz.withParams(TABLE_THEME_PARAMS);
 
@@ -187,6 +191,7 @@ export default function VehicleLogTableView() {
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         pagination={false}
+        onRowClicked={(event) => onRowClick?.(event.data)}
       />
     </div>
   );
