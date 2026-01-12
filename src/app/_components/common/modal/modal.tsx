@@ -1,5 +1,6 @@
-import { Button, Group, Modal as MantineModal, type ModalBaseOverlayProps } from "@mantine/core";
+import { Group, Modal as MantineModal, type ModalBaseOverlayProps } from "@mantine/core";
 import type { ReactNode } from "react";
+import Button from "../button/Button";
 
 interface ModalProps {
   opened: boolean;
@@ -40,7 +41,7 @@ export default function Modal({
 }: ModalProps) {
   const defaultFooter = showDefaultFooter && (
     <Group justify="flex-end" mt="md">
-      <Button variant="subtle" onClick={onClose} disabled={loading}>
+      <Button variant="secondary" onClick={onClose} disabled={loading}>
         {cancelText}
       </Button>
       <Button onClick={onConfirm} loading={loading}>
@@ -55,6 +56,7 @@ export default function Modal({
       onClose={onClose}
       title={title}
       size={size}
+      padding="xl"
       centered={centered}
       withCloseButton={withCloseButton}
       closeOnClickOutside={closeOnClickOutside}

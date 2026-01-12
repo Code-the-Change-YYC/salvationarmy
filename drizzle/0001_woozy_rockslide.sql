@@ -1,1 +1,0 @@
-ALTER TABLE "bookings" RENAME COLUMN "passengerInfo" TO "passenger_info";

@@ -7,9 +7,9 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import { Box, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo, useRef } from "react";
-import Check from "../../assets/icons/check";
-import Cross from "../../assets/icons/cross";
-import { type Booking, BookingStatus, type CalendarEvent } from "../../types/types";
+import Check from "../../../assets/icons/check";
+import Cross from "../../../assets/icons/cross";
+import { type Booking, BookingStatus, type CalendarEvent } from "../../../types/types";
 import styles from "./calendar-view.module.scss";
 
 // Event color constants
