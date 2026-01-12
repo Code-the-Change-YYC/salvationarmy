@@ -75,59 +75,8 @@ export default function VehicleLogTableView({ onRowClick }: VehicleLogTableViewP
   // Custom theme for the table
   const theme = themeQuartz.withParams(TABLE_THEME_PARAMS);
 
-  // Mock data for now - will be replaced with actual vehicle logs data
-  const [rowData] = useState<VehicleLogData[]>([
-    {
-      DATE: "2025-09-12",
-      DESTINATION: "123 Place NE, Calgary",
-      DEPARTURE_TIME: "2025-09-12T12:00:00",
-      ARRIVAL_TIME: "2025-09-12T12:26:00",
-      ODOMETER_START: 12000,
-      ODOMETER_END: 12026,
-      KM_DRIVEN: 26,
-      DRIVER: "Patrick Star",
-    },
-    {
-      DATE: "2025-09-12",
-      DESTINATION: "Dorchester Square Office Tower, Unit 933, 505 Burrard Street, Calgary",
-      DEPARTURE_TIME: "2025-09-12T12:00:00",
-      ARRIVAL_TIME: "2025-09-12T12:26:00",
-      ODOMETER_START: 12000,
-      ODOMETER_END: 12026,
-      KM_DRIVEN: 26,
-      DRIVER: "Patrick Star",
-    },
-    {
-      DATE: "2025-09-12",
-      DESTINATION: "123 Place NE, Calgary",
-      DEPARTURE_TIME: "2025-09-12T12:00:00",
-      ARRIVAL_TIME: "2025-09-12T12:26:00",
-      ODOMETER_START: 12000,
-      ODOMETER_END: 12026,
-      KM_DRIVEN: 26,
-      DRIVER: "Patrick Star",
-    },
-    {
-      DATE: "2025-09-12",
-      DESTINATION: "123 Place NE, Calgary",
-      DEPARTURE_TIME: "2025-09-12T12:00:00",
-      ARRIVAL_TIME: "2025-09-12T12:26:00",
-      ODOMETER_START: 12000,
-      ODOMETER_END: 12026,
-      KM_DRIVEN: 26,
-      DRIVER: "Patrick Star",
-    },
-    {
-      DATE: "2025-09-12",
-      DESTINATION: "123 Place NE, Calgary",
-      DEPARTURE_TIME: "2025-09-12T12:00:00",
-      ARRIVAL_TIME: "2025-09-12T12:26:00",
-      ODOMETER_START: 12000,
-      ODOMETER_END: 12026,
-      KM_DRIVEN: 26,
-      DRIVER: "Patrick Star",
-    },
-  ]);
+  // TODO: Replace with tRPC query to fetch vehicle logs from database
+  const [rowData] = useState<VehicleLogData[]>([]);
 
   const columnDefs: ColDef[] = useMemo(
     () => [
