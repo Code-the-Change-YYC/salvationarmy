@@ -54,8 +54,14 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
           value={form.values.departureTime}
           onChange={(value) => {
             form.setFieldValue("departureTime", value || "");
-            // Reset arrival time if it's invalid
-            form.setFieldValue("arrivalTime", "");
+            if (value && form.values.arrivalTime) {
+              // Reset arrival time if it's invalid (arrival must be after departure)
+              const departureDate = typeof value === "string" ? new Date(value) : value;
+              const arrivalDate = new Date(form.values.arrivalTime);
+              if (arrivalDate <= departureDate) {
+                form.setFieldValue("arrivalTime", "");
+              }
+            }
           }}
           timePickerProps={{
             withDropdown: true,
