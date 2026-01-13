@@ -6,10 +6,10 @@ import type { UseFormReturnType } from "@mantine/form";
 import classes from "./vehicle-log-form.module.scss";
 
 interface VehicleLogForm {
-  date: Date | null;
+  date: string;
   travelLocation: string;
-  departureTime: Date | null;
-  arrivalTime: Date | null;
+  departureTime: string;
+  arrivalTime: string;
   odometerStart: string;
   odometerEnd: string;
   kilometersDriven: string;
@@ -32,7 +32,7 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
           placeholder="Select date"
           minDate={now}
           value={form.values.date}
-          onChange={(value) => form.setFieldValue("date", value)}
+          onChange={(value) => form.setFieldValue("date", value || "")}
           clearable
         />
       </div>
@@ -53,11 +53,9 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
           minDate={now}
           value={form.values.departureTime}
           onChange={(value) => {
-            form.setFieldValue("departureTime", value);
+            form.setFieldValue("departureTime", value || "");
             // Reset arrival time if it's invalid
-            if (value && form.values.arrivalTime && form.values.arrivalTime <= value) {
-              form.setFieldValue("arrivalTime", null);
-            }
+            form.setFieldValue("arrivalTime", "");
           }}
           timePickerProps={{
             withDropdown: true,
@@ -72,9 +70,9 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
           withAsterisk
           label="Arrival Time"
           placeholder="Select arrival time"
-          minDate={form.values.departureTime ?? now}
+          minDate={form.values.departureTime ? new Date(form.values.departureTime) : now}
           value={form.values.arrivalTime}
-          onChange={(value) => form.setFieldValue("arrivalTime", value)}
+          onChange={(value) => form.setFieldValue("arrivalTime", value || "")}
           disabled={!form.values.departureTime}
           timePickerProps={{
             withDropdown: true,
