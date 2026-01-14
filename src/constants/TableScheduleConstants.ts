@@ -38,3 +38,7 @@ export const TABLE_THEME_PARAMS = {
   cellTextColor: "var(--color-dark-grey)",
   borderColor: "var(--color-border)",
 } as const;
+
+export const TABLE_SLOT_MIN_TIME = "08:00:00";
+export const TABLE_SLOT_MAX_TIME = "19:00:00";
+export const TABLE_SLOT_DURATION = "01:00:00";

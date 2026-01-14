@@ -7,6 +7,11 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import { Box, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo, useRef } from "react";
+import {
+  TABLE_SLOT_DURATION,
+  TABLE_SLOT_MAX_TIME,
+  TABLE_SLOT_MIN_TIME,
+} from "@/constants/TableScheduleConstants";
 import Check from "../../../assets/icons/check";
 import Cross from "../../../assets/icons/cross";
 import { type Booking, BookingStatus, type CalendarEvent } from "../../../types/types";
@@ -208,9 +213,9 @@ export default function CalendarView({
         events={events}
         eventClick={handleEventClick}
         eventContent={renderEventContent}
-        slotMinTime="08:00:00"
-        slotMaxTime="19:00:00"
-        slotDuration="01:00:00"
+        slotMinTime={TABLE_SLOT_MIN_TIME}
+        slotMaxTime={TABLE_SLOT_MAX_TIME}
+        slotDuration={TABLE_SLOT_DURATION}
         slotLabelFormat={{
           hour: "numeric",
           hour12: true,
