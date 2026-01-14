@@ -1,3 +1,4 @@
+@use "@/styles/variables" as *;
 .calendarWrapper {
   width: 100%;
   // Ensure FullCalendar takes full width
@@ -39,6 +40,18 @@
   :global(.fc-event) {
     margin: 0 4px !important;
     cursor: pointer !important;
+  }
+
+  :global(.fc-button) {
+    --fc-button-text-color: #{$color-dark-grey};
+    --fc-button-bg-color: white;
+    --fc-button-border-color: white;
+    --fc-button-hover-bg-color: #{$color-light-grey};
+    --fc-button-hover-border-color: #{$color-white};
+    --fc-button-active-bg-color: #{$color-white};
+    --fc-button-active-border-color: #{$color-white};
+    --fc-button-background: transparent;
+    --fc-border-color: #ddd;
   }
 }
 

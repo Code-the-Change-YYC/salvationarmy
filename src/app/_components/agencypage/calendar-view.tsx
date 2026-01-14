@@ -73,13 +73,26 @@ interface CalendarViewProps {
   bookings: Booking[];
   currentDate?: Date;
   setIsDayView?: (isDayView: boolean) => void;
+  includeButtons?: boolean;
 }
 
-export default function CalendarView({ bookings, currentDate, setIsDayView }: CalendarViewProps) {
+export default function CalendarView({
+  bookings,
+  currentDate,
+  setIsDayView,
+  includeButtons,
+}: CalendarViewProps) {
   const events = useMemo(() => transformBookingsToEvents(bookings ?? []), [bookings]);
   const calendarRef = useRef<FullCalendar>(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
   const initialDate = getInitialDate(currentDate);
+  const toolbar = includeButtons
+    ? {
+        left: "",
+        center: "title",
+        right: "prev,next",
+      }
+    : false;
 
   // Notify parent of view state changes
   useEffect(() => {
@@ -191,7 +204,7 @@ export default function CalendarView({ bookings, currentDate, setIsDayView }: Ca
         plugins={[timeGridPlugin, dayGridPlugin]}
         initialView={isMobile ? "timeGridDay" : "timeGridWeek"}
         initialDate={initialDate}
-        headerToolbar={false}
+        headerToolbar={toolbar}
         events={events}
         eventClick={handleEventClick}
         eventContent={renderEventContent}
