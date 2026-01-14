@@ -1,3 +1,4 @@
+import CalendarView from "@/app/_components/drivercomponents/calendar-view";
 import { requireRole } from "@/lib/auth-helpers";
 import { api, HydrateClient } from "@/trpc/server";
 import { Role } from "@/types/types";
@@ -21,6 +22,29 @@ export default async function DriverHome() {
             {session && <span>Logged in as {session.user?.name}</span>}
           </p>
         </div>
+        <CalendarView
+          bookings={[
+            {
+              id: 5,
+              title: "test",
+              pickupAddress: "address",
+              destinationAddress: "destination",
+              purpose: "testing",
+              passengerInfo: "info",
+              phoneNumber: "81394954",
+              status: "incomplete",
+              agencyId: "34",
+              //Test data seeded on January 13
+              startTime: "2026-01-13T11:00:00-05:00",
+              endTime: "2026-01-13T13:30:00-05:00",
+              driverId: "423",
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              createdBy: "testUser",
+              updatedBy: "testUser",
+            },
+          ]}
+        ></CalendarView>
       </main>
     </HydrateClient>
   );
