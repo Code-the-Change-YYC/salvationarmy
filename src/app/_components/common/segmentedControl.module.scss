@@ -35,3 +35,9 @@
 .indicator {
   border-radius: 24px;
 }
+
+.labelHideOnMobile {
+  @media (max-width: 768px) {
+    display: none;
+  }
+}

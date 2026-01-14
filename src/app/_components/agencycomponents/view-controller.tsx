@@ -131,7 +131,7 @@ export const ViewController = ({
 
   return (
     <div className={styles.controlsBar}>
-      <div className={styles.viewToggles}>
+      <div className={styles.leftControls}>
         <SegmentedControl
           leftOption={leftViewOption}
           rightOption={rightViewOption}
@@ -139,9 +139,17 @@ export const ViewController = ({
           onChange={setViewMode}
           color="black"
           size="md"
+          hideLabelsOnMobile
         />
+        <div className={styles.addButtonMobile}>
+          <IconButton
+            icon={<Plus />}
+            onClick={() => setShowBookingModal(true)}
+            ariaLabel="Add booking"
+          />
+        </div>
       </div>
-      <div className={styles.navigationControls}>
+      <div className={styles.rightControls}>
         <div className={styles.weekNavigation}>
           <IconButton
             icon={<Chevron rotation="left" />}
@@ -157,7 +165,9 @@ export const ViewController = ({
             transparent
           />
         </div>
-        <Button onClick={() => setShowBookingModal(true)} text="Add booking" icon={<Plus />} />
+        <div className={styles.addButtonDesktop}>
+          <Button onClick={() => setShowBookingModal(true)} text="Add booking" icon={<Plus />} />
+        </div>
       </div>
     </div>
   );

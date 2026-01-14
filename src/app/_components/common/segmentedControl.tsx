@@ -6,7 +6,7 @@ import styles from "./segmentedControl.module.scss";
 
 export interface SegmentedControlOption<T extends string = string> {
   value: T;
-  label: string;
+  label?: string;
   icon?: React.ComponentType<SVGProps<SVGSVGElement>>;
   disabled?: boolean;
 }
@@ -23,6 +23,7 @@ export interface SegmentedControlProps<T extends string = string> {
   transitionTimingFunction?: string;
   readOnly?: boolean;
   disabled?: boolean;
+  hideLabelsOnMobile?: boolean;
 }
 export function SegmentedControl<T extends string = string>({
   leftOption,
@@ -36,8 +37,10 @@ export function SegmentedControl<T extends string = string>({
   transitionTimingFunction = "ease",
   readOnly = false,
   disabled = false,
+  hideLabelsOnMobile = false,
 }: SegmentedControlProps<T>) {
   const ICON_SIZE = 22;
+  const labelClass = hideLabelsOnMobile ? styles.labelHideOnMobile : "";
 
   const data = [
     {
@@ -53,10 +56,10 @@ export function SegmentedControl<T extends string = string>({
               className={`${styles.icon} ${value === leftOption.value ? styles.iconActive : ""}`}
             />
           </div>
-          <span>{leftOption.label}</span>
+          <span className={labelClass}>{leftOption.label}</span>
         </Center>
       ) : (
-        leftOption.label
+        <span className={labelClass}>{leftOption.label}</span>
       ),
       disabled: leftOption.disabled,
     },
@@ -73,10 +76,10 @@ export function SegmentedControl<T extends string = string>({
               className={`${styles.icon} ${value === rightOption.value ? styles.iconActive : ""}`}
             />
           </div>
-          <span>{rightOption.label}</span>
+          <span className={labelClass}>{rightOption.label}</span>
         </Center>
       ) : (
-        rightOption.label
+        <span className={labelClass}>{rightOption.label}</span>
       ),
       disabled: rightOption.disabled,
     },
