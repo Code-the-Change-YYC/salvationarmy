@@ -1,4 +1,4 @@
-import CalendarView from "@/app/_components/agencypage/calendar-view";
+import CalendarView from "@/app/_components/common/calendar/calendar-view";
 import { requireRole } from "@/lib/auth-helpers";
 import { api, HydrateClient } from "@/trpc/server";
 import { type Booking, Role } from "@/types/types";

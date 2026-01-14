@@ -6,12 +6,12 @@ import { type Libraries, useLoadScript } from "@react-google-maps/api";
 import { useEffect, useRef, useState } from "react";
 import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
 import { ViewController } from "@/app/_components/agencycomponents/view-controller";
+import CalendarView from "@/app/_components/common/calendar/calendar-view";
 import Modal from "@/app/_components/common/modal/modal";
 import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { ViewMode } from "@/types/types";
-import CalendarView from "../agencypage/calendar-view";
 import TableView from "../agencypage/table-view";
 import styles from "./agency-interactive-area.module.scss";
 
