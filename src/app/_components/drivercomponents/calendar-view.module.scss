@@ -44,6 +44,18 @@
   }
 }
 
+:global(:root) {
+  --fc-button-text-color: #{$color-dark-grey};
+  --fc-button-bg-color: white;
+  --fc-button-border-color: white;
+  --fc-button-hover-bg-color: #{$color-light-grey};
+  --fc-button-hover-border-color: #{$color-white};
+  --fc-button-active-bg-color: #{$color-white};
+  --fc-button-active-border-color: #{$color-white};
+  --fc-button-background: transparent;
+  --fc-border-color: #ddd;
+}
+
 .dayHeaderContainer {
   text-align: center;
 }
@@ -67,16 +79,4 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-}
-
-:root {
-  --fc-button-text-color: #{$color-dark-grey};
-  --fc-button-bg-color: white;
-  --fc-button-border-color: white;
-  --fc-button-hover-bg-color: #{$color-light-grey};
-  --fc-button-hover-border-color: #{$color-white};
-  --fc-button-active-bg-color: #{$color-white};
-  --fc-button-active-border-color: #{$color-white};
-  --fc-button-background: transparent;
-  --fc-border-color: #ddd;
 }
