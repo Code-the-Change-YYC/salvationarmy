@@ -44,7 +44,7 @@
   }
 }
 
-:global(:root) {
+:global(.fc-button) {
   --fc-button-text-color: #{$color-dark-grey};
   --fc-button-bg-color: white;
   --fc-button-border-color: white;
