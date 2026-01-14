@@ -1,12 +1,13 @@
 "use client";
 
 import { Center, SegmentedControl as MantineSegmentedControl } from "@mantine/core";
-import type React from "react";
+import type { SVGProps } from "react";
+import styles from "./segmentedControl.module.scss";
 
 export interface SegmentedControlOption<T extends string = string> {
   value: T;
   label: string;
-  icon?: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+  icon?: React.ComponentType<SVGProps<SVGSVGElement>>;
   disabled?: boolean;
 }
 
@@ -36,22 +37,20 @@ export function SegmentedControl<T extends string = string>({
   readOnly = false,
   disabled = false,
 }: SegmentedControlProps<T>) {
+  const ICON_SIZE = 22;
+
   const data = [
     {
       value: leftOption.value,
       label: leftOption.icon ? (
-        <Center style={{ gap: 8 }}>
+        <Center className={styles.center}>
           <div
-            style={{
-              color: value === leftOption.value ? "white" : "inherit",
-            }}
+            className={`${styles.iconWrapper} ${value === leftOption.value ? styles.iconWrapperActive : ""}`}
           >
             <leftOption.icon
-              size={16}
-              style={{
-                color: value === leftOption.value ? "white" : "inherit",
-                filter: value === leftOption.value ? "brightness(0) invert(1)" : "none",
-              }}
+              width={ICON_SIZE}
+              height={ICON_SIZE}
+              className={`${styles.icon} ${value === leftOption.value ? styles.iconActive : ""}`}
             />
           </div>
           <span>{leftOption.label}</span>
@@ -64,18 +63,14 @@ export function SegmentedControl<T extends string = string>({
     {
       value: rightOption.value,
       label: rightOption.icon ? (
-        <Center style={{ gap: 8 }}>
+        <Center className={styles.center}>
           <div
-            style={{
-              color: value === rightOption.value ? "white" : "inherit",
-            }}
+            className={`${styles.iconWrapper} ${value === rightOption.value ? styles.iconWrapperActive : ""}`}
           >
             <rightOption.icon
-              size={16}
-              style={{
-                color: value === rightOption.value ? "white" : "inherit",
-                filter: value === rightOption.value ? "brightness(0) invert(1)" : "none",
-              }}
+              width={ICON_SIZE}
+              height={ICON_SIZE}
+              className={`${styles.icon} ${value === rightOption.value ? styles.iconActive : ""}`}
             />
           </div>
           <span>{rightOption.label}</span>
@@ -106,16 +101,10 @@ export function SegmentedControl<T extends string = string>({
       readOnly={readOnly}
       disabled={disabled}
       radius="xl"
-      styles={{
-        root: {
-          borderRadius: "24px",
-        },
-        control: {
-          borderRadius: "24px",
-        },
-        indicator: {
-          borderRadius: "24px",
-        },
+      classNames={{
+        root: styles.root,
+        control: styles.control,
+        indicator: styles.indicator,
       }}
     />
   );
