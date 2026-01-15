@@ -97,7 +97,11 @@ export const InviteUserForm = ({ form, organizations }: InviteUserFormProps) => 
             withAsterisk
             label="Affiliated Agency"
             placeholder="Select an agency"
-            data={organizations.map((org) => ({ value: org.id, label: org.name })) ?? NO_ORGS_DATA}
+            data={
+              organizations.length > 0
+                ? organizations.map((org) => ({ value: org.id, label: org.name }))
+                : NO_ORGS_DATA
+            }
             key={form.key("organizationId")}
             {...form.getInputProps("organizationId")}
           />

@@ -25,89 +25,9 @@ const SvgComponent = ({
       d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"
     />
     <path
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeOpacity={0.2}
-      strokeWidth={2}
-      d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"
-    />
-    <path
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeOpacity={0.2}
-      strokeWidth={2}
-      d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"
-    />
-    <path
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeOpacity={0.2}
-      strokeWidth={2}
-      d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"
-    />
-    <path
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeOpacity={0.2}
-      strokeWidth={2}
-      d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"
-    />
-    <path
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeOpacity={0.2}
-      strokeWidth={2}
-      d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"
-    />
-    <path
       stroke={stroke}
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={2}
-      d="M9 22V12h6v10"
-    />
-    <path
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeOpacity={0.2}
-      strokeWidth={2}
-      d="M9 22V12h6v10"
-    />
-    <path
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeOpacity={0.2}
-      strokeWidth={2}
-      d="M9 22V12h6v10"
-    />
-    <path
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeOpacity={0.2}
-      strokeWidth={2}
-      d="M9 22V12h6v10"
-    />
-    <path
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeOpacity={0.2}
-      strokeWidth={2}
-      d="M9 22V12h6v10"
-    />
-    <path
-      stroke="#000"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeOpacity={0.2}
       strokeWidth={2}
       d="M9 22V12h6v10"
     />
