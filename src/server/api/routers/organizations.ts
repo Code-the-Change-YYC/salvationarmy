@@ -99,9 +99,10 @@ export const organizationRouter = createTRPCRouter({
   inviteUser: adminProcedure
     .input(
       z.object({
+        name: z.string().min(1),
         email: z.string().email(),
         organizationRole: z.nativeEnum(OrganizationRole),
-        organizationId: z.string(),
+        organizationId: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -124,7 +125,7 @@ export const organizationRouter = createTRPCRouter({
         const newUser = await auth.api.signUpEmail({
           body: {
             email: input.email,
-            name: "", // blank so they can fill it in later
+            name: input.name,
             password: randomPassword,
           },
         });
@@ -137,13 +138,15 @@ export const organizationRouter = createTRPCRouter({
         }
 
         // add the newly created user to the organization with the specified role
-        await auth.api.addMember({
-          body: {
-            userId: newUser.user.id,
-            organizationId: input.organizationId,
-            role: input.organizationRole,
-          },
-        });
+        if (input.organizationId) {
+          await auth.api.addMember({
+            body: {
+              userId: newUser.user.id,
+              organizationId: input.organizationId,
+              role: input.organizationRole,
+            },
+          });
+        }
 
         // send the invitation email using the forgot password flow
         console.log("Sending password reset email to:", input.email);
