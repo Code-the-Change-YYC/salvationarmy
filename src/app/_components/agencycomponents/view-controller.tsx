@@ -73,9 +73,12 @@ export const ViewController = ({
     // Week view: Monday to Friday
     const weekStart = d.isoWeekday(1); // Monday
     const weekEnd = weekStart.add(4, "day"); // Friday
-    const today = dayjs();
+    const today = dayjs().startOf("day");
 
-    if (today >= weekStart && today <= weekEnd) {
+    if (
+      (today.isAfter(weekStart) || today.isSame(weekStart, "day")) &&
+      (today.isBefore(weekEnd) || today.isSame(weekEnd, "day"))
+    ) {
       return "This week";
     }
 
