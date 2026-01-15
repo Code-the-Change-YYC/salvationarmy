@@ -1,9 +1,15 @@
 import { TRPCError } from "@trpc/server";
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import { and, desc, eq, gte, lt, or } from "drizzle-orm";
 import { z } from "zod";
 import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
 import { BOOKING_STATUS, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+
+dayjs.extend(utc); //Allows dayjs to work in UTC
+dayjs.extend(timezone); //Allows dayjs to convert dates between time zones
 
 const StatusZ = z.enum(BOOKING_STATUS); // ← uses "cancelled" (double-L)
 
@@ -105,15 +111,12 @@ export const bookingsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const role = ctx.session.user.role ?? "user";
-      const startDate = input?.startDate ?? "1970-01-01T00:00:00.000-07:00";
+      const startDate = input?.startDate ?? "1970-01-01T00:00:00-07:00";
       let endDate = input?.endDate ?? "";
 
       if (input === undefined || input.endDate === undefined) {
-        //No end date given, make one
-        let largeDate = new Date(new Date().getTime() + 31536000000 * 100).toISOString(); //~100 years after the current date
-        largeDate = largeDate.substring(0, largeDate.length - 1); //Remove the UTC timezone to add MST instead
-        largeDate = largeDate + "-07:00"; //Add the MST offset
-        endDate = largeDate; //Assign it to input.endDate
+        //No end date given, assign one to input.endDate
+        endDate = dayjs().utc().add(50, "year").tz("America/Hermosillo").format();
       }
 
       let startAndEndDateErrorMessage = "Invalid: ";
