@@ -1,6 +1,11 @@
 "use client";
 
+import dayjs, { type Dayjs } from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
+import isToday from "dayjs/plugin/isToday";
+import type React from "react";
 import Button from "@/app/_components/common/button/Button";
+import IconButton from "@/app/_components/common/button/IconButton";
 import SegmentedControl from "@/app/_components/common/segmentedControl";
 import Calendar from "@/assets/icons/calendar";
 import Chevron from "@/assets/icons/chevron";
@@ -8,6 +13,9 @@ import Grid from "@/assets/icons/grid";
 import Plus from "@/assets/icons/plus";
 import type { ViewMode } from "@/types/types";
 import styles from "./view-controller.module.scss";
+
+dayjs.extend(isoWeek);
+dayjs.extend(isToday);
 
 const leftViewOption = {
   value: "calendar",
@@ -21,9 +29,6 @@ const rightViewOption = {
   icon: Grid,
 };
 
-import type React from "react";
-import IconButton from "@/app/_components/common/button/IconButton";
-
 interface ViewControllerProps {
   viewMode: ViewMode;
   setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
@@ -33,6 +38,22 @@ interface ViewControllerProps {
   isDayView?: boolean;
 }
 
+// Adjust weekend to nearest weekday (Sun -> Mon, Sat -> Fri)
+const toWeekday = (d: Dayjs): Dayjs => {
+  if (d.day() === 0) return d.add(1, "day");
+  if (d.day() === 6) return d.subtract(1, "day");
+  return d;
+};
+
+// Move to next/previous weekday, skipping weekends
+const moveWeekday = (d: Dayjs, direction: 1 | -1): Dayjs => {
+  let result = d.add(direction, "day");
+  while (result.day() === 0 || result.day() === 6) {
+    result = result.add(direction, "day");
+  }
+  return result;
+};
+
 export const ViewController = ({
   viewMode,
   setViewMode,
@@ -41,97 +62,44 @@ export const ViewController = ({
   onDateChange,
   isDayView = false,
 }: ViewControllerProps) => {
-  // Check if a date is a weekend
-  const isWeekend = (date: Date): boolean => {
-    const day = date.getDay();
-    return day === 0 || day === 6; // Sunday or Saturday
-  };
-
-  // Adjust a weekend day to the nearest weekday
-  const toWeekday = (date: Date): Date => {
-    const d = new Date(date);
-    if (d.getDay() === 0) d.setDate(d.getDate() + 1); // Sunday -> Monday
-    if (d.getDay() === 6) d.setDate(d.getDate() - 1); // Saturday -> Friday
-    return d;
-  };
-
-  // Move to next/previous weekday
-  const moveWeekday = (date: Date, direction: 1 | -1): Date => {
-    const d = new Date(date);
-    do {
-      d.setDate(d.getDate() + direction);
-    } while (isWeekend(d));
-    return d;
-  };
-
-  // Get Monday of the week containing the date
-  const getWeekStart = (date: Date): Date => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const daysFromMonday = day === 0 ? 6 : day - 1; // Sunday is 6 days from Monday
-    d.setDate(d.getDate() - daysFromMonday);
-    return d;
-  };
-
-  // Format date
-  const formatDate = (date: Date): string => {
-    const month = date.toLocaleDateString("en-US", { month: "short" });
-    return `${month} ${date.getDate()}`;
-  };
-
-  // Check if date is today
-  const isToday = (date: Date): boolean => {
-    const today = new Date();
-    return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    );
-  };
-
-  // Format date display text
-  const formatDateDisplay = (date: Date): string => {
-    const weekdayDate = toWeekday(new Date(date));
+  const formatDateDisplay = (): string => {
+    const d = toWeekday(dayjs(currentDate));
 
     if (isDayView) {
-      if (isToday(weekdayDate)) return "Today";
-      const weekday = weekdayDate.toLocaleDateString("en-US", {
-        weekday: "short",
-      });
-      return `${weekday}, ${formatDate(weekdayDate)}`;
+      if (d.isToday()) return "Today";
+      return d.format("ddd, MMM D");
     }
 
-    // Week view
-    const weekStart = getWeekStart(weekdayDate);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 4);
+    // Week view: Monday to Friday
+    const weekStart = d.isoWeekday(1); // Monday
+    const weekEnd = weekStart.add(4, "day"); // Friday
+    const today = dayjs().startOf("day");
 
-    const today = new Date();
-    if (weekStart <= today && today <= weekEnd) {
+    if (
+      (today.isAfter(weekStart) || today.isSame(weekStart, "day")) &&
+      (today.isBefore(weekEnd) || today.isSame(weekEnd, "day"))
+    ) {
       return "This week";
     }
 
-    return `${formatDate(weekStart)} - ${formatDate(weekEnd)}`;
+    return `${weekStart.format("MMM D")} - ${weekEnd.format("MMM D")}`;
   };
 
-  // Navigation handlers
   const handlePrevious = () => {
-    const newDate = isDayView
-      ? moveWeekday(currentDate, -1)
-      : toWeekday(new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000)); // Move back a week in milliseconds
-    onDateChange(newDate);
+    const current = dayjs(currentDate);
+    const newDate = isDayView ? moveWeekday(current, -1) : toWeekday(current.subtract(1, "week"));
+    onDateChange(newDate.toDate());
   };
 
   const handleNext = () => {
-    const newDate = isDayView
-      ? moveWeekday(currentDate, 1)
-      : toWeekday(new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000)); // Move forward a week in milliseconds
-    onDateChange(newDate);
+    const current = dayjs(currentDate);
+    const newDate = isDayView ? moveWeekday(current, 1) : toWeekday(current.add(1, "week"));
+    onDateChange(newDate.toDate());
   };
 
   return (
     <div className={styles.controlsBar}>
-      <div className={styles.viewToggles}>
+      <div className={styles.leftControls}>
         <SegmentedControl
           leftOption={leftViewOption}
           rightOption={rightViewOption}
@@ -139,9 +107,17 @@ export const ViewController = ({
           onChange={setViewMode}
           color="black"
           size="md"
+          hideLabelsOnMobile
         />
+        <div className={styles.addButtonMobile}>
+          <IconButton
+            icon={<Plus />}
+            onClick={() => setShowBookingModal(true)}
+            ariaLabel="Add booking"
+          />
+        </div>
       </div>
-      <div className={styles.navigationControls}>
+      <div className={styles.rightControls}>
         <div className={styles.weekNavigation}>
           <IconButton
             icon={<Chevron rotation="left" />}
@@ -149,7 +125,7 @@ export const ViewController = ({
             ariaLabel={isDayView ? "Previous day" : "Previous week"}
             transparent
           />
-          <span>{formatDateDisplay(currentDate)}</span>
+          <span>{formatDateDisplay()}</span>
           <IconButton
             icon={<Chevron rotation="right" />}
             onClick={handleNext}
@@ -157,7 +133,9 @@ export const ViewController = ({
             transparent
           />
         </div>
-        <Button onClick={() => setShowBookingModal(true)} text="Add booking" icon={<Plus />} />
+        <div className={styles.addButtonDesktop}>
+          <Button onClick={() => setShowBookingModal(true)} text="Add booking" icon={<Plus />} />
+        </div>
       </div>
     </div>
   );
