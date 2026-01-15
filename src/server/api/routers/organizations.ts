@@ -31,7 +31,7 @@ export const organizationRouter = createTRPCRouter({
     const role = user.role as Role;
     let redirectUrl = "/";
 
-    if (ctx.session.user.name === "") {
+    if (user.name === "") {
       redirectUrl = "/fill-out-name";
     } else {
       switch (role) {
