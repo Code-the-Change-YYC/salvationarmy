@@ -76,14 +76,17 @@ export default function VehicleLogTableView({ onRowClick }: VehicleLogTableViewP
   const theme = themeQuartz.withParams(TABLE_THEME_PARAMS);
 
   // TODO: Replace with tRPC query to fetch vehicle logs from database
-  const [rowData] = useState<VehicleLogData[]>([]);
+  const [vehicleLogs] = useState<VehicleLogData[]>([]);
 
   const columnDefs: ColDef[] = useMemo(
     () => [
       {
         ...createColumnDef(COLUMN_IDS.DATE),
         headerComponent: HeaderWithIcon,
-        valueFormatter: (params) => dayjs(params.value).format("MMM D, YYYY"),
+        valueFormatter: (params) => {
+          if (!params.value) return "";
+          return dayjs(params.value).format("MMM D, YYYY");
+        },
       },
       {
         ...createColumnDef(COLUMN_IDS.DESTINATION),
@@ -93,27 +96,42 @@ export default function VehicleLogTableView({ onRowClick }: VehicleLogTableViewP
       {
         ...createColumnDef(COLUMN_IDS.DEPARTURE_TIME),
         headerComponent: HeaderWithIcon,
-        valueFormatter: (params) => dayjs(params.value).format("h:mm A"),
+        valueFormatter: (params) => {
+          if (!params.value) return "";
+          return dayjs(params.value).format("h:mm A");
+        },
       },
       {
         ...createColumnDef(COLUMN_IDS.ARRIVAL_TIME),
         headerComponent: HeaderWithIcon,
-        valueFormatter: (params) => dayjs(params.value).format("h:mm A"),
+        valueFormatter: (params) => {
+          if (!params.value) return "";
+          return dayjs(params.value).format("h:mm A");
+        },
       },
       {
         ...createColumnDef(COLUMN_IDS.ODOMETER_START),
         headerComponent: HeaderWithIcon,
-        valueFormatter: (params) => `${params.value.toLocaleString()} KM`,
+        valueFormatter: (params) => {
+          if (params.value == null) return "";
+          return `${params.value.toLocaleString()} KM`;
+        },
       },
       {
         ...createColumnDef(COLUMN_IDS.ODOMETER_END),
         headerComponent: HeaderWithIcon,
-        valueFormatter: (params) => `${params.value.toLocaleString()} KM`,
+        valueFormatter: (params) => {
+          if (params.value == null) return "";
+          return `${params.value.toLocaleString()} KM`;
+        },
       },
       {
         ...createColumnDef(COLUMN_IDS.KM_DRIVEN),
         headerComponent: HeaderWithIcon,
-        valueFormatter: (params) => `${params.value} KM`,
+        valueFormatter: (params) => {
+          if (params.value == null) return "";
+          return `${params.value} KM`;
+        },
       },
       {
         ...createColumnDef(COLUMN_IDS.DRIVER),
@@ -136,7 +154,7 @@ export default function VehicleLogTableView({ onRowClick }: VehicleLogTableViewP
     <div className={styles.tableContainer}>
       <AgGridReact
         theme={theme}
-        rowData={rowData}
+        rowData={vehicleLogs}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         pagination={false}
