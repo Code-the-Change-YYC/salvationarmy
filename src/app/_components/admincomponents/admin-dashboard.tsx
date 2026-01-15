@@ -34,14 +34,21 @@ export const AdminDashboard = () => {
   const form = useForm({
     mode: "uncontrolled",
     initialValues: {
+      name: "",
       email: "",
       organizationRole: OrganizationRole.MEMBER,
       organizationId: "",
     },
     validate: {
+      name: (value) => (value.trim().length > 0 ? null : "Name is required"),
       email: (value) => (value.trim().length > 0 ? null : "Email is required"),
       organizationRole: (value) => (value.trim().length > 0 ? null : "Role is required"),
-      organizationId: (value) => (value.trim().length > 0 ? null : "Organization is required"),
+      organizationId: (value, values) => {
+        if (values.organizationRole === OrganizationRole.MEMBER) {
+          return value.trim().length > 0 ? null : "Organization is required";
+        }
+        return null;
+      },
     },
   });
 
@@ -53,10 +60,18 @@ export const AdminDashboard = () => {
       return;
     }
 
-    // todo: handle case where admin permissions are given within the organization
-    console.log("submit", form.values);
+    // Prepare data for submission - only include organizationId for members
+    const submitData = {
+      name: form.values.name,
+      email: form.values.email,
+      organizationRole: form.values.organizationRole,
+      ...(form.values.organizationRole === OrganizationRole.MEMBER && {
+        organizationId: form.values.organizationId,
+      }),
+    };
 
-    inviteUserMutation.mutate(form.values);
+    console.log("submit", submitData);
+    inviteUserMutation.mutate(submitData);
   };
 
   const handleCloseModal = () => {
@@ -123,12 +138,13 @@ export const AdminDashboard = () => {
           onConfirm={handleConfirm}
           title={
             <Box fw={600} fz="xl">
-              Invite a new user
+              Invite a User
             </Box>
           }
-          size="md"
+          size="lg"
           showDefaultFooter
-          confirmText="Send Invitation"
+          confirmText="Invite to Navigation Centre"
+          cancelText="Cancel Invite"
           loading={inviteUserMutation.isPending}
         >
           <InviteUserForm organizations={organizations.data ?? []} form={form} />
