@@ -124,7 +124,7 @@ export const organizationRouter = createTRPCRouter({
         const newUser = await auth.api.signUpEmail({
           body: {
             email: input.email,
-            name: "", // blank so they can fill it in later
+            name: "", // User will set their name when completing registration
             password: randomPassword,
           },
         });
