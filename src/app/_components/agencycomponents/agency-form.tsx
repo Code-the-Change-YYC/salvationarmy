@@ -3,6 +3,7 @@
 import { Box, Divider, Stack, Textarea, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
+import dayjs from "dayjs";
 import classes from "./agency-form.module.scss";
 
 interface AgencyBookingForm {
@@ -24,30 +25,6 @@ interface AgencyFormProps {
 
 export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => {
   const now = new Date();
-
-  // Helper function to convert Date or string to local ISO string (preserves local time, no UTC conversion)
-  const toLocalISOString = (value: Date | string | null): string => {
-    if (!value) return "";
-
-    // Normalize input to Date object
-    let date: Date;
-    if (typeof value === "string") {
-      date = new Date(value);
-      // Check if the parsed date is invalid
-      if (Number.isNaN(date.getTime())) return "";
-    } else {
-      date = value;
-    }
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-  };
 
   return (
     <Stack gap="lg">
@@ -109,14 +86,24 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             label="Start time"
             placeholder="Select start date and time"
             minDate={now}
-            valueFormat="YYYY-MM-DDTHH:mm:ss"
+            valueFormat="MMM DD, YYYY hh:mm A"
             value={form.values.startTime ? new Date(form.values.startTime) : null}
             onChange={(value) => {
-              const localISOString = toLocalISOString(value);
-              form.setFieldValue("startTime", localISOString);
+              if (!value) {
+                form.setFieldValue("startTime", "");
+                return;
+              }
+              const isoString = dayjs(value).toISOString();
+              console.log("Start Time - parsed:", isoString);
+              console.log("Start Time - after parsing:", new Date(isoString));
+              console.log(
+                "Start Time - show local time:",
+                dayjs(isoString).format("YYYY-MM-DD hh:mm A"),
+              );
+              form.setFieldValue("startTime", isoString);
 
-              // to reset the end time if it's invalid
-              if (localISOString && form.values.endTime && form.values.endTime <= localISOString) {
+              if (isoString && form.values.endTime && form.values.endTime <= isoString) {
+                // to reset the end time if it's invalid
                 form.setFieldValue("endTime", "");
               }
             }}
@@ -135,11 +122,21 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             label="End time"
             placeholder="Select end date and time"
             minDate={form.values.startTime ? new Date(form.values.startTime) : now}
-            valueFormat="YYYY-MM-DDTHH:mm:ss"
+            valueFormat="MMM DD, YYYY hh:mm A"
             value={form.values.endTime ? new Date(form.values.endTime) : null}
             onChange={(value) => {
-              const localISOString = toLocalISOString(value);
-              form.setFieldValue("endTime", localISOString);
+              if (!value) {
+                form.setFieldValue("endTime", "");
+                return;
+              }
+              const isoString = dayjs(value).toISOString();
+              console.log("End Time - parsed:", isoString);
+              console.log("End Time - after parsing:", new Date(isoString));
+              console.log(
+                "End Time - show local time:",
+                dayjs(isoString).format("YYYY-MM-DD hh:mm A"),
+              );
+              form.setFieldValue("endTime", isoString);
             }}
             disabled={!form.values.startTime}
             timePickerProps={{
