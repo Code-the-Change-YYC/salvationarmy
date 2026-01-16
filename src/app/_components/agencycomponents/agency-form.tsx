@@ -3,6 +3,7 @@
 import { Box, Divider, Stack, Textarea, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
+import dayjs from "dayjs";
 import classes from "./agency-form.module.scss";
 
 interface AgencyBookingForm {
@@ -85,12 +86,24 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             label="Start time"
             placeholder="Select start date and time"
             minDate={now}
-            value={form.values.startTime}
+            valueFormat="MMM DD, YYYY hh:mm A"
+            value={form.values.startTime ? new Date(form.values.startTime) : null}
             onChange={(value) => {
-              form.setFieldValue("startTime", value || "");
+              if (!value) {
+                form.setFieldValue("startTime", "");
+                return;
+              }
+              const isoString = dayjs(value).toISOString();
+              console.log("Start Time - parsed:", isoString);
+              console.log("Start Time - after parsing:", new Date(isoString));
+              console.log(
+                "Start Time - show local time:",
+                dayjs(isoString).format("YYYY-MM-DD hh:mm A"),
+              );
+              form.setFieldValue("startTime", isoString);
 
-              // to reset the end time if it's invalid
-              if (value && form.values.endTime && form.values.endTime <= value) {
+              if (isoString && form.values.endTime && form.values.endTime <= isoString) {
+                // to reset the end time if it's invalid
                 form.setFieldValue("endTime", "");
               }
             }}
@@ -108,9 +121,23 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             withAsterisk
             label="End time"
             placeholder="Select end date and time"
-            minDate={form.values.startTime ?? now}
-            value={form.values.endTime}
-            onChange={(value) => form.setFieldValue("endTime", value || "")}
+            minDate={form.values.startTime ? new Date(form.values.startTime) : now}
+            valueFormat="MMM DD, YYYY hh:mm A"
+            value={form.values.endTime ? new Date(form.values.endTime) : null}
+            onChange={(value) => {
+              if (!value) {
+                form.setFieldValue("endTime", "");
+                return;
+              }
+              const isoString = dayjs(value).toISOString();
+              console.log("End Time - parsed:", isoString);
+              console.log("End Time - after parsing:", new Date(isoString));
+              console.log(
+                "End Time - show local time:",
+                dayjs(isoString).format("YYYY-MM-DD hh:mm A"),
+              );
+              form.setFieldValue("endTime", isoString);
+            }}
             disabled={!form.values.startTime}
             timePickerProps={{
               withDropdown: true,

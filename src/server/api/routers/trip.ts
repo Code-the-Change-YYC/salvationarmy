@@ -9,7 +9,7 @@ export const tripRouter = createTRPCRouter({
       z.object({
         title: z.string().min(1, "Title is required"),
         residentName: z.string().min(1, "Resident name is required"),
-        contactInfo: z.string().min(1, "Contact info is required"),
+        phoneNumber: z.string().min(1, "Phone number is required"),
         additionalInfo: z.string().optional(),
         // Requires ISO 8601 String
         startTime: z.string().datetime(),
@@ -24,7 +24,8 @@ export const tripRouter = createTRPCRouter({
         title: input.title,
         pickupAddress: input.pickupAddress,
         destinationAddress: input.destinationAddress,
-        passengerInfo: `${input.residentName} ${input.contactInfo} ${input.additionalInfo ? `${input.additionalInfo}` : ""}`,
+        passengerInfo: `${input.residentName} ${input.additionalInfo ? `${input.additionalInfo}` : ""}`,
+        phoneNumber: input.phoneNumber,
         agencyId: ctx.session.user.id,
         purpose: input.purpose,
         createdBy: ctx.session.user.id,
