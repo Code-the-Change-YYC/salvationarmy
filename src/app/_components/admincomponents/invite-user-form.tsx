@@ -1,13 +1,11 @@
 "use client";
-import { Box, Button, Divider, Group, Select, Stack, TextInput } from "@mantine/core";
+import { Box, Button, Group, Select, Stack, TextInput } from "@mantine/core";
 import type { UseFormReturnType } from "@mantine/form";
 import type { Organization } from "better-auth/plugins/organization";
 import User from "@/assets/icons/user";
 import { ALL_ORGANIZATION_ROLES, OrganizationRole } from "@/types/types";
-import classes from "./invite-user-form.module.scss";
 
 interface InviteUserForm {
-  name: string;
   email: string;
   organizationRole: OrganizationRole;
   organizationId: string;
@@ -44,13 +42,6 @@ export const InviteUserForm = ({ form, organizations }: InviteUserFormProps) => 
         <Box fw={600} fz="lg" c="#8B2635">
           Invitee Information
         </Box>
-        <TextInput
-          withAsterisk
-          label="Name"
-          placeholder="Enter invitee name"
-          key={form.key("name")}
-          {...form.getInputProps("name")}
-        />
         <TextInput
           withAsterisk
           label="Email Address (Gmail only)"
