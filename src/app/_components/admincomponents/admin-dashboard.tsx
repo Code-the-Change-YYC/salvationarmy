@@ -96,22 +96,34 @@ export const AdminDashboard = () => {
       return;
     }
 
-    // Prepare data for submission - only include organizationId for members
-    const submitData: {
-      name: string;
-      email: string;
-      organizationRole: typeof userForm.values.organizationRole;
-      organizationId?: string;
-    } = {
+    // Determine the organization ID based on role
+    let organizationId: string;
+    const role = userForm.values.organizationRole;
+
+    if (role === OrganizationRole.ADMIN) {
+      const adminsOrg = organizations.data?.find((org) => org.slug === "admins");
+      if (!adminsOrg) {
+        notify.error("Admins organization not found");
+        return;
+      }
+      organizationId = adminsOrg.id;
+    } else if (role === OrganizationRole.OWNER) {
+      const driversOrg = organizations.data?.find((org) => org.slug === "drivers");
+      if (!driversOrg) {
+        notify.error("Drivers organization not found");
+        return;
+      }
+      organizationId = driversOrg.id;
+    } else {
+      organizationId = userForm.values.organizationId;
+    }
+
+    const submitData = {
       name: userForm.values.name,
       email: userForm.values.email,
       organizationRole: userForm.values.organizationRole,
+      organizationId,
     };
-
-    // Only add organizationId if the role is MEMBER
-    if (userForm.values.organizationRole === OrganizationRole.MEMBER) {
-      submitData.organizationId = userForm.values.organizationId;
-    }
 
     console.log("submit user", submitData);
     inviteUserMutation.mutate(submitData);
