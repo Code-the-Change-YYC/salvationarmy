@@ -48,13 +48,11 @@ export const AdminDashboard = () => {
   const userForm = useForm({
     mode: "uncontrolled",
     initialValues: {
-      name: "",
       email: "",
       organizationRole: OrganizationRole.MEMBER,
       organizationId: "",
     },
     validate: {
-      name: (value) => (value.trim().length > 0 ? null : "Name is required"),
       email: (value) => {
         if (value.trim().length === 0) return "Email is required";
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -96,9 +94,11 @@ export const AdminDashboard = () => {
       return;
     }
 
+    const formValues = userForm.getValues();
+
     // Determine the organization ID based on role
     let organizationId: string;
-    const role = userForm.values.organizationRole;
+    const role = formValues.organizationRole;
 
     if (role === OrganizationRole.ADMIN) {
       const adminsOrg = organizations.data?.find((org) => org.slug === "admins");
@@ -115,13 +115,12 @@ export const AdminDashboard = () => {
       }
       organizationId = driversOrg.id;
     } else {
-      organizationId = userForm.values.organizationId;
+      organizationId = formValues.organizationId;
     }
 
     const submitData = {
-      name: userForm.values.name,
-      email: userForm.values.email,
-      organizationRole: userForm.values.organizationRole,
+      email: formValues.email,
+      organizationRole: formValues.organizationRole,
       organizationId,
     };
 
@@ -137,8 +136,9 @@ export const AdminDashboard = () => {
       return;
     }
 
-    console.log("submit agency", agencyForm.values);
-    createAgencyMutation.mutate(agencyForm.values);
+    const formValues = agencyForm.getValues();
+    console.log("submit agency", formValues);
+    createAgencyMutation.mutate(formValues);
   };
 
   const handleCloseModal = () => {

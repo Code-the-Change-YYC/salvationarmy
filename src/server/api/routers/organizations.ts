@@ -99,7 +99,6 @@ export const organizationRouter = createTRPCRouter({
   inviteUser: adminProcedure
     .input(
       z.object({
-        name: z.string().min(1),
         email: z.string().email(),
         organizationRole: z.nativeEnum(OrganizationRole),
         organizationId: z.string(),
@@ -125,7 +124,7 @@ export const organizationRouter = createTRPCRouter({
         const newUser = await auth.api.signUpEmail({
           body: {
             email: input.email,
-            name: input.name,
+            name: "", // User will set their name when completing registration
             password: randomPassword,
           },
         });
