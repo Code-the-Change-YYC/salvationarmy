@@ -3,7 +3,6 @@
 import { Group, Text } from "@mantine/core";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Button from "@/app/_components/common/button/Button";
 import Bell from "@/assets/icons/bell";
 import Home from "@/assets/icons/home";
 import styles from "./navbar.module.scss";
@@ -14,6 +13,22 @@ type NavbarView = "admin" | "agency" | "driver";
 interface NavbarProps {
   view: NavbarView;
   agencyName?: string;
+}
+
+interface NavLinkProps {
+  href: string;
+  children: React.ReactNode;
+}
+
+function NavLink({ href, children }: NavLinkProps) {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
+  return (
+    <Link href={href} className={styles.navLink}>
+      <span className={isActive ? styles.navLinkActive : styles.navLinkDefault}>{children}</span>
+    </Link>
+  );
 }
 
 export default function Navbar({ view, agencyName }: NavbarProps) {
@@ -48,26 +63,17 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
   return (
     <Group justify="space-between" className={`border-bottom ${styles.navbar}`}>
       <Group>
-        <Link className={styles.flex} href={homeLink()}>
-          <Home />
-        </Link>
-        <Text>{navbarText()}</Text>
+        <Home />
+        <Text>{view === "agency" ? `${agencyName ?? "[Agency name]"} Home` : ""}</Text>
       </Group>
 
       {view === "admin" && (
-        <Group gap={20}>
-          <Link href="/admin/agencies">
-            <Button text="View Agencies" variant="secondary" />
-          </Link>
-          <Link href="/admin/rider-logs">
-            <Button text="Rider Logs" variant="secondary" />
-          </Link>
-          <Link href="/admin/vehicle-logs">
-            <Button text="Vehicle Log" variant="secondary" />
-          </Link>
-          <Link href="/admin/schedule">
-            <Button text="Schedule" variant="secondary" />
-          </Link>
+        <Group gap={30}>
+          <NavLink href="/admin/agencies">View Agencies</NavLink>
+          <NavLink href="/admin/invite">Invite</NavLink>
+          <NavLink href="/admin/rider-logs">Rider Logs</NavLink>
+          <NavLink href="/admin/vehicle-logs">Vehicle Log</NavLink>
+          <NavLink href="/admin/schedule">View Schedule</NavLink>
           <Profile />
         </Group>
       )}
@@ -81,9 +87,7 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
 
       {view === "driver" && (
         <Group gap={30}>
-          <Link href="/driver/surveys">
-            <Button text="Surveys" variant="secondary" />
-          </Link>
+          <NavLink href="/driver/surveys">Surveys</NavLink>
           <Bell />
           <Profile />
         </Group>
