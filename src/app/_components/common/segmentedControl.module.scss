@@ -1,0 +1,43 @@
+.center {
+  gap: 0.25rem;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+}
+
+.iconWrapperActive {
+  color: white;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconActive {
+  color: white;
+  filter: brightness(0) invert(1);
+}
+
+.root {
+  border-radius: 24px;
+}
+
+.control {
+  border-radius: 24px;
+}
+
+.indicator {
+  border-radius: 24px;
+}
+
+.labelHideOnMobile {
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
