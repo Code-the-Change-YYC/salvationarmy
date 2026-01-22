@@ -7,9 +7,14 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import { Box, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo, useRef } from "react";
-import Check from "../../assets/icons/check";
-import Cross from "../../assets/icons/cross";
-import { type Booking, BookingStatus, type CalendarEvent } from "../../types/types";
+import Check from "@/assets/icons/check";
+import Cross from "@/assets/icons/cross";
+import {
+  TABLE_SLOT_DURATION,
+  TABLE_SLOT_MAX_TIME,
+  TABLE_SLOT_MIN_TIME,
+} from "@/constants/TableScheduleConstants";
+import { type Booking, BookingStatus, type CalendarEvent } from "@/types/types";
 import styles from "./calendar-view.module.scss";
 
 // Event color constants
@@ -73,13 +78,26 @@ interface CalendarViewProps {
   bookings: Booking[];
   currentDate?: Date;
   setIsDayView?: (isDayView: boolean) => void;
+  includeButtons?: boolean;
 }
 
-export default function CalendarView({ bookings, currentDate, setIsDayView }: CalendarViewProps) {
+export default function CalendarView({
+  bookings,
+  currentDate,
+  setIsDayView,
+  includeButtons,
+}: CalendarViewProps) {
   const events = useMemo(() => transformBookingsToEvents(bookings ?? []), [bookings]);
   const calendarRef = useRef<FullCalendar>(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
   const initialDate = getInitialDate(currentDate);
+  const toolbar = includeButtons
+    ? {
+        left: "",
+        center: "title",
+        right: "prev,next",
+      }
+    : false;
 
   // Notify parent of view state changes
   useEffect(() => {
@@ -191,13 +209,13 @@ export default function CalendarView({ bookings, currentDate, setIsDayView }: Ca
         plugins={[timeGridPlugin, dayGridPlugin]}
         initialView={isMobile ? "timeGridDay" : "timeGridWeek"}
         initialDate={initialDate}
-        headerToolbar={false}
+        headerToolbar={toolbar}
         events={events}
         eventClick={handleEventClick}
         eventContent={renderEventContent}
-        slotMinTime="08:00:00"
-        slotMaxTime="19:00:00"
-        slotDuration="01:00:00"
+        slotMinTime={TABLE_SLOT_MIN_TIME}
+        slotMaxTime={TABLE_SLOT_MAX_TIME}
+        slotDuration={TABLE_SLOT_DURATION}
         slotLabelFormat={{
           hour: "numeric",
           hour12: true,
