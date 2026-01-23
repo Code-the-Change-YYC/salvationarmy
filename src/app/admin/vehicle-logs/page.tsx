@@ -119,17 +119,10 @@ export default function VehicleLogsPage() {
       {/* Header Section */}
       <Title order={2}>Vehicle Logs</Title>
 
-      <Group justify="space-between" align="center">
-        <Group>
-          <Button text="Ford Expedition CTW 2276" variant="secondary" />
-          <Button text="Optimus Prime" variant="secondary" />
-        </Group>
-
-        <Group>
-          {/* TODO: add export to csv functionality to this button */}
-          <Button text="Export to CSV File" variant="secondary" icon={<Grid />} />
-          <Button text="Add to Log" variant="primary" icon={<Plus />} onClick={handleAddToLog} />
-        </Group>
+      <Group justify="flex-end" align="center">
+        {/* TODO: add export to csv functionality to this button */}
+        <Button text="Export to CSV File" variant="secondary" icon={<Grid />} />
+        <Button text="Add to Log" variant="primary" icon={<Plus />} onClick={handleAddToLog} />
       </Group>
 
       {/* Table Section */}

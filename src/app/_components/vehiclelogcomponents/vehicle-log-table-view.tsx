@@ -76,58 +76,7 @@ export default function VehicleLogTableView({ onRowClick }: VehicleLogTableViewP
   const theme = themeQuartz.withParams(TABLE_THEME_PARAMS);
 
   // TODO: Replace with tRPC query to fetch vehicle logs from database
-  const [vehicleLogs] = useState<VehicleLogData[]>([
-    {
-      DATE: "2026-01-10",
-      DESTINATION: "Calgary General Hospital, 841 Centre Ave E, Calgary, AB",
-      DEPARTURE_TIME: "2026-01-10T09:00:00",
-      ARRIVAL_TIME: "2026-01-10T10:30:00",
-      ODOMETER_START: 10000,
-      ODOMETER_END: 10035,
-      KM_DRIVEN: 35,
-      DRIVER: "John Smith",
-    },
-    {
-      DATE: "2026-01-11",
-      DESTINATION: "Real Canadian Superstore, 1130 37 St SW, Calgary, AB",
-      DEPARTURE_TIME: "2026-01-11T14:00:00",
-      ARRIVAL_TIME: "2026-01-11T16:00:00",
-      ODOMETER_START: 10035,
-      ODOMETER_END: 10060,
-      KM_DRIVEN: 25,
-      DRIVER: "Sarah Johnson",
-    },
-    {
-      DATE: "2026-01-12",
-      DESTINATION: "Eau Claire Market, 200 Barclay Parade SW, Calgary, AB",
-      DEPARTURE_TIME: "2026-01-12T10:00:00",
-      ARRIVAL_TIME: "2026-01-12T12:00:00",
-      ODOMETER_START: 10060,
-      ODOMETER_END: 10078,
-      KM_DRIVEN: 18,
-      DRIVER: "Mike Williams",
-    },
-    {
-      DATE: "2026-01-13",
-      DESTINATION: "Shoppers Drug Mart, 1020 16 Ave NW, Calgary, AB",
-      DEPARTURE_TIME: "2026-01-13T11:00:00",
-      ARRIVAL_TIME: "2026-01-13T12:00:00",
-      ODOMETER_START: 10078,
-      ODOMETER_END: 10092,
-      KM_DRIVEN: 14,
-      DRIVER: "John Smith",
-    },
-    {
-      DATE: "2026-01-13",
-      DESTINATION: "TD Canada Trust, 700 2 St SW, Calgary, AB",
-      DEPARTURE_TIME: "2026-01-13T15:00:00",
-      ARRIVAL_TIME: "2026-01-13T16:30:00",
-      ODOMETER_START: 10092,
-      ODOMETER_END: 10118,
-      KM_DRIVEN: 26,
-      DRIVER: "Sarah Johnson",
-    },
-  ]);
+  const [vehicleLogs] = useState<VehicleLogData[]>([]);
 
   const columnDefs: ColDef[] = useMemo(
     () => [
