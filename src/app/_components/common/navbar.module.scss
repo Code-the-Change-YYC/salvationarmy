@@ -1,0 +1,35 @@
+.navbar {
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--color-light-grey);
+}
+
+.navLink {
+    text-decoration: none;
+    color: inherit;
+}
+
+.navLinkDefault {
+    font-weight: 400;
+    transition: color 0.2s ease;
+}
+
+.navLinkDefault,
+.navLinkActive {
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+}
+
+.navLinkDefault:hover {
+    background-color: var(--color-light-grey);
+}
+
+.navLinkDefault {
+    font-weight: 400;
+}
+
+.navLinkActive {
+    font-weight: 600;
+}
