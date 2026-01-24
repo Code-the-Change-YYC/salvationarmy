@@ -63,7 +63,7 @@ export default async function Home() {
             <h1>Go to agency page</h1>
             <Link href="/agency/home">Agency Home Page</Link>
             <h1>Go to admin page (there is auth here)</h1>
-            <Link href="/admin/home">Admin Home Page</Link>
+            <Link href="/admin/schedule">Admin Home Page</Link>
             <h1>Go to drivers page (there is auth here)</h1>
             <Link href="/driver/home">Drivers Home Page</Link>
             <h1>Go to button style guide</h1>
