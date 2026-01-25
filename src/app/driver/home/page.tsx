@@ -1,4 +1,5 @@
 import CalendarView from "@/app/_components/common/calendar/calendar-view";
+import Navbar from "@/app/_components/common/navbar";
 import { requireRole } from "@/lib/auth-helpers";
 import { api, HydrateClient } from "@/trpc/server";
 import { type Booking, Role } from "@/types/types";
@@ -35,6 +36,7 @@ export default async function DriverHome() {
 
   return (
     <HydrateClient>
+      <Navbar view="driver" />
       <main className={styles.main}>
         <div className={styles.container}>
           <h1 className={styles.title}>Driver home page</h1>
