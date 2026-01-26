@@ -96,6 +96,27 @@ export const organizationRouter = createTRPCRouter({
       });
     }
   }),
+
+  getAllWithMembers: adminProcedure.query(async ({ ctx }) => {
+    try {
+      const organizations = await ctx.db.query.organization.findMany({
+        with: {
+          members: {
+            with: {
+              user: true,
+            },
+          },
+        },
+      });
+
+      return organizations;
+    } catch (error) {
+      throw new TRPCError({
+        cause: error,
+        code: "INTERNAL_SERVER_ERROR",
+      });
+    }
+  }),
   inviteUser: adminProcedure
     .input(
       z.object({
