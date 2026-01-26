@@ -4,6 +4,7 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { and, desc, eq, gte, lt, or } from "drizzle-orm";
 import { z } from "zod";
+import { Role } from "@/types/types";
 import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
 import { BOOKING_STATUS, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -249,5 +250,64 @@ export const bookingsRouter = createTRPCRouter({
         .where(eq(bookings.id, input.id))
         .returning()
         .then((r) => r[0]);
+    }),
+
+  getDriverTrip: protectedProcedure
+    .input(
+      z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.query.user.findFirst({
+        where: (user, { eq }) => eq(user.id, ctx.session.user.id),
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found in database",
+        });
+      }
+
+      if (user.role !== Role.DRIVER) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User is not a driver",
+        });
+      }
+
+      let startAndEndDateErrorMessage = "Invalid: ";
+
+      if (
+        !(isoTimeRegex.test(input.startDate) || isoTimeRegexFourDigitYears.test(input.startDate))
+      ) {
+        startAndEndDateErrorMessage = startAndEndDateErrorMessage + "Start Date ";
+      }
+
+      if (!(isoTimeRegex.test(input.endDate) || isoTimeRegexFourDigitYears.test(input.endDate))) {
+        startAndEndDateErrorMessage = startAndEndDateErrorMessage + "End Date ";
+      }
+
+      if (startAndEndDateErrorMessage !== "Invalid: ") {
+        //Either (or both) dates failed regex check
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: startAndEndDateErrorMessage,
+        });
+      }
+
+      return ctx.db
+        .select()
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.driverId, user.id),
+            gte(bookings.startTime, input.startDate),
+            lt(bookings.startTime, input.endDate),
+          ),
+        )
+        .orderBy(desc(bookings.createdAt));
     }),
 });
