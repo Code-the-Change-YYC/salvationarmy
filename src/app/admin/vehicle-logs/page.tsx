@@ -29,20 +29,20 @@ export default function VehicleLogsPage() {
 
   const form = useForm({
     initialValues: {
-      date: "",
+      date: null as string | null,
       destination: "",
-      departureTime: "",
-      arrivalTime: "",
+      departureTime: null as string | null,
+      arrivalTime: null as string | null,
       odometerStart: "",
       odometerEnd: "",
       driver: "",
     },
 
     validate: {
-      date: (value) => (value.trim().length > 0 ? null : "Date is required"),
+      date: (value) => (value ? null : "Date is required"),
       destination: (value) => (value.trim().length > 0 ? null : "Destination is required"),
-      departureTime: (value) => (value.trim().length > 0 ? null : "Departure time is required"),
-      arrivalTime: (value) => (value.trim().length > 0 ? null : "Arrival time is required"),
+      departureTime: (value) => (value ? null : "Departure time is required"),
+      arrivalTime: (value) => (value ? null : "Arrival time is required"),
       odometerStart: (value) => {
         if (value.trim().length === 0) return "Odometer start is required";
         const num = Number.parseFloat(value);
@@ -74,10 +74,10 @@ export default function VehicleLogsPage() {
   const handleRowClick = (log: VehicleLogData) => {
     setIsEditMode(true);
     form.setValues({
-      date: log.DATE,
+      date: log.DATE || null,
       destination: log.DESTINATION,
-      departureTime: log.DEPARTURE_TIME,
-      arrivalTime: log.ARRIVAL_TIME,
+      departureTime: log.DEPARTURE_TIME || null,
+      arrivalTime: log.ARRIVAL_TIME || null,
       odometerStart: log.ODOMETER_START.toString(),
       odometerEnd: log.ODOMETER_END.toString(),
       driver: log.DRIVER,
@@ -96,9 +96,6 @@ export default function VehicleLogsPage() {
       setLoading(false);
       return;
     }
-
-    const values = form.values;
-    console.log(isEditMode ? "edit" : "add", values);
 
     // TODO: Call tRPC mutation to save vehicle log
 

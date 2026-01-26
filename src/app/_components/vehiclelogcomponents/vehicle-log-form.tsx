@@ -6,10 +6,10 @@ import type { UseFormReturnType } from "@mantine/form";
 import classes from "./vehicle-log-form.module.scss";
 
 interface VehicleLogFormData {
-  date: string;
+  date: string | null;
   destination: string;
-  departureTime: string;
-  arrivalTime: string;
+  departureTime: string | null;
+  arrivalTime: string | null;
   odometerStart: string;
   odometerEnd: string;
   driver: string;
@@ -77,11 +77,11 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
             minDate={now}
             value={form.values.departureTime}
             onChange={(value) => {
-              form.setFieldValue("departureTime", value || "");
+              form.setFieldValue("departureTime", value);
 
               // Reset arrival time if it's invalid
               if (value && form.values.arrivalTime && form.values.arrivalTime <= value) {
-                form.setFieldValue("arrivalTime", "");
+                form.setFieldValue("arrivalTime", null);
               }
             }}
             timePickerProps={{
