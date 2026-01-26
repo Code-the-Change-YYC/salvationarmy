@@ -1,18 +1,18 @@
 "use client";
 
-import { Alert, Box, Loader } from "@mantine/core";
+import { Alert, Box, Loader, Paper, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { type Libraries, useLoadScript } from "@react-google-maps/api";
 import { useEffect, useRef, useState } from "react";
 import { AgencyForm } from "@/app/_components/agencycomponents/agency-form";
 import { ViewController } from "@/app/_components/agencycomponents/view-controller";
+import CalendarView from "@/app/_components/common/calendar/calendar-view";
 import Modal from "@/app/_components/common/modal/modal";
 import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { ViewMode } from "@/types/types";
 import { validateStringLength, validateTimeRange } from "@/types/validation";
-import CalendarView from "../agencypage/calendar-view";
 import TableView from "../agencypage/table-view";
 import styles from "./agency-interactive-area.module.scss";
 
@@ -191,7 +191,13 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
 
   //If the script hasn't loaded yet, don't render anything until it does
   if (!isLoaded) {
-    return <div></div>;
+    return (
+      <div style={{ maxWidth: "250px", margin: "4rem auto", padding: "0 1rem" }}>
+        <Paper shadow="sm" p="xl" radius="md">
+          <Title>Loading...</Title>
+        </Paper>
+      </div>
+    );
   }
 
   return (

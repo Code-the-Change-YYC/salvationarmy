@@ -1,0 +1,9 @@
+@use "@/styles/variables" as *;
+
+.navbar {
+  padding: 1rem;
+
+  @media (min-width: 768px) {
+    padding: 1rem 2rem;
+  }
+}
