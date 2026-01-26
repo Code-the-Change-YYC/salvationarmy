@@ -31,6 +31,9 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
 
       {view === "admin" && (
         <Group gap={20}>
+          <Link href="/admin/agencies">
+            <Button text="View Agencies" variant="secondary" />
+          </Link>
           <Link href="/admin/rider-logs">
             <Button text="Rider Logs" variant="secondary" />
           </Link>
