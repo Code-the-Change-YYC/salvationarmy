@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Group, Stack, Title } from "@mantine/core";
+import { useForm } from "@mantine/form";
 import { useState } from "react";
 import Button from "@/app/_components/common/button/Button";
 import Modal from "@/app/_components/common/modal/modal";
@@ -26,80 +27,61 @@ export default function VehicleLogsPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Simple state instead of Mantine form
-  const [date, setDate] = useState("");
-  const [destination, setDestination] = useState("");
-  const [departureTime, setDepartureTime] = useState("");
-  const [arrivalTime, setArrivalTime] = useState("");
-  const [odometerStart, setOdometerStart] = useState("");
-  const [odometerEnd, setOdometerEnd] = useState("");
-  const [driver, setDriver] = useState("");
+  const form = useForm({
+    initialValues: {
+      date: "",
+      destination: "",
+      departureTime: "",
+      arrivalTime: "",
+      odometerStart: "",
+      odometerEnd: "",
+      driver: "",
+    },
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const resetFields = () => {
-    setDate("");
-    setDestination("");
-    setDepartureTime("");
-    setArrivalTime("");
-    setOdometerStart("");
-    setOdometerEnd("");
-    setDriver("");
-    setErrors({});
-  };
+    validate: {
+      date: (value) => (value.trim().length > 0 ? null : "Date is required"),
+      destination: (value) => (value.trim().length > 0 ? null : "Destination is required"),
+      departureTime: (value) => (value.trim().length > 0 ? null : "Departure time is required"),
+      arrivalTime: (value) => (value.trim().length > 0 ? null : "Arrival time is required"),
+      odometerStart: (value) => (value.trim().length > 0 ? null : "Odometer start is required"),
+      odometerEnd: (value) => (value.trim().length > 0 ? null : "Odometer end is required"),
+      driver: (value) => (value.trim().length > 0 ? null : "Driver is required"),
+    },
+  });
 
   const handleAddToLog = () => {
     setIsEditMode(false);
-    resetFields();
+    form.reset();
     setShowModal(true);
   };
 
   const handleRowClick = (log: VehicleLogData) => {
     setIsEditMode(true);
-    setDate(log.DATE);
-    setDestination(log.DESTINATION);
-    setDepartureTime(log.DEPARTURE_TIME);
-    setArrivalTime(log.ARRIVAL_TIME);
-    setOdometerStart(log.ODOMETER_START.toString());
-    setOdometerEnd(log.ODOMETER_END.toString());
-    setDriver(log.DRIVER);
-    setErrors({});
+    form.setValues({
+      date: log.DATE,
+      destination: log.DESTINATION,
+      departureTime: log.DEPARTURE_TIME,
+      arrivalTime: log.ARRIVAL_TIME,
+      odometerStart: log.ODOMETER_START.toString(),
+      odometerEnd: log.ODOMETER_END.toString(),
+      driver: log.DRIVER,
+    });
     setShowModal(true);
-  };
-
-  const validateFields = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!date.trim()) newErrors.date = "Date is required";
-    if (!destination.trim()) newErrors.destination = "Destination is required";
-    if (!departureTime.trim()) newErrors.departureTime = "Departure time is required";
-    if (!arrivalTime.trim()) newErrors.arrivalTime = "Arrival time is required";
-    if (!odometerStart.trim()) newErrors.odometerStart = "Odometer start is required";
-    if (!odometerEnd.trim()) newErrors.odometerEnd = "Odometer end is required";
-    if (!driver.trim()) newErrors.driver = "Driver is required";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleConfirm = async () => {
     setLoading(true);
 
-    if (!validateFields()) {
+    const validation = form.validate();
+    const hasErrors = Object.keys(validation.errors).length > 0;
+
+    if (hasErrors) {
       notify.error("Please fix the errors in the form before submitting");
       setLoading(false);
       return;
     }
 
-    const values = {
-      date,
-      destination,
-      departureTime,
-      arrivalTime,
-      odometerStart,
-      odometerEnd,
-      driver,
-    };
+    const values = form.values;
     console.log(isEditMode ? "edit" : "add", values);
 
     // TODO: Call tRPC mutation to save vehicle log
@@ -110,7 +92,7 @@ export default function VehicleLogsPage() {
       notify.success(
         isEditMode ? "Vehicle log updated successfully" : "Vehicle log added successfully",
       );
-      resetFields();
+      form.reset();
     }, 2000);
   };
 
@@ -132,7 +114,7 @@ export default function VehicleLogsPage() {
       <Modal
         opened={showModal}
         onClose={() => {
-          resetFields();
+          form.clearErrors();
           setShowModal(false);
         }}
         onConfirm={handleConfirm}
@@ -146,23 +128,7 @@ export default function VehicleLogsPage() {
         confirmText={isEditMode ? "Save Changes" : "Add to Log"}
         loading={loading}
       >
-        <VehicleLogForm
-          date={date}
-          setDate={setDate}
-          destination={destination}
-          setDestination={setDestination}
-          departureTime={departureTime}
-          setDepartureTime={setDepartureTime}
-          arrivalTime={arrivalTime}
-          setArrivalTime={setArrivalTime}
-          odometerStart={odometerStart}
-          setOdometerStart={setOdometerStart}
-          odometerEnd={odometerEnd}
-          setOdometerEnd={setOdometerEnd}
-          driver={driver}
-          setDriver={setDriver}
-          errors={errors}
-        />
+        <VehicleLogForm form={form} />
       </Modal>
     </Stack>
   );

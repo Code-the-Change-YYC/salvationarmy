@@ -2,49 +2,30 @@
 
 import { Box, Divider, Stack, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
+import type { UseFormReturnType } from "@mantine/form";
 import classes from "./vehicle-log-form.module.scss";
 
-interface VehicleLogFormProps {
+interface VehicleLogFormData {
   date: string;
-  setDate: (value: string) => void;
   destination: string;
-  setDestination: (value: string) => void;
   departureTime: string;
-  setDepartureTime: (value: string) => void;
   arrivalTime: string;
-  setArrivalTime: (value: string) => void;
   odometerStart: string;
-  setOdometerStart: (value: string) => void;
   odometerEnd: string;
-  setOdometerEnd: (value: string) => void;
   driver: string;
-  setDriver: (value: string) => void;
-  errors: Record<string, string>;
 }
 
-export const VehicleLogForm = ({
-  date,
-  setDate,
-  destination,
-  setDestination,
-  departureTime,
-  setDepartureTime,
-  arrivalTime,
-  setArrivalTime,
-  odometerStart,
-  setOdometerStart,
-  odometerEnd,
-  setOdometerEnd,
-  driver,
-  setDriver,
-  errors,
-}: VehicleLogFormProps) => {
+interface VehicleLogFormProps {
+  form: UseFormReturnType<VehicleLogFormData>;
+}
+
+export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
   const now = new Date();
 
   // Calculate KM driven
   const calculateKmDriven = () => {
-    const start = Number.parseFloat(odometerStart);
-    const end = Number.parseFloat(odometerEnd);
+    const start = Number.parseFloat(form.values.odometerStart);
+    const end = Number.parseFloat(form.values.odometerEnd);
 
     if (!Number.isNaN(start) && !Number.isNaN(end) && end >= start) {
       return (end - start).toString();
@@ -60,15 +41,14 @@ export const VehicleLogForm = ({
           label="Date"
           placeholder="Select date"
           minDate={now}
-          value={date}
-          onChange={(value) => setDate(value || "")}
+          key={form.key("date")}
+          {...form.getInputProps("date")}
           timePickerProps={{
             withDropdown: true,
             popoverProps: { withinPortal: false },
             format: "12h",
           }}
           clearable
-          error={errors.date}
         />
       </div>
 
@@ -77,9 +57,8 @@ export const VehicleLogForm = ({
           withAsterisk
           label="Destination"
           placeholder="Enter destination address"
-          value={destination}
-          onChange={(e) => setDestination(e.currentTarget.value)}
-          error={errors.destination}
+          key={form.key("destination")}
+          {...form.getInputProps("destination")}
         />
       </div>
 
@@ -96,13 +75,13 @@ export const VehicleLogForm = ({
             label="Departure Time"
             placeholder="Select departure time"
             minDate={now}
-            value={departureTime}
+            value={form.values.departureTime}
             onChange={(value) => {
-              setDepartureTime(value || "");
+              form.setFieldValue("departureTime", value || "");
 
               // Reset arrival time if it's invalid
-              if (value && arrivalTime && arrivalTime <= value) {
-                setArrivalTime("");
+              if (value && form.values.arrivalTime && form.values.arrivalTime <= value) {
+                form.setFieldValue("arrivalTime", "");
               }
             }}
             timePickerProps={{
@@ -111,7 +90,7 @@ export const VehicleLogForm = ({
               format: "12h",
             }}
             clearable
-            error={errors.departureTime}
+            error={form.errors.departureTime}
           />
         </div>
 
@@ -120,17 +99,16 @@ export const VehicleLogForm = ({
             withAsterisk
             label="Arrival Time"
             placeholder="Select arrival time"
-            minDate={departureTime || now}
-            value={arrivalTime}
-            onChange={(value) => setArrivalTime(value || "")}
-            disabled={!departureTime}
+            minDate={form.values.departureTime || now}
+            disabled={!form.values.departureTime}
+            key={form.key("arrivalTime")}
+            {...form.getInputProps("arrivalTime")}
             timePickerProps={{
               withDropdown: true,
               popoverProps: { withinPortal: false },
               format: "12h",
             }}
             clearable
-            error={errors.arrivalTime}
           />
         </div>
       </Stack>
@@ -148,9 +126,8 @@ export const VehicleLogForm = ({
             label="Odometer Start (KM)"
             placeholder="Enter starting odometer reading"
             type="number"
-            value={odometerStart}
-            onChange={(e) => setOdometerStart(e.currentTarget.value)}
-            error={errors.odometerStart}
+            key={form.key("odometerStart")}
+            {...form.getInputProps("odometerStart")}
           />
         </div>
 
@@ -160,9 +137,8 @@ export const VehicleLogForm = ({
             label="Odometer End (KM)"
             placeholder="Enter ending odometer reading"
             type="number"
-            value={odometerEnd}
-            onChange={(e) => setOdometerEnd(e.currentTarget.value)}
-            error={errors.odometerEnd}
+            key={form.key("odometerEnd")}
+            {...form.getInputProps("odometerEnd")}
           />
         </div>
 
@@ -183,9 +159,8 @@ export const VehicleLogForm = ({
           withAsterisk
           label="Driver"
           placeholder="Enter driver name"
-          value={driver}
-          onChange={(e) => setDriver(e.currentTarget.value)}
-          error={errors.driver}
+          key={form.key("driver")}
+          {...form.getInputProps("driver")}
         />
       </div>
     </Stack>
