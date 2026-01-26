@@ -43,8 +43,24 @@ export default function VehicleLogsPage() {
       destination: (value) => (value.trim().length > 0 ? null : "Destination is required"),
       departureTime: (value) => (value.trim().length > 0 ? null : "Departure time is required"),
       arrivalTime: (value) => (value.trim().length > 0 ? null : "Arrival time is required"),
-      odometerStart: (value) => (value.trim().length > 0 ? null : "Odometer start is required"),
-      odometerEnd: (value) => (value.trim().length > 0 ? null : "Odometer end is required"),
+      odometerStart: (value) => {
+        if (value.trim().length === 0) return "Odometer start is required";
+        const num = Number.parseFloat(value);
+        if (Number.isNaN(num)) return "Must be a valid number";
+        if (num < 0) return "Must be a positive number";
+        return null;
+      },
+      odometerEnd: (value, values) => {
+        if (value.trim().length === 0) return "Odometer end is required";
+        const num = Number.parseFloat(value);
+        if (Number.isNaN(num)) return "Must be a valid number";
+        if (num < 0) return "Must be a positive number";
+        const start = Number.parseFloat(values.odometerStart);
+        if (!Number.isNaN(start) && num < start) {
+          return "End reading must be greater than or equal to start reading";
+        }
+        return null;
+      },
       driver: (value) => (value.trim().length > 0 ? null : "Driver is required"),
     },
   });
