@@ -94,12 +94,6 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
                 return;
               }
               const isoString = dayjs(value).toISOString();
-              console.log("Start Time - parsed:", isoString);
-              console.log("Start Time - after parsing:", new Date(isoString));
-              console.log(
-                "Start Time - show local time:",
-                dayjs(isoString).format("YYYY-MM-DD hh:mm A"),
-              );
               form.setFieldValue("startTime", isoString);
 
               if (isoString && form.values.endTime && form.values.endTime <= isoString) {
@@ -130,12 +124,6 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
                 return;
               }
               const isoString = dayjs(value).toISOString();
-              console.log("End Time - parsed:", isoString);
-              console.log("End Time - after parsing:", new Date(isoString));
-              console.log(
-                "End Time - show local time:",
-                dayjs(isoString).format("YYYY-MM-DD hh:mm A"),
-              );
               form.setFieldValue("endTime", isoString);
             }}
             disabled={!form.values.startTime}
