@@ -4,14 +4,15 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { and, desc, eq, gte, lt, or } from "drizzle-orm";
 import { z } from "zod";
+import { BOOKING_STATUSES, BookingStatus } from "@/types/types";
 import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
-import { BOOKING_STATUS, bookings } from "../../db/booking-schema";
+import { bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 dayjs.extend(utc); //Allows dayjs to work in UTC
 dayjs.extend(timezone); //Allows dayjs to convert dates between time zones
 
-const StatusZ = z.enum(BOOKING_STATUS); // ← uses "cancelled" (double-L)
+const StatusZ = z.enum(BOOKING_STATUSES); // ← uses "cancelled" (double-L)
 
 export const bookingsRouter = createTRPCRouter({
   // POST /bookings (create)
@@ -82,7 +83,11 @@ export const bookingsRouter = createTRPCRouter({
       .limit(1)
       .then((r) => r[0]);
 
-    if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+    if (!row)
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Booking not found",
+      });
 
     const userId = ctx.session.user.id;
     const role = ctx.session.user.role ?? "user"; // default safety
@@ -122,11 +127,11 @@ export const bookingsRouter = createTRPCRouter({
       let startAndEndDateErrorMessage = "Invalid: ";
 
       if (!(isoTimeRegex.test(startDate) || isoTimeRegexFourDigitYears.test(startDate))) {
-        startAndEndDateErrorMessage = startAndEndDateErrorMessage + "Start Date ";
+        startAndEndDateErrorMessage = `${startAndEndDateErrorMessage} Start Date `;
       }
 
       if (!(isoTimeRegex.test(endDate) || isoTimeRegexFourDigitYears.test(endDate))) {
-        startAndEndDateErrorMessage = startAndEndDateErrorMessage + "End Date ";
+        startAndEndDateErrorMessage = `${startAndEndDateErrorMessage} End Date `;
       }
 
       if (startAndEndDateErrorMessage !== "Invalid: ") {
@@ -188,7 +193,10 @@ export const bookingsRouter = createTRPCRouter({
         .then((r) => r[0]);
 
       if (!existing) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Booking not found",
+        });
       }
 
       // 2) Authorization check
@@ -198,7 +206,10 @@ export const bookingsRouter = createTRPCRouter({
       const allowed = role === "admin" || existing.agencyId === userId;
 
       if (!allowed) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "You cannot update this booking." });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You cannot update this booking.",
+        });
       }
 
       // 3) Filter only defined updates
@@ -231,7 +242,10 @@ export const bookingsRouter = createTRPCRouter({
         .then((r) => r[0]);
 
       if (!existing) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Booking not found",
+        });
       }
 
       const userId = ctx.session.user.id;
@@ -240,12 +254,18 @@ export const bookingsRouter = createTRPCRouter({
       const allowed = role === "admin" || existing.agencyId === userId;
 
       if (!allowed) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "You cannot cancel this booking." });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You cannot cancel this booking.",
+        });
       }
 
       return ctx.db
         .update(bookings)
-        .set({ status: "cancelled", updatedBy: ctx.session.user.id })
+        .set({
+          status: BookingStatus.CANCELLED,
+          updatedBy: ctx.session.user.id,
+        })
         .where(eq(bookings.id, input.id))
         .returning()
         .then((r) => r[0]);

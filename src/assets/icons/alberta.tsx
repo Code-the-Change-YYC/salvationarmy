@@ -1,11 +1,8 @@
+import Image, { type ImageProps } from "next/image";
 import { memo } from "react";
 
-const SvgComponent = ({
-  width = "146px",
-  height = "57px",
-}: React.ImgHTMLAttributes<HTMLImageElement>) => (
-  <img src={"/images/alberta.png"} alt="Alberta Logo" width={width} height={height} />
-);
+const Alberta = (props: Omit<ImageProps, "src" | "alt">) => {
+  return <Image src="/images/alberta.png" alt="Alberta Logo" width={146} height={57} {...props} />;
+};
 
-const Alberta = memo(SvgComponent);
-export default Alberta;
+export default memo(Alberta);

@@ -29,7 +29,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
   const [loading, setLoading] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [isDayView, setIsDayView] = useState<boolean>(false);
-  const [validationAddressGood, setValidationAddressGood] = useState<boolean>(false);
+  const [_validationAddressGood, setValidationAddressGood] = useState<boolean>(false);
 
   const {
     data: bookings,
