@@ -1,11 +1,16 @@
+import Image, { type ImageProps } from "next/image";
 import { memo } from "react";
 
-const SvgComponent = ({
-  width = "56px",
-  height = "65px",
-}: React.ImgHTMLAttributes<HTMLImageElement>) => (
-  <img src={"/images/salvation.png"} alt="Salvation Army Logo" width={width} height={height} />
-);
+const SalvationArmyLogo = (props: Omit<ImageProps, "src" | "alt">) => {
+  return (
+    <Image
+      src="/images/salvation.png"
+      alt="Salvation Army Logo"
+      width={56}
+      height={65}
+      {...props}
+    />
+  );
+};
 
-const Salvation = memo(SvgComponent);
-export default Salvation;
+export default memo(SalvationArmyLogo);
