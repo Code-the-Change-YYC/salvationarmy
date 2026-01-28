@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Box, Loader, Paper, Title } from "@mantine/core";
+import { Alert, Box, Loader, Paper, Text, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { type Libraries, useLoadScript } from "@react-google-maps/api";
 import { useEffect, useRef, useState } from "react";
@@ -225,9 +225,9 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
           handleConfirm();
         }}
         title={
-          <Box fw={600} fz="xl">
+          <Text fw={600} size="xl">
             Add a booking
-          </Box>
+          </Text>
         }
         size="xl"
         showDefaultFooter

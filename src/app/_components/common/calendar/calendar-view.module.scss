@@ -40,6 +40,16 @@
   :global(.fc-event) {
     margin: 0 4px !important;
     cursor: pointer !important;
+    border-radius: 8px !important;
+  }
+
+  // Remove dark overlay when event is selected/clicked
+  :global(.fc-event-selected::after) {
+    display: none !important;
+  }
+
+  :global(.fc-event:focus::after) {
+    display: none !important;
   }
 
   :global(.fc-header-toolbar) {
