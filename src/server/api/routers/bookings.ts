@@ -122,11 +122,11 @@ export const bookingsRouter = createTRPCRouter({
       let startAndEndDateErrorMessage = "Invalid: ";
 
       if (!(isoTimeRegex.test(startDate) || isoTimeRegexFourDigitYears.test(startDate))) {
-        startAndEndDateErrorMessage = startAndEndDateErrorMessage + "Start Date ";
+        startAndEndDateErrorMessage = `${startAndEndDateErrorMessage}Start Date `;
       }
 
       if (!(isoTimeRegex.test(endDate) || isoTimeRegexFourDigitYears.test(endDate))) {
-        startAndEndDateErrorMessage = startAndEndDateErrorMessage + "End Date ";
+        startAndEndDateErrorMessage = `${startAndEndDateErrorMessage}End Date `;
       }
 
       if (startAndEndDateErrorMessage !== "Invalid: ") {
