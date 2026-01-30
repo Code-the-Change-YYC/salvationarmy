@@ -4,6 +4,7 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { and, desc, eq, gte, lt, or } from "drizzle-orm";
 import { z } from "zod";
+import { Role } from "@/types/types";
 import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
 import { BOOKING_STATUS, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -249,5 +250,53 @@ export const bookingsRouter = createTRPCRouter({
         .where(eq(bookings.id, input.id))
         .returning()
         .then((r) => r[0]);
+    }),
+
+  getTripDetails: protectedProcedure
+    .input(
+      z.object({
+        tripID: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.query.user.findFirst({
+        where: (user, { eq }) => eq(user.id, ctx.session.user.id),
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found in database",
+        });
+      }
+
+      if (user.role !== Role.DRIVER) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User is not a driver",
+        });
+      }
+
+      const trip = await ctx.db
+        .select()
+        .from(bookings)
+        .where(eq(bookings.id, input.tripID))
+        .then((listOfRows) => listOfRows[0]);
+
+      if (!trip) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Trip ID is invalid",
+        });
+      }
+
+      if (trip.driverId !== user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Cannot access trips not assigned to the user",
+        });
+      }
+
+      return trip; //TODO: returns a JSON. May have to return in a different format depending on trip info modal
     }),
 });
