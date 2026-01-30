@@ -9,6 +9,16 @@ const config = {
   experimental: {
     reactCompiler: true,
   },
+
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/login",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default config;
