@@ -4,10 +4,8 @@ import type { EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { Box, Divider, Flex, Group, Popover, Stack, Text } from "@mantine/core";
+import { Box, Drawer, Popover, Stack } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import dayjs from "dayjs";
-import { Calendar, CircleCheck, CircleDashed, CircleX, Clock, MapPin, User } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -15,9 +13,11 @@ import {
   TABLE_SLOT_MAX_TIME,
   TABLE_SLOT_MIN_TIME,
 } from "@/constants/TableScheduleConstants";
-import { type Booking, BookingStatus, type CalendarEvent } from "@/types/types";
+import type { Booking, BookingStatus, CalendarEvent, CalendarViewType } from "@/types/types";
 
 import styles from "./calendar-view.module.scss";
+import EventBlock from "./event-block";
+import EventDetails from "./event-details";
 
 // Event color constants
 const CHERRY_RED = "#A03145"; // Red for current day
@@ -81,6 +81,7 @@ interface CalendarViewProps {
   currentDate?: Date;
   setIsDayView?: (isDayView: boolean) => void;
   includeButtons?: boolean;
+  viewType?: CalendarViewType;
 }
 
 export default function CalendarView({
@@ -88,6 +89,7 @@ export default function CalendarView({
   currentDate,
   setIsDayView,
   includeButtons,
+  viewType,
 }: CalendarViewProps) {
   const [openedEventId, setOpenedEventId] = useState<string | null>(null);
   const events = useMemo(() => transformBookingsToEvents(bookings ?? []), [bookings]);
@@ -102,10 +104,16 @@ export default function CalendarView({
       }
     : false;
 
+  // Find the selected event for the mobile drawer
+  const selectedEvent = useMemo(() => {
+    if (!openedEventId) return null;
+    return events.find((e) => e.id === openedEventId) ?? null;
+  }, [openedEventId, events]);
+
   // Notify parent of view state changes
   useEffect(() => {
     if (setIsDayView) {
-      setIsDayView(isMobile);
+      setIsDayView(isMobile ?? false);
     }
   }, [isMobile, setIsDayView]);
 
@@ -137,25 +145,32 @@ export default function CalendarView({
     }
     // Notify parent of view change
     if (setIsDayView) {
-      setIsDayView(isMobile);
+      setIsDayView(isMobile ?? false);
     }
   }, [isMobile, setIsDayView]);
 
   // Custom event content renderer
   const renderEventContent = (eventInfo: EventContentArg) => {
     const event = eventInfo.event;
-    const status = eventInfo.event.extendedProps.status;
+    const status = event.extendedProps.status as BookingStatus | null;
     const popoverOpened = openedEventId === event.id;
 
-    const StatusIcon =
-      status === BookingStatus.COMPLETED
-        ? CircleCheck
-        : status === BookingStatus.CANCELLED
-          ? CircleX
-          : status === BookingStatus.IN_PROGRESS
-            ? CircleDashed
-            : null;
+    const eventBlock = (
+      <EventBlock
+        title={event.title}
+        start={event.start}
+        end={event.end}
+        status={status}
+        showTime={!!eventInfo.timeText}
+      />
+    );
 
+    // On mobile, just render the event block (drawer handles the details)
+    if (isMobile) {
+      return eventBlock;
+    }
+
+    // On desktop, wrap with Popover
     return (
       <Popover
         opened={popoverOpened}
@@ -167,110 +182,19 @@ export default function CalendarView({
         transitionProps={{ duration: 100, transition: "pop" }}
         radius={8}
       >
-        <Popover.Target>
-          <Box p="0.25rem">
-            <Box className={styles.eventContentContainer}>
-              <Box>
-                <Text fw={600} size="sm" truncate="end">
-                  {event.title}
-                </Text>
-                {eventInfo.timeText && (
-                  <Text size="xs" opacity={0.75}>
-                    {dayjs(event.start).format("h:mm")} - {dayjs(event.end).format("h:mm")}
-                  </Text>
-                )}
-              </Box>
-              <Box>{StatusIcon && <StatusIcon size={16} />}</Box>
-            </Box>
-          </Box>
-        </Popover.Target>
+        <Popover.Target>{eventBlock}</Popover.Target>
         <Popover.Dropdown>
-          <Stack gap="sm">
-            <Group justify="space-between">
-              <Text fw={600} size="lg" style={{ flex: 1 }}>
-                {event.title}
-              </Text>
-              {StatusIcon && (
-                <Flex
-                  justify="center"
-                  align="center"
-                  c={
-                    status === BookingStatus.COMPLETED
-                      ? "green"
-                      : status === BookingStatus.CANCELLED
-                        ? "red"
-                        : status === BookingStatus.IN_PROGRESS
-                          ? "blue"
-                          : "gray"
-                  }
-                >
-                  <StatusIcon size={20} />
-                </Flex>
-              )}
-            </Group>
-
-            <Divider />
-
-            <Stack gap="0.25rem">
-              <Group gap="0.35rem" wrap="nowrap" c="dimmed">
-                <Calendar size={14} />
-                <Text size="xs">Date</Text>
-              </Group>
-              <Text size="sm">{dayjs(event.start).format("dddd, MMM D")}</Text>
-            </Stack>
-
-            <Stack gap="0.25rem">
-              <Group gap="0.35rem" wrap="nowrap" c="dimmed">
-                <Clock size={14} />
-                <Text size="xs">Time</Text>
-              </Group>
-              <Text size="sm">
-                {dayjs(event.start).format("h:mm A")} - {dayjs(event.end).format("h:mm A")}
-              </Text>
-            </Stack>
-
-            {event.extendedProps.pickupAddress && (
-              <Stack gap="0.25rem">
-                <Group gap="0.35rem" wrap="nowrap" c="dimmed">
-                  <MapPin size={14} />
-                  <Text size="xs">Pickup</Text>
-                </Group>
-                <Text size="sm">{event.extendedProps.pickupAddress}</Text>
-              </Stack>
-            )}
-
-            {event.extendedProps.destinationAddress && (
-              <Stack gap="0.25rem">
-                <Group gap="0.35rem" wrap="nowrap" c="dimmed">
-                  <MapPin size={14} />
-                  <Text size="xs">Dropoff</Text>
-                </Group>
-                <Text size="sm">{event.extendedProps.destinationAddress}</Text>
-              </Stack>
-            )}
-
-            {event.extendedProps.passengerInfo && (
-              <Stack gap="0.25rem">
-                <Group gap="0.35rem" wrap="nowrap" c="dimmed">
-                  <User size={14} />
-                  <Text size="xs">Passenger</Text>
-                </Group>
-                <Text size="sm">{event.extendedProps.passengerInfo}</Text>
-              </Stack>
-            )}
-
-            {event.extendedProps.purpose && (
-              <>
-                <Divider />
-                <Stack gap="0.25rem">
-                  <Text size="xs" c="dimmed">
-                    Purpose
-                  </Text>
-                  <Text size="sm">{event.extendedProps.purpose}</Text>
-                </Stack>
-              </>
-            )}
-          </Stack>
+          <EventDetails
+            title={event.title}
+            start={event.start}
+            end={event.end}
+            status={status}
+            pickupAddress={event.extendedProps.pickupAddress}
+            destinationAddress={event.extendedProps.destinationAddress}
+            passengerInfo={event.extendedProps.passengerInfo}
+            purpose={event.extendedProps.purpose}
+            viewType={viewType}
+          />
         </Popover.Dropdown>
       </Popover>
     );
@@ -314,6 +238,33 @@ export default function CalendarView({
         height={700}
         weekends={false}
       />
+
+      <Drawer
+        opened={isMobile === true && openedEventId !== null}
+        onClose={() => setOpenedEventId(null)}
+        position="bottom"
+        size="80%"
+        radius="md"
+        padding="lg"
+        withCloseButton={false}
+      >
+        <Stack>
+          <Box bg="#DEE2E6" h={5} w="30%" mx="auto" bdrs="md" mb="lg"></Box>
+        </Stack>
+        {selectedEvent && (
+          <EventDetails
+            title={selectedEvent.title}
+            start={selectedEvent.start ? new Date(selectedEvent.start) : null}
+            end={selectedEvent.end ? new Date(selectedEvent.end) : null}
+            status={selectedEvent.extendedProps?.status ?? null}
+            pickupAddress={selectedEvent.extendedProps?.pickupAddress}
+            destinationAddress={selectedEvent.extendedProps?.destinationAddress}
+            passengerInfo={selectedEvent.extendedProps?.passengerInfo}
+            purpose={selectedEvent.extendedProps?.purpose}
+            viewType={viewType}
+          />
+        )}
+      </Drawer>
     </Box>
   );
 }

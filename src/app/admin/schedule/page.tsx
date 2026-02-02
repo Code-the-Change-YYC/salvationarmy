@@ -2,5 +2,5 @@ import { BookingInteractiveArea } from "@/app/_components/agencycomponents/agenc
 import { ViewMode } from "@/types/types";
 
 export default async function SchedulePage() {
-  return <BookingInteractiveArea initialViewMode={ViewMode.CALENDAR} />;
+  return <BookingInteractiveArea initialViewMode={ViewMode.CALENDAR} viewType="admin" />;
 }

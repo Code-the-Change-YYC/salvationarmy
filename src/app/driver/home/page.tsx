@@ -45,7 +45,11 @@ export default async function DriverHome() {
             {session && <span>Logged in as {session.user?.name}</span>}
           </p>
         </div>
-        <CalendarView bookings={testBookings} includeButtons={true}></CalendarView>
+        <CalendarView
+          bookings={testBookings}
+          includeButtons={true}
+          viewType="driver"
+        ></CalendarView>
       </main>
     </HydrateClient>
   );

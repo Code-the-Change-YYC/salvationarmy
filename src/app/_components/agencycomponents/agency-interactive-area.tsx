@@ -11,18 +11,22 @@ import Modal from "@/app/_components/common/modal/modal";
 import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
-import { ViewMode } from "@/types/types";
+import { type CalendarViewType, ViewMode } from "@/types/types";
 import TableView from "../agencypage/table-view";
 import styles from "./agency-interactive-area.module.scss";
 
 interface Props {
   initialViewMode?: ViewMode;
+  viewType?: CalendarViewType;
 }
 
 const GOOGLE_MAPS_LIBRARIES_ARRAY: Libraries = ["places"]; //Add more to this array if you need to import more libraries from the API
 const CHERRY_RED = "#A03145";
 
-export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
+export const BookingInteractiveArea = ({
+  initialViewMode = ViewMode.CALENDAR,
+  viewType,
+}: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
   // eventually this loading state will be replacted with a tanstack mutation loading state
@@ -208,6 +212,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
             bookings={bookings ?? []}
             currentDate={currentDate}
             setIsDayView={setIsDayView}
+            viewType={viewType}
           />
         ) : (
           <TableView bookings={bookings ?? []} />
