@@ -1,45 +1,23 @@
 .controlsBar {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
   margin-bottom: 1.5rem;
 
-  .leftControls {
+  .viewToggles {
     display: flex;
-    align-items: center;
     gap: 0.5rem;
   }
 
-  .rightControls {
+  .navigationControls {
     display: flex;
     align-items: center;
     gap: 1rem;
-  }
 
-  .weekNavigation {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  // Mobile: show icon-only button, hide full button
-  .addButtonMobile {
-    display: none;
-  }
-
-  .addButtonDesktop {
-    display: flex;
-  }
-
-  @media (max-width: 768px) {
-    .addButtonMobile {
+    .weekNavigation {
       display: flex;
-    }
-
-    .addButtonDesktop {
-      display: none;
+      align-items: center;
+      gap: 0.5rem;
     }
   }
 

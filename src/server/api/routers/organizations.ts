@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
@@ -9,9 +8,8 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { user } from "@/server/db/auth-schema";
 import { OrganizationRole, Role } from "@/types/types";
-import { nameRegex, passwordSchema } from "@/types/validation";
+import { passwordSchema } from "@/types/validation";
 
 export const organizationRouter = createTRPCRouter({
   redirectToDashboard: protectedProcedure.mutation(async ({ ctx }) => {
@@ -31,56 +29,50 @@ export const organizationRouter = createTRPCRouter({
     const role = user.role as Role;
     let redirectUrl = "/";
 
-    if (user.name === "") {
-      redirectUrl = "/fill-out-name";
-    } else {
-      switch (role) {
-        case Role.ADMIN:
-          redirectUrl = "/admin/home";
-          break;
+    switch (role) {
+      case Role.ADMIN:
+        redirectUrl = "/admin/home";
+        break;
 
-        case Role.AGENCY: {
-          const activeOrgId = ctx.session.session.activeOrganizationId;
+      case Role.AGENCY: {
+        const activeOrgId = ctx.session.session.activeOrganizationId;
 
-          if (!activeOrgId) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message:
-                "No active organization found for this agency user. Please contact an administrator for assistance",
-            });
-          }
-
-          const organization = await ctx.db.query.organization.findFirst({
-            where: (org, { eq }) => eq(org.id, activeOrgId),
+        if (!activeOrgId) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "No active organization found for this agency user",
           });
-
-          if (!organization) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Organization not found",
-            });
-          }
-
-          if (!organization.slug) {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message:
-                "Organization is missing required slug configuration. Please contact an administrator for assistance",
-            });
-          }
-
-          redirectUrl = `/agency/home/${organization.slug}`;
-          break;
         }
 
-        case Role.DRIVER:
-          redirectUrl = "/driver/home";
-          break;
+        const organization = await ctx.db.query.organization.findFirst({
+          where: (org, { eq }) => eq(org.id, activeOrgId),
+        });
 
-        default:
-          redirectUrl = "/";
-          break;
+        if (!organization) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Organization not found",
+          });
+        }
+
+        if (!organization.slug) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Organization is missing required slug configuration",
+          });
+        }
+
+        redirectUrl = `/agency/home/${organization.slug}`;
+        break;
       }
+
+      case Role.DRIVER:
+        redirectUrl = "/driver/home";
+        break;
+
+      default:
+        redirectUrl = "/";
+        break;
     }
 
     return {
@@ -322,34 +314,6 @@ export const organizationRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to send password reset email",
-        });
-      }
-    }),
-
-  changeName: protectedProcedure
-    .input(z.object({ newName: z.string() }))
-    .mutation(async ({ input, ctx }) => {
-      const { newName } = input; //Get the passed variables
-
-      if (!nameRegex.test(newName)) {
-        //User inputted name is not proper
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invalid Name",
-        });
-      }
-
-      const listOfUpdatedUsers = await ctx.db
-        .update(user)
-        .set({ name: newName })
-        .where(eq(user.id, ctx.session.user.id))
-        .returning(); //Make DB update command to change the user's name
-
-      if (listOfUpdatedUsers.length === 0) {
-        //Drizzle updated no users (something went wrong)
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update user's name",
         });
       }
     }),
