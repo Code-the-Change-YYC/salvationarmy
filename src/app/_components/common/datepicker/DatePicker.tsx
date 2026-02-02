@@ -42,7 +42,7 @@ export default function DatePicker({
   let mantineValue = value ? new Date(value) : null;
 
   // Validate the date
-  if (mantineValue && isNaN(mantineValue.getTime())) {
+  if (mantineValue && Number.isNaN(mantineValue.getTime())) {
     console.warn("Invalid ISO string provided to DatePicker:", value);
     mantineValue = null;
   }

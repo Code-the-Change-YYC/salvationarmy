@@ -5,7 +5,7 @@ import { Role } from "@/types/types";
 import styles from "./admin-layout.module.scss";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const session = await requireRole([Role.ADMIN]);
+  const _session = await requireRole([Role.ADMIN]);
 
   return (
     <HydrateClient>

@@ -4,7 +4,6 @@ import { Button, Divider, Group, Select, Textarea, TextInput } from "@mantine/co
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
 import { api } from "@/trpc/react";
 import { ALL_BOOKING_STATUSES, BookingStatus, type BookingStatusValue } from "@/types/types";
 import styles from "./BookingDebugPage.module.scss";
