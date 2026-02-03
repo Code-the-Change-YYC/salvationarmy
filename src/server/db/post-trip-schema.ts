@@ -1,5 +1,6 @@
-import { relations, sql } from "drizzle-orm";
+import { type InferInsertModel, type InferSelectModel, relations, sql } from "drizzle-orm";
 import { boolean, check, integer, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { BookingStatus } from "@/types/types";
 import { user } from "./auth-schema";
 import { bookings } from "./booking-schema";
 
@@ -17,13 +18,18 @@ export const postTripSurveys = pgTable(
 
     // Trip completion
     tripCompletionStatus: text("trip_completion_status", {
-      enum: ["completed", "partially_completed", "cancelled", "no_show"],
+      enum: [
+        BookingStatus.INCOMPLETE,
+        BookingStatus.IN_PROGRESS,
+        BookingStatus.COMPLETED,
+        BookingStatus.CANCELLED,
+      ],
     })
       .notNull()
-      .default("completed"),
+      .default(BookingStatus.COMPLETED),
 
     // Odometer readings
-    startReading: integer("start_reading").notNull(),
+    startReading: integer("start_reading"),
     endReading: integer("end_reading"),
     timeOfDeparture: timestamp("time_of_departure"),
     timeOfArrival: timestamp("time_of_arrival"),
@@ -55,3 +61,6 @@ export const postTripSurveysRelations = relations(postTripSurveys, ({ one }) => 
     references: [user.id],
   }),
 }));
+
+export type SurveySelectType = InferSelectModel<typeof postTripSurveys>;
+export type SurveyInsertType = InferInsertModel<typeof postTripSurveys>;

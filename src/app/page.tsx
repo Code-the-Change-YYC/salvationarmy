@@ -1,11 +1,6 @@
 import { Box } from "@mantine/core";
 import { headers } from "next/headers";
 import Link from "next/link";
-import ModalTests from "@/app/_components/common/modal/modaltests";
-import FullCalendarTest from "@/app/_components/fullcalendartest";
-import MantineTest from "@/app/_components/mantinetest";
-import SegmentedControlTest from "@/app/_components/segmentedControlTest";
-import { TestNotificationButton } from "@/app/_components/testnotificationbutton";
 import { auth } from "@/lib/auth";
 import { api, HydrateClient } from "@/trpc/server";
 
@@ -73,27 +68,6 @@ export default async function Home() {
             <Link href="/driver/home">Drivers Home Page</Link>
             <h1>Go to button style guide</h1>
             <Link href="/style-guide">Button Style Guide</Link>
-          </div>
-          <div>
-            <h1>full calendar test</h1>
-            <FullCalendarTest />
-          </div>
-          <div>
-            <h1>mantine test</h1>
-            <MantineTest />
-          </div>
-          <div>
-            <h1>Segmented Control Test</h1>
-            <SegmentedControlTest />
-          </div>
-
-          <div>
-            <h1>Mantine notifications test</h1>
-            <TestNotificationButton />
-          </div>
-          <div>
-            <h1>Modal Tests</h1>
-            <ModalTests />
           </div>
           <div id="SANC_39_GOOGLE_MAPS_LINK_INTEGRATION_CODE">
             <a href={formattedGoogleMapsURL} target="_blank" rel="noreferrer">

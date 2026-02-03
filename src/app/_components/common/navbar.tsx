@@ -2,6 +2,7 @@
 
 import { Group, Text } from "@mantine/core";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Button from "@/app/_components/common/button/Button";
 import Bell from "@/assets/icons/bell";
 import Home from "@/assets/icons/home";
@@ -12,21 +13,45 @@ type NavbarView = "admin" | "agency" | "driver";
 
 interface NavbarProps {
   view: NavbarView;
-  agencyName?: string; //only used in Agency View
+  agencyName?: string;
 }
 
 export default function Navbar({ view, agencyName }: NavbarProps) {
+  const pathname = usePathname();
+
+  const section = pathname.split("/")[2];
+
+  const navbarText = () => {
+    switch (view) {
+      case "admin":
+        return `Admin ${section}`;
+      case "agency":
+        return `${agencyName ?? "[Agency name]"} ${section}`;
+      case "driver":
+        return `Driver ${section}`;
+      default:
+        return "";
+    }
+  };
+
+  const homeLink = () => {
+    switch (view) {
+      case "admin":
+        return `/admin/home`;
+      case "agency":
+        return `/agency/home`;
+      case "driver":
+        return `/driver/home`;
+    }
+  };
+
   return (
     <Group justify="space-between" className={`border-bottom ${styles.navbar}`}>
       <Group>
-        <Home />
-        <Text>
-          {view === "admin"
-            ? "Admin Home"
-            : view === "agency"
-              ? `${agencyName ?? "[Agency name]"} Home`
-              : ""}
-        </Text>
+        <Link className={styles.flex} href={homeLink()}>
+          <Home />
+        </Link>
+        <Text>{navbarText()}</Text>
       </Group>
 
       {view === "admin" && (
@@ -56,6 +81,9 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
 
       {view === "driver" && (
         <Group gap={30}>
+          <Link href="/driver/surveys">
+            <Button text="Surveys" variant="secondary" />
+          </Link>
           <Bell />
           <Profile />
         </Group>
