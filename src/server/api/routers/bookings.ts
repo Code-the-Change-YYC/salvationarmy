@@ -1,12 +1,28 @@
 import { TRPCError } from "@trpc/server";
-import { desc, eq, or } from "drizzle-orm";
+import { asc, desc, eq, or } from "drizzle-orm";
 import { z } from "zod";
+import { user } from "../../db/auth-schema";
 import { BOOKING_STATUS, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const StatusZ = z.enum(BOOKING_STATUS); // ← uses "cancelled" (double-L)
 
 export const bookingsRouter = createTRPCRouter({
+  // GET /bookings/drivers (list all drivers)
+  listDrivers: protectedProcedure.query(async ({ ctx }) => {
+    const drivers = await ctx.db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      })
+      .from(user)
+      .where(eq(user.role, "driver"))
+      .orderBy(asc(user.name));
+
+    return drivers;
+  }),
+
   // POST /bookings (create)
   create: protectedProcedure
     .input(
