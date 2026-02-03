@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { asc, desc, eq, or } from "drizzle-orm";
+import { and, asc, desc, eq, gt, lt, ne, or } from "drizzle-orm";
 import { z } from "zod";
 import { user } from "../../db/auth-schema";
 import { BOOKING_STATUS, bookings } from "../../db/booking-schema";
@@ -22,6 +22,48 @@ export const bookingsRouter = createTRPCRouter({
 
     return drivers;
   }),
+
+  // GET /bookings/is-driver-available
+  isDriverAvailable: protectedProcedure
+    .input(
+      z.object({
+        driverId: z.string().min(1),
+        startTime: z.string().datetime(),
+        endTime: z.string().datetime(),
+        /**
+         * Optional booking ID to exclude from the overlap check.
+         * Useful when editing an existing booking.
+         */
+        excludeBookingId: z.number().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { driverId, startTime, endTime, excludeBookingId } = input;
+
+      // Overlap condition:
+      // existing.startTime < endTime AND existing.endTime > startTime
+      const baseCondition = and(
+        eq(bookings.driverId, driverId),
+        ne(bookings.status, "cancelled"),
+        lt(bookings.startTime, endTime),
+        gt(bookings.endTime, startTime),
+      );
+
+      const whereCondition =
+        excludeBookingId !== undefined
+          ? and(baseCondition, ne(bookings.id, excludeBookingId))
+          : baseCondition;
+
+      const overlapping = await ctx.db
+        .select({ id: bookings.id })
+        .from(bookings)
+        .where(whereCondition)
+        .limit(1);
+
+      return {
+        available: overlapping.length === 0,
+      };
+    }),
 
   // POST /bookings (create)
   create: protectedProcedure
