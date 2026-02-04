@@ -112,6 +112,12 @@ export default function SurveyNotification({
     const validation = form.validate();
     const hasErrors = Object.keys(validation.errors).length > 0;
 
+    // TODO: Make sure that updates work (eventually)
+    if (completed) {
+      setShowSurveyModal(false);
+      return;
+    }
+
     if (hasErrors) {
       notify.error("Please fix the errors in the form before submitting");
       return;
@@ -121,8 +127,8 @@ export default function SurveyNotification({
 
     // if the trip is cancelled don't need to pass any of the other fields.
     const formData = {
-      bookingId: survey.bookingId,
-      driverId: survey.driverId,
+      bookingId: survey.bookingId as number, // TODO: will remove eventually!
+      driverId: survey.driverId as string,
       tripCompletionStatus: form.values.tripCompletionStatus,
       destinationAddress: form.values.destinationAddress,
       comments: form.values.comments,
