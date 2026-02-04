@@ -19,7 +19,7 @@ interface NavbarProps {
 export default function Navbar({ view, agencyName }: NavbarProps) {
   const pathname = usePathname();
 
-  const section = pathname.split("/")[2];
+  const section = pathname.split("/")[2] ?? "home";
 
   const navbarText = () => {
     switch (view) {

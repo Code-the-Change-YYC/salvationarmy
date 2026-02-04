@@ -13,7 +13,7 @@ import { type Booking, BookingStatus, type Survey } from "@/types/types";
 import { validateStringLength, validateTimeRange } from "@/types/validation";
 
 type SurveyNotificationProps = {
-  survey: Survey;
+  survey: Partial<Survey>;
   additionalInformation?: Partial<Booking>;
   completed?: boolean;
 };
@@ -62,13 +62,13 @@ export default function SurveyNotification({
       startReading: (value, values) => {
         if (values.tripCompletionStatus === BookingStatus.CANCELLED) return null;
         if (value === "" || value === null) return "Start reading is required";
-        if (typeof value === "number" && value < 0) return "Start reading must be positive";
+        if (typeof value === "number" && value <= 0) return "Start reading must be positive";
         return null;
       },
       endReading: (value, values) => {
         if (values.tripCompletionStatus === BookingStatus.CANCELLED) return null;
         if (value === "" || value === null) return "End reading is required";
-        if (typeof value === "number" && value < 0) return "End reading must be positive";
+        if (typeof value === "number" && value <= 0) return "End reading must be positive";
         if (
           typeof value === "number" &&
           typeof values.startReading === "number" &&

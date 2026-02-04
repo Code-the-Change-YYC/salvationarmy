@@ -176,12 +176,8 @@ export const SurveyForm = ({ form }: SurveyFormProps) => {
             withAsterisk={form.values.tripCompletionStatus !== BookingStatus.CANCELLED}
             label="Was the original location changed?"
             key={form.key("originalLocationChanged")}
-            {...form.getInputProps("originalLocationChanged", {
-              type: "checkbox",
-            })}
-            onChange={(value) => {
-              form.setFieldValue("originalLocationChanged", value === "true");
-            }}
+            value={form.values.originalLocationChanged ? "true" : "false"}
+            onChange={(value) => form.setFieldValue("originalLocationChanged", value === "true")}
             disabled={form.values.tripCompletionStatus === BookingStatus.CANCELLED}
             error={form.errors.originalLocationChanged}
           >

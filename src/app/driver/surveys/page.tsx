@@ -4,13 +4,13 @@ import styles from "./index.module.scss";
 
 export default async function SurveyPage() {
   const initialBookings = await api.bookings.getAll({ surveyCompleted: false });
-  const initalSurveys = await api.surveys.getAll();
+  const initialSurveys = await api.surveys.getAll();
 
   return (
     <HydrateClient>
       <main>
         <div className={styles.surveysContainer}>
-          <SurveyViewToggle initialBookings={initialBookings} initialSurveys={initalSurveys} />
+          <SurveyViewToggle initialBookings={initialBookings} initialSurveys={initialSurveys} />
         </div>
       </main>
     </HydrateClient>

@@ -34,18 +34,52 @@ export const surveysRouter = createTRPCRouter({
           passengerFitRating: z.number().int().min(1).max(5).optional(),
           comments: z.string().optional(),
         })
-        .refine(
-          (data) => {
-            if (data.endReading !== undefined && data.startReading !== undefined) {
-              return data.endReading > data.startReading;
+        .superRefine((data, ctx) => {
+          if (data.tripCompletionStatus !== BookingStatus.CANCELLED) {
+            if (data.startReading == null)
+              ctx.addIssue({
+                code: "custom",
+                path: ["startReading"],
+                message: "Start reading is required",
+              });
+            if (data.endReading == null)
+              ctx.addIssue({
+                code: "custom",
+                path: ["endReading"],
+                message: "End reading is required",
+              });
+            if (!data.timeOfDeparture)
+              ctx.addIssue({
+                code: "custom",
+                path: ["timeOfDeparture"],
+                message: "Departure time is required",
+              });
+            if (!data.timeOfArrival)
+              ctx.addIssue({
+                code: "custom",
+                path: ["timeOfArrival"],
+                message: "Arrival time is required",
+              });
+          }
+          if (data.timeOfDeparture && data.timeOfArrival) {
+            if (new Date(data.timeOfArrival) <= new Date(data.timeOfDeparture)) {
+              ctx.addIssue({
+                code: "custom",
+                path: ["timeOfArrival"],
+                message: "Arrival must be after departure",
+              });
             }
-            return true;
-          },
-          {
-            message: "End reading must be greater than start reading",
-            path: ["endReading"],
-          },
-        ),
+          }
+          if (data.endReading !== undefined && data.startReading !== undefined) {
+            if (data.endReading <= data.startReading) {
+              ctx.addIssue({
+                code: "custom",
+                path: ["endReading"],
+                message: "End reading must be greater than start reading",
+              });
+            }
+          }
+        }),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;

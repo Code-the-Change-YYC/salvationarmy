@@ -62,7 +62,7 @@ export default function SurveyViewToggle({
                     timeOfArrival: new Date(booking.endTime),
                     destinationAddress: booking.destinationAddress,
                     bookingId: booking.id,
-                    driverId: booking.driverId,
+                    driverId: booking.driverId, // there should hopefully always be an assigned driver...
                   } as Survey
                 }
                 additionalInformation={{ passengerInfo: booking.passengerInfo }}
