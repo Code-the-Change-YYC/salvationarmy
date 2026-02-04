@@ -11,7 +11,7 @@ import Home from "@/assets/icons/home";
 import User from "@/assets/icons/user";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
-import { OrganizationRole } from "@/types/types";
+import { OrganizationRole, Role } from "@/types/types";
 
 type InviteType = "user" | "agency" | null;
 
@@ -49,6 +49,7 @@ export const AdminDashboard = () => {
     mode: "uncontrolled",
     initialValues: {
       email: "",
+      role: Role.DRIVER,
       organizationRole: OrganizationRole.MEMBER,
       organizationId: "",
     },
@@ -59,9 +60,9 @@ export const AdminDashboard = () => {
         if (!emailRegex.test(value)) return "Invalid email address";
         return null;
       },
-      organizationRole: (value) => (value.trim().length > 0 ? null : "Role is required"),
+      role: (value) => (value.trim().length > 0 ? null : "Role is required"),
       organizationId: (value, values) => {
-        if (values.organizationRole === OrganizationRole.MEMBER) {
+        if (values.role === Role.AGENCY) {
           return value.trim().length > 0 ? null : "Organization is required";
         }
         return null;
@@ -96,18 +97,18 @@ export const AdminDashboard = () => {
 
     const formValues = userForm.getValues();
 
-    // Determine the organization ID based on role
+    // Determine the organization ID based on application role
     let organizationId: string;
-    const role = formValues.organizationRole;
+    const appRole = formValues.role;
 
-    if (role === OrganizationRole.ADMIN) {
+    if (appRole === Role.ADMIN) {
       const adminsOrg = organizations.data?.find((org) => org.slug === "admins");
       if (!adminsOrg) {
         notify.error("Admins organization not found");
         return;
       }
       organizationId = adminsOrg.id;
-    } else if (role === OrganizationRole.OWNER) {
+    } else if (appRole === Role.DRIVER) {
       const driversOrg = organizations.data?.find((org) => org.slug === "drivers");
       if (!driversOrg) {
         notify.error("Drivers organization not found");
@@ -121,6 +122,7 @@ export const AdminDashboard = () => {
     const submitData = {
       email: formValues.email,
       organizationRole: formValues.organizationRole,
+      role: formValues.role,
       organizationId,
     };
 
