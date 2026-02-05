@@ -1,7 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, gt, lt, ne, or } from "drizzle-orm";
 import { z } from "zod";
-import { PICKUP_WAIT_TIME_MINUTES, TRAVEL_BUFFER_MINUTES } from "@/constants/driver-assignment";
+import {
+  MAX_GAP_MINUTES_FOR_TRAVEL_CHECK,
+  PICKUP_WAIT_TIME_MINUTES,
+  TRAVEL_BUFFER_MINUTES,
+} from "@/constants/driver-assignment";
 import { roundUpToNearestIncrement } from "@/lib/datetime";
 import { getTravelTimeMinutes } from "@/lib/google-maps";
 import { user } from "../../db/auth-schema";
@@ -209,6 +213,57 @@ export const bookingsRouter = createTRPCRouter({
             message: "Driver has another booking at that time.",
           });
         }
+
+        // When new start is within 1 hour of driver's previous booking end, ensure
+        // there is enough time to travel from previous destination to new pickup.
+        const [prevBooking] = await ctx.db
+          .select({
+            endTime: bookings.endTime,
+            destinationAddress: bookings.destinationAddress,
+          })
+          .from(bookings)
+          .where(
+            and(
+              eq(bookings.driverId, input.driverId),
+              ne(bookings.status, "cancelled"),
+              lt(bookings.endTime, input.startTime),
+            ),
+          )
+          .orderBy(desc(bookings.endTime))
+          .limit(1);
+
+        if (
+          prevBooking?.endTime &&
+          prevBooking?.destinationAddress &&
+          prevBooking.destinationAddress.trim() !== ""
+        ) {
+          const prevEndMs = new Date(prevBooking.endTime).getTime();
+          const newStartMs = new Date(input.startTime).getTime();
+          const gapMinutes = (newStartMs - prevEndMs) / (60 * 1000);
+
+          if (gapMinutes <= MAX_GAP_MINUTES_FOR_TRAVEL_CHECK) {
+            const travelMinutes =
+              (await getTravelTimeMinutes(prevBooking.destinationAddress, input.pickupAddress)) ??
+              FALLBACK_TRAVEL_MINUTES;
+            const requiredMinutes = travelMinutes + TRAVEL_BUFFER_MINUTES;
+
+            if (gapMinutes < requiredMinutes) {
+              const nextPossible = new Date(prevEndMs);
+              nextPossible.setMinutes(nextPossible.getMinutes() + requiredMinutes);
+              const nextRounded = roundUpToNearestIncrement(nextPossible);
+              const nextFormatted = nextRounded.toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              });
+
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: `Invalid start time. Travel time from previous booking to pickup is ${travelMinutes} minutes and more time is required to reach pickup. Next possible start time is ${nextFormatted}.`,
+              });
+            }
+          }
+        }
       }
 
       const [row] = await ctx.db.insert(bookings).values(bookingData).returning();
@@ -333,6 +388,60 @@ export const bookingsRouter = createTRPCRouter({
             code: "CONFLICT",
             message: "Driver has another booking at that time.",
           });
+        }
+
+        // When this booking's start is within 1 hour of driver's previous booking end,
+        // ensure there is enough time to travel from previous destination to this pickup.
+        const [prevBooking] = await ctx.db
+          .select({
+            endTime: bookings.endTime,
+            destinationAddress: bookings.destinationAddress,
+          })
+          .from(bookings)
+          .where(
+            and(
+              eq(bookings.driverId, updatesToApply.driverId),
+              ne(bookings.status, "cancelled"),
+              lt(bookings.endTime, existing.startTime),
+              ne(bookings.id, id),
+            ),
+          )
+          .orderBy(desc(bookings.endTime))
+          .limit(1);
+
+        if (
+          prevBooking?.endTime &&
+          prevBooking?.destinationAddress &&
+          prevBooking.destinationAddress.trim() !== ""
+        ) {
+          const prevEndMs = new Date(prevBooking.endTime).getTime();
+          const newStartMs = new Date(existing.startTime).getTime();
+          const gapMinutes = (newStartMs - prevEndMs) / (60 * 1000);
+
+          if (gapMinutes <= MAX_GAP_MINUTES_FOR_TRAVEL_CHECK) {
+            const travelMinutes =
+              (await getTravelTimeMinutes(
+                prevBooking.destinationAddress,
+                existing.pickupAddress,
+              )) ?? FALLBACK_TRAVEL_MINUTES;
+            const requiredMinutes = travelMinutes + TRAVEL_BUFFER_MINUTES;
+
+            if (gapMinutes < requiredMinutes) {
+              const nextPossible = new Date(prevEndMs);
+              nextPossible.setMinutes(nextPossible.getMinutes() + requiredMinutes);
+              const nextRounded = roundUpToNearestIncrement(nextPossible);
+              const nextFormatted = nextRounded.toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              });
+
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: `Invalid start time. Travel time from previous booking to pickup is ${travelMinutes} minutes and more time is required to reach pickup. Next possible start time is ${nextFormatted}.`,
+              });
+            }
+          }
         }
       }
 
