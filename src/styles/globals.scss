@@ -33,8 +33,12 @@
 body {
   padding: 0;
   margin: 0;
-  font-family: var(--font-albert-sans), -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+  font-family:
+    var(--font-albert-sans),
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
   color: $color-text-primary;
   background-color: $color-background;
 }
@@ -79,50 +83,50 @@ p,
   color: $color-text-primary;
 }
 
-.bg-primary { 
-  background-color: $color-primary; 
-  color: $color-primary-text; 
+.bg-primary {
+  background-color: $color-primary;
+  color: $color-primary-text;
 }
 
-.bg-primary-hover:hover { 
-  background-color: $color-primary-hover; 
-  color: $color-primary-hover-text; 
+.bg-primary-hover:hover {
+  background-color: $color-primary-hover;
+  color: $color-primary-hover-text;
 }
 
-.bg-secondary { 
-  background-color: $color-secondary; 
-  color: $color-secondary-text; 
+.bg-secondary {
+  background-color: $color-secondary;
+  color: $color-secondary-text;
 }
 
-.bg-secondary-hover:hover { 
+.bg-secondary-hover:hover {
   background-color: $color-secondary-hover;
   color: $color-secondary-text;
 }
 
-.bg-disabled { 
-  background-color: $color-disabled; 
-  color: $color-disabled-text; 
+.bg-disabled {
+  background-color: $color-disabled;
+  color: $color-disabled-text;
 }
 
-.bg-view-selected { 
-  background-color: $color-view-selected; 
-  color: $color-view-selected-text; 
+.bg-view-selected {
+  background-color: $color-view-selected;
+  color: $color-view-selected-text;
 }
 
-.bg-view-hover:hover { 
-  background-color: $color-view-hover; 
-  color: $color-view-hover-text; 
+.bg-view-hover:hover {
+  background-color: $color-view-hover;
+  color: $color-view-hover-text;
 }
 
-.bg-view-deselected { 
-  background-color: $color-view-deselected; 
-  color: $color-view-deselected-text; 
+.bg-view-deselected {
+  background-color: $color-view-deselected;
+  color: $color-view-deselected-text;
 }
 
-.border { 
-  border: 1px solid $color-border; 
+.border {
+  border: 1px solid $color-border;
 }
 
-.border-bottom { 
-  border-bottom: 1px solid $color-border; 
+.border-bottom {
+  border-bottom: 1px solid $color-border;
 }
