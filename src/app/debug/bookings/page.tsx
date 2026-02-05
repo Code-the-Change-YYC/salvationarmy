@@ -40,6 +40,17 @@ function formatTimeSlot(startTime: string, endTime: string): string {
   return `${start} – ${end}`;
 }
 
+/** Example pre-filled booking for testing */
+const EXAMPLE_BOOKING = {
+  title: "Test Example",
+  pickupAddress: "The Inn from the Cold, 110 11 Ave SE, Calgary, AB",
+  destinationAddress: "Sheldon M. Chumir Health Centre, 1213 4 St SW, Calgary, AB",
+  passengerInfo: "1 passenger",
+  agencyId: "AGENCY_001",
+  purpose: "Medical appointment",
+  start: "2026-02-15T15:00:00.000Z", // Feb 20, 2026 3:00 PM UTC
+};
+
 function bookingOverlapsDay(booking: { startTime: string; endTime: string }, day: Date): boolean {
   const dayStart = new Date(day);
   dayStart.setHours(0, 0, 0, 0);
@@ -58,22 +69,25 @@ export default function BookingDebugPage() {
   const [bookingId, setBookingId] = useState<number>(1);
 
   // Day picker for driver availability (date-only)
-  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [selectedDay, setSelectedDay] = useState<Date | null>(() => {
+    const d = new Date(EXAMPLE_BOOKING.start);
+    return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  });
 
   // Keep DatePicker values exactly like the styleguide: string | null
-  const [startPickerValue, setStartPickerValue] = useState<string | null>(null);
+  const [startPickerValue, setStartPickerValue] = useState<string | null>(EXAMPLE_BOOKING.start);
   const [endPickerValue, setEndPickerValue] = useState<string | null>(null);
 
   const form = useForm({
     initialValues: {
-      title: "",
-      pickupAddress: "",
-      destinationAddress: "",
-      passengerInfo: "",
-      start: "", // will be kept in sync with picker (string)
-      end: "", // will be kept in sync with picker (string)
-      agencyId: "",
-      purpose: "",
+      title: EXAMPLE_BOOKING.title,
+      pickupAddress: EXAMPLE_BOOKING.pickupAddress,
+      destinationAddress: EXAMPLE_BOOKING.destinationAddress,
+      passengerInfo: EXAMPLE_BOOKING.passengerInfo,
+      start: EXAMPLE_BOOKING.start, // will be kept in sync with picker (string)
+      end: "", // will be kept in sync with picker (string), auto-calculated
+      agencyId: EXAMPLE_BOOKING.agencyId,
+      purpose: EXAMPLE_BOOKING.purpose,
       driverId: "",
       status: BookingStatus.INCOMPLETE as BookingStatusValue,
     },
@@ -108,6 +122,13 @@ export default function BookingDebugPage() {
       })),
     [listDriversQuery.data],
   );
+
+  // Pre-select first driver when options load (for example pre-fill)
+  useEffect(() => {
+    if (driverOptions.length > 0 && !form.values.driverId) {
+      form.setFieldValue("driverId", driverOptions[0]?.value ?? "");
+    }
+  }, [driverOptions, form.setFieldValue, form.values.driverId]);
 
   const canCalculateEnd =
     !!form.values.pickupAddress?.trim() &&
@@ -153,8 +174,15 @@ export default function BookingDebugPage() {
       await allBookingsQuery.refetch();
 
       form.reset();
-      setSelectedDay(null);
-      setStartPickerValue(null);
+      const exampleStartDate = new Date(EXAMPLE_BOOKING.start);
+      setSelectedDay(
+        new Date(
+          exampleStartDate.getUTCFullYear(),
+          exampleStartDate.getUTCMonth(),
+          exampleStartDate.getUTCDate(),
+        ),
+      );
+      setStartPickerValue(EXAMPLE_BOOKING.start);
       setEndPickerValue(null);
     },
     onError: (err) => {
@@ -288,8 +316,9 @@ export default function BookingDebugPage() {
               </Text>
             ) : (
               (() => {
-                const day = selectedDay!;
-                const driverId = form.values.driverId!;
+                const day = selectedDay;
+                const driverId = form.values.driverId;
+                if (!day || !driverId) return null;
                 const bookedSlots = (allBookingsQuery.data ?? [])
                   .filter(
                     (b) =>
