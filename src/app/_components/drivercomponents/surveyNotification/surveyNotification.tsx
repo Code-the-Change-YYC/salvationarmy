@@ -6,11 +6,11 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import Button from "@/app/_components/common/button/Button";
 import Modal from "@/app/_components/common/modal/modal";
-import { SurveyForm } from "@/app/_components/drivercomponents/surveyForm/surveyForm";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { type Booking, BookingStatus, type Survey } from "@/types/types";
 import { validateStringLength, validateTimeRange } from "@/types/validation";
+import { TripSurveyModal } from "../TripSurveyModal";
 
 type SurveyNotificationProps = {
   survey: Partial<Survey>;
@@ -189,7 +189,7 @@ export default function SurveyNotification({
         confirmText="Submit Survey"
         loading={submitSurveyMutation.isPending}
       >
-        <SurveyForm form={form} />
+        <TripSurveyModal form={form} />
       </Modal>
     </>
   );
