@@ -247,6 +247,7 @@ export default function CalendarView({
         radius="md"
         padding="lg"
         withCloseButton={false}
+        classNames={{ body: styles.drawerBody }}
       >
         {selectedEvent && (
           <EventDetails

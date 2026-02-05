@@ -93,7 +93,7 @@
 }
 
 // Make drawer body take full height for event details
-:global(.mantine-Drawer-body) {
+.drawerBody {
   height: 100%;
   display: flex;
   flex-direction: column;
