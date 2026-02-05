@@ -4,7 +4,7 @@ import type { EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { Box, Drawer, Popover, Stack } from "@mantine/core";
+import { Box, Drawer, Popover } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -248,9 +248,6 @@ export default function CalendarView({
         padding="lg"
         withCloseButton={false}
       >
-        <Stack>
-          <Box bg="#DEE2E6" h={5} w="30%" mx="auto" bdrs="md" mb="lg"></Box>
-        </Stack>
         {selectedEvent && (
           <EventDetails
             title={selectedEvent.title}
