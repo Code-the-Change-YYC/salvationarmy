@@ -1,9 +1,15 @@
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, gt, lt, ne, or } from "drizzle-orm";
 import { z } from "zod";
+import { PICKUP_WAIT_TIME_MINUTES, TRAVEL_BUFFER_MINUTES } from "@/constants/driver-assignment";
+import { roundUpToNearestIncrement } from "@/lib/datetime";
+import { getTravelTimeMinutes } from "@/lib/google-maps";
 import { user } from "../../db/auth-schema";
 import { BOOKING_STATUS, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+
+/** Fallback travel minutes per leg when Google Maps API fails */
+const FALLBACK_TRAVEL_MINUTES = 15;
 
 const StatusZ = z.enum(BOOKING_STATUS); // ← uses "cancelled" (double-L)
 
@@ -62,6 +68,74 @@ export const bookingsRouter = createTRPCRouter({
 
       return {
         available: overlapping.length === 0,
+      };
+    }),
+
+  // GET /bookings/earliest-start-for-driver
+  getEarliestStartForDriver: protectedProcedure
+    .input(
+      z.object({
+        driverId: z.string().min(1),
+        newPickupAddress: z.string().min(1),
+        /** Optional: only consider bookings ending after this time (ISO string) */
+        afterDate: z.string().datetime().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { driverId, newPickupAddress, afterDate } = input;
+
+      const driverCondition = and(
+        eq(bookings.driverId, driverId),
+        ne(bookings.status, "cancelled"),
+      );
+      const whereCondition =
+        afterDate !== undefined
+          ? and(driverCondition, gt(bookings.endTime, afterDate))
+          : driverCondition;
+
+      const [lastBooking] = await ctx.db
+        .select({
+          id: bookings.id,
+          startTime: bookings.startTime,
+          endTime: bookings.endTime,
+          pickupAddress: bookings.pickupAddress,
+          destinationAddress: bookings.destinationAddress,
+        })
+        .from(bookings)
+        .where(whereCondition)
+        .orderBy(desc(bookings.endTime))
+        .limit(1);
+
+      if (
+        !lastBooking?.startTime ||
+        !lastBooking?.pickupAddress ||
+        !lastBooking?.destinationAddress
+      ) {
+        return { earliestStart: null };
+      }
+
+      const prevStart = new Date(lastBooking.startTime);
+
+      const travel1 =
+        (await getTravelTimeMinutes(lastBooking.pickupAddress, lastBooking.destinationAddress)) ??
+        FALLBACK_TRAVEL_MINUTES;
+      const travel2 =
+        (await getTravelTimeMinutes(lastBooking.destinationAddress, newPickupAddress)) ??
+        FALLBACK_TRAVEL_MINUTES;
+
+      const earliest = new Date(prevStart.getTime());
+      earliest.setMinutes(
+        earliest.getMinutes() +
+          PICKUP_WAIT_TIME_MINUTES +
+          travel1 +
+          travel2 +
+          TRAVEL_BUFFER_MINUTES,
+      );
+
+      const rounded = roundUpToNearestIncrement(earliest);
+
+      return {
+        earliestStart: rounded.toISOString(),
       };
     }),
 
