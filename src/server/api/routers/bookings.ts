@@ -188,6 +188,29 @@ export const bookingsRouter = createTRPCRouter({
       if (input.driverId !== undefined) bookingData.driverId = input.driverId;
       if (input.status !== undefined) bookingData.status = input.status;
 
+      // Validate driver availability when assigning a driver (no overlapping bookings)
+      if (input.driverId) {
+        const overlapping = await ctx.db
+          .select({ id: bookings.id })
+          .from(bookings)
+          .where(
+            and(
+              eq(bookings.driverId, input.driverId),
+              ne(bookings.status, "cancelled"),
+              lt(bookings.startTime, input.endTime),
+              gt(bookings.endTime, input.startTime),
+            ),
+          )
+          .limit(1);
+
+        if (overlapping.length > 0) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Driver has another booking at that time.",
+          });
+        }
+      }
+
       const [row] = await ctx.db.insert(bookings).values(bookingData).returning();
 
       if (!row) {
@@ -288,6 +311,30 @@ export const bookingsRouter = createTRPCRouter({
       const updatesToApply = Object.fromEntries(
         Object.entries(updates).filter(([, v]) => v !== undefined),
       );
+
+      // 3b) Validate driver availability when assigning/changing driver (no overlapping bookings)
+      if (updatesToApply.driverId !== undefined && updatesToApply.driverId) {
+        const overlapping = await ctx.db
+          .select({ id: bookings.id })
+          .from(bookings)
+          .where(
+            and(
+              eq(bookings.driverId, updatesToApply.driverId),
+              ne(bookings.status, "cancelled"),
+              lt(bookings.startTime, existing.endTime),
+              gt(bookings.endTime, existing.startTime),
+              ne(bookings.id, id),
+            ),
+          )
+          .limit(1);
+
+        if (overlapping.length > 0) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Driver has another booking at that time.",
+          });
+        }
+      }
 
       // 4) Perform update with updatedBy field set
       const res = await ctx.db
