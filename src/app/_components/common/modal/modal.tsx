@@ -57,7 +57,7 @@ export default function Modal({
       opened={opened}
       onClose={onClose}
       title={title}
-      size="md"
+      size={size}
       fullScreen={isMobile}
       padding="xl"
       centered={centered}
