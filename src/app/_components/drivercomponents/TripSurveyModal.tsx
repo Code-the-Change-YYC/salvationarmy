@@ -104,9 +104,7 @@ export default function TripSurveyModal() {
         <Text size="xl" fw={700}>
           Post Ride Survey
         </Text>
-        <Text size="l" fw={700}>
-          Drive Details
-        </Text>
+        <Text fw={700}>Drive Details</Text>
         <Stack gap="sm">
           <TextInput
             label="Destination Address"
@@ -138,9 +136,7 @@ export default function TripSurveyModal() {
             {...form.getInputProps("endReading")}
             required
           />
-          <Text size="l" fw={700}>
-            Fit or Not fit
-          </Text>
+          <Text fw={700}>Fit or Not fit</Text>
           <Text size="sm" fw={600}>
             Did the rider request to go to a different location than originally booked?
           </Text>
