@@ -1,4 +1,5 @@
 import { Group, Modal as MantineModal, type ModalBaseOverlayProps } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import type { ReactNode } from "react";
 import Button from "../button/Button";
 
@@ -39,6 +40,7 @@ export default function Modal({
   loading = false,
   overlayProps,
 }: ModalProps) {
+  const isMobile = useMediaQuery("(max-width: 50em)");
   const defaultFooter = showDefaultFooter && (
     <Group justify="flex-end" mt="md">
       <Button variant="secondary" onClick={onClose} disabled={loading}>
@@ -55,7 +57,8 @@ export default function Modal({
       opened={opened}
       onClose={onClose}
       title={title}
-      size={size}
+      size="md"
+      fullScreen={isMobile}
       padding="xl"
       centered={centered}
       withCloseButton={withCloseButton}

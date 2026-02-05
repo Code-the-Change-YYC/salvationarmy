@@ -15,6 +15,7 @@ import {
 } from "@mantine/core";
 import { useState } from "react";
 import Modal from "@/app/_components/common/modal/modal";
+import TripSurveyModal from "../../drivercomponents/TripSurveyModal";
 
 export const ModalTests = () => {
   const [simpleOpen, setSimpleOpen] = useState(false);
@@ -301,6 +302,7 @@ export const ModalTests = () => {
           <NumberInput label="Session timeout (minutes)" defaultValue={30} min={5} max={120} />
         </Stack>
       </Modal>
+      <TripSurveyModal></TripSurveyModal>
     </Stack>
   );
 };
