@@ -1,5 +1,8 @@
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, gt, lt, ne, or } from "drizzle-orm";
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import { and, asc, desc, eq, gt, gte, lt, ne, or } from "drizzle-orm";
 import { z } from "zod";
 import {
   MAX_GAP_MINUTES_FOR_TRAVEL_CHECK,
@@ -8,9 +11,13 @@ import {
 } from "@/constants/driver-assignment";
 import { roundUpToNearestIncrement } from "@/lib/datetime";
 import { getTravelTimeMinutes } from "@/lib/google-maps";
+import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
 import { user } from "../../db/auth-schema";
-import { BOOKING_STATUS, bookings } from "../../db/booking-schema";
+import { BOOKING_STATUS, type BookingInsertType, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+
+dayjs.extend(utc); //Allows dayjs to work in UTC
+dayjs.extend(timezone); //Allows dayjs to convert dates between time zones
 
 /** Fallback travel minutes per leg when Google Maps API fails */
 const FALLBACK_TRAVEL_MINUTES = 15;
@@ -208,7 +215,7 @@ export const bookingsRouter = createTRPCRouter({
       // Only allow admins to specify agencyId; non-admins use their own ID
       const agencyId = role === "admin" ? input.agencyId : userId;
 
-      const bookingData: typeof bookings.$inferInsert = {
+      const bookingData: BookingInsertType = {
         title: input.title,
         pickupAddress: input.pickupAddress,
         destinationAddress: input.destinationAddress,
@@ -318,7 +325,11 @@ export const bookingsRouter = createTRPCRouter({
       .limit(1)
       .then((r) => r[0]);
 
-    if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+    if (!row)
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Booking not found",
+      });
 
     const userId = ctx.session.user.id;
     const role = ctx.session.user.role ?? "user"; // default safety
@@ -335,26 +346,73 @@ export const bookingsRouter = createTRPCRouter({
     return row;
   }),
 
-  getAll: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.session.user.id;
-    const role = ctx.session.user.role ?? "user";
+  getAll: protectedProcedure
+    .input(
+      z
+        .object({
+          startDate: z.string().optional(),
+          endDate: z.string().optional(),
+          surveyCompleted: z.boolean().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const role = ctx.session.user.role ?? "user";
+      const startDate = input?.startDate ?? "1970-01-01T00:00:00-07:00";
+      let endDate = input?.endDate ?? "";
 
-    if (role === "admin") {
-      return ctx.db.select().from(bookings).orderBy(desc(bookings.createdAt));
-    }
+      if (input === undefined || input.endDate === undefined) {
+        //No end date given, assign one to input.endDate
+        endDate = dayjs().utc().add(50, "year").tz("America/Hermosillo").format();
+      }
 
-    return ctx.db
-      .select()
-      .from(bookings)
-      .where(
-        or(
-          eq(bookings.createdBy, userId),
-          eq(bookings.agencyId, userId),
-          eq(bookings.driverId, userId),
-        ),
-      )
-      .orderBy(desc(bookings.createdAt));
-  }),
+      let startAndEndDateErrorMessage = "Invalid: ";
+
+      if (!(isoTimeRegex.test(startDate) || isoTimeRegexFourDigitYears.test(startDate))) {
+        startAndEndDateErrorMessage = `${startAndEndDateErrorMessage}Start Date `;
+      }
+
+      if (!(isoTimeRegex.test(endDate) || isoTimeRegexFourDigitYears.test(endDate))) {
+        startAndEndDateErrorMessage = `${startAndEndDateErrorMessage}End Date `;
+      }
+
+      if (startAndEndDateErrorMessage !== "Invalid: ") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: startAndEndDateErrorMessage,
+        });
+      }
+
+      const conditions = [gte(bookings.startTime, startDate), lt(bookings.startTime, endDate)];
+
+      if (input?.surveyCompleted !== undefined) {
+        conditions.push(eq(bookings.surveyCompleted, input.surveyCompleted));
+      }
+
+      if (role === "admin") {
+        return ctx.db
+          .select()
+          .from(bookings)
+          .where(and(...conditions))
+          .orderBy(desc(bookings.createdAt));
+      }
+
+      return ctx.db
+        .select()
+        .from(bookings)
+        .where(
+          and(
+            or(
+              eq(bookings.createdBy, userId),
+              eq(bookings.agencyId, userId),
+              eq(bookings.driverId, userId),
+            ),
+            ...conditions,
+          ),
+        )
+        .orderBy(desc(bookings.createdAt));
+    }),
 
   // PATCH /bookings/:id
   update: protectedProcedure
@@ -382,7 +440,10 @@ export const bookingsRouter = createTRPCRouter({
         .then((r) => r[0]);
 
       if (!existing) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Booking not found",
+        });
       }
 
       // 2) Authorization check
@@ -392,7 +453,10 @@ export const bookingsRouter = createTRPCRouter({
       const allowed = role === "admin" || existing.agencyId === userId;
 
       if (!allowed) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "You cannot update this booking." });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You cannot update this booking.",
+        });
       }
 
       // 3) Filter only defined updates
@@ -503,7 +567,10 @@ export const bookingsRouter = createTRPCRouter({
         .then((r) => r[0]);
 
       if (!existing) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Booking not found",
+        });
       }
 
       const userId = ctx.session.user.id;
@@ -512,7 +579,10 @@ export const bookingsRouter = createTRPCRouter({
       const allowed = role === "admin" || existing.agencyId === userId;
 
       if (!allowed) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "You cannot cancel this booking." });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You cannot cancel this booking.",
+        });
       }
 
       return ctx.db
