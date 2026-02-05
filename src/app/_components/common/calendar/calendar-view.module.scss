@@ -91,3 +91,10 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+// Make drawer body take full height for event details
+:global(.mantine-Drawer-body) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
