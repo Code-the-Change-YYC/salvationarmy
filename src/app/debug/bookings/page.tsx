@@ -56,6 +56,16 @@ export default function BookingDebugPage() {
     staleTime: 0,
   });
 
+  const listDriversQuery = api.bookings.listDrivers.useQuery();
+  const driverOptions = useMemo(
+    () =>
+      (listDriversQuery.data ?? []).map((d) => ({
+        value: d.id,
+        label: `${d.name} (${d.email})`,
+      })),
+    [listDriversQuery.data],
+  );
+
   const canCheckAvailability =
     !!form.values.driverId?.trim() &&
     !!form.values.start &&
@@ -200,7 +210,14 @@ export default function BookingDebugPage() {
         <Textarea withAsterisk label="Passenger Info" {...form.getInputProps("passengerInfo")} />
         <TextInput withAsterisk label="Agency ID" {...form.getInputProps("agencyId")} />
         <TextInput label="Purpose (optional)" {...form.getInputProps("purpose")} />
-        <TextInput label="Driver ID (optional)" {...form.getInputProps("driverId")} />
+        <Select
+          label="Driver (optional)"
+          placeholder="Select driver"
+          data={driverOptions}
+          searchable
+          clearable
+          {...form.getInputProps("driverId")}
+        />
 
         {/* ✅ Styleguide DatePicker (date + time) */}
         <DatePicker
