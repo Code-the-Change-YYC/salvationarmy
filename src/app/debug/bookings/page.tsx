@@ -3,7 +3,7 @@
 import { Alert, Button, Divider, Group, Select, Text, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DatePicker from "@/app/_components/common/datepicker/DatePicker"; // <-- adjust path if needed
 import { api } from "@/trpc/react";
 import { ALL_BOOKING_STATUSES, BookingStatus, type BookingStatusValue } from "@/types/types";
@@ -65,6 +65,27 @@ export default function BookingDebugPage() {
       })),
     [listDriversQuery.data],
   );
+
+  const canCalculateEnd =
+    !!form.values.pickupAddress?.trim() &&
+    !!form.values.destinationAddress?.trim() &&
+    !!form.values.start;
+
+  const estimatedEndQuery = api.bookings.getEstimatedEndTime.useQuery(
+    {
+      pickupAddress: form.values.pickupAddress,
+      destinationAddress: form.values.destinationAddress,
+      startTime: form.values.start,
+    },
+    { enabled: canCalculateEnd },
+  );
+
+  useEffect(() => {
+    if (estimatedEndQuery.data) {
+      setEndPickerValue(estimatedEndQuery.data.estimatedEndTime);
+      form.setFieldValue("end", estimatedEndQuery.data.estimatedEndTime);
+    }
+  }, [estimatedEndQuery.data, form.setFieldValue]);
 
   const canCheckAvailability =
     !!form.values.driverId?.trim() &&
@@ -230,15 +251,40 @@ export default function BookingDebugPage() {
           }}
         />
 
-        <DatePicker
+        <TextInput
           label="Ends"
-          placeholder="Select date and time"
-          value={endPickerValue}
-          onChange={(v) => {
-            setEndPickerValue(v);
-            form.setFieldValue("end", v ?? "");
-          }}
+          value={
+            endPickerValue
+              ? new Date(endPickerValue).toLocaleString("en-US", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })
+              : ""
+          }
+          placeholder="Enter pickup, destination, and start time to calculate"
+          readOnly
+          styles={{ input: { cursor: "default" } }}
         />
+
+        {canCalculateEnd && estimatedEndQuery.data && (
+          <div className={styles.debugOutput}>
+            <h4>End time calculation</h4>
+            <pre>
+              {/* Location 1: {estimatedEndQuery.data.location1}
+              {"\n"}
+              Location 2: {estimatedEndQuery.data.location2}
+              {"\n"} */}
+              Calculated driving time: {estimatedEndQuery.data.drivingTimeMinutes} min
+              {"\n"}
+              Total booking time: {estimatedEndQuery.data.totalBookingMinutes} min (15 min pickup
+              wait + {estimatedEndQuery.data.drivingTimeMinutes} min travel)
+              {"\n"}
+              Start time: {estimatedEndQuery.data.startTime}
+              {"\n"}
+              Estimated end time: {estimatedEndQuery.data.estimatedEndTime}
+            </pre>
+          </div>
+        )}
 
         {!endAfterStart && (
           <p className={styles.errorMessage}>End time must be after start time.</p>

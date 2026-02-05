@@ -75,6 +75,39 @@ export const bookingsRouter = createTRPCRouter({
       };
     }),
 
+  // GET /bookings/estimated-end-time
+  // End time = Start + Pickup wait (15 min) + Travel time (Location 1 → Location 2)
+  getEstimatedEndTime: protectedProcedure
+    .input(
+      z.object({
+        pickupAddress: z.string().min(1),
+        destinationAddress: z.string().min(1),
+        startTime: z.string().datetime(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const drivingTimeMinutes =
+        (await getTravelTimeMinutes(input.pickupAddress, input.destinationAddress)) ??
+        FALLBACK_TRAVEL_MINUTES;
+
+      const totalBookingMinutes = PICKUP_WAIT_TIME_MINUTES + drivingTimeMinutes;
+
+      const start = new Date(input.startTime);
+      const end = new Date(start.getTime());
+      end.setMinutes(end.getMinutes() + totalBookingMinutes);
+
+      const estimatedEndTime = roundUpToNearestIncrement(end).toISOString();
+
+      return {
+        location1: input.pickupAddress,
+        location2: input.destinationAddress,
+        drivingTimeMinutes,
+        totalBookingMinutes,
+        startTime: input.startTime,
+        estimatedEndTime,
+      };
+    }),
+
   // GET /bookings/earliest-start-for-driver
   getEarliestStartForDriver: protectedProcedure
     .input(
