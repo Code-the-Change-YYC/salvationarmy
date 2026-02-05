@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Divider, Group, Select, Textarea, TextInput } from "@mantine/core";
+import { Alert, Button, Divider, Group, Select, Text, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useMemo, useState } from "react";
@@ -55,6 +55,21 @@ export default function BookingDebugPage() {
     enabled: false,
     staleTime: 0,
   });
+
+  const canCheckAvailability =
+    !!form.values.driverId?.trim() &&
+    !!form.values.start &&
+    !!form.values.end &&
+    isEndAfterStart(form.values.start, form.values.end);
+
+  const availabilityQuery = api.bookings.isDriverAvailable.useQuery(
+    {
+      driverId: form.values.driverId,
+      startTime: form.values.start,
+      endTime: form.values.end,
+    },
+    { enabled: canCheckAvailability },
+  );
 
   const createMutation = api.bookings.create.useMutation({
     onSuccess: async () => {
@@ -210,6 +225,27 @@ export default function BookingDebugPage() {
 
         {!endAfterStart && (
           <p className={styles.errorMessage}>End time must be after start time.</p>
+        )}
+
+        {canCheckAvailability && availabilityQuery.isLoading && (
+          <Text size="sm" c="dimmed">
+            Checking availability…
+          </Text>
+        )}
+        {canCheckAvailability && availabilityQuery.data && (
+          <Alert
+            color={availabilityQuery.data.available ? "green" : "red"}
+            title={availabilityQuery.data.available ? "Driver available" : "Driver not available"}
+          >
+            {availabilityQuery.data.available
+              ? "Driver is available for this time."
+              : "Driver has another booking at this time."}
+          </Alert>
+        )}
+        {!canCheckAvailability && form.values.driverId?.trim() && (
+          <Text size="sm" c="dimmed">
+            Enter start and end time to check driver availability.
+          </Text>
         )}
 
         <Button type="submit" className={styles.submitButton}>
