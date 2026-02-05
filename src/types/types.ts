@@ -49,6 +49,8 @@ export enum ViewMode {
   TABLE = "table",
 }
 
+export type CalendarViewType = "admin" | "driver" | "agency";
+
 export type { ViewMode as IViewMode };
 
 export enum BookingStatus {
