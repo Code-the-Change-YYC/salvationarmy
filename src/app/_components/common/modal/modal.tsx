@@ -40,7 +40,7 @@ export default function Modal({
   overlayProps,
 }: ModalProps) {
   const defaultFooter = showDefaultFooter && (
-    <Group justify="flex-end" mt="md">
+    <Group justify="flex-end" mt="xl">
       <Button variant="secondary" onClick={onClose} disabled={loading}>
         {cancelText}
       </Button>
