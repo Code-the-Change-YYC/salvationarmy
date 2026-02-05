@@ -12,7 +12,7 @@ import { notify } from "@/lib/notifications";
  * @param agGrid Reference to an AgGrid
  * @returns A function that initiates CSV file download when called
  */
-export function defaultFunction(agGrid: RefObject<AgGridReact | null>): (...args: any[]) => void {
+export function defaultFunction(agGrid: RefObject<AgGridReact | null>): () => void {
   return () => {
     if (agGrid.current !== null) {
       agGrid.current.api.exportDataAsCsv();
@@ -23,7 +23,7 @@ export function defaultFunction(agGrid: RefObject<AgGridReact | null>): (...args
 }
 
 interface ExportToCSVButtonProps {
-  downloadFunction?: (...args: any[]) => void; //Variable is of type function
+  downloadFunction?: () => void; //Variable is of type function
 }
 
 export default function ExportToCSVButton({ downloadFunction }: ExportToCSVButtonProps) {
