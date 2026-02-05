@@ -1,44 +1,36 @@
-import { Button, Group, Rating, Stack, Text, Textarea, TextInput } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import { useState } from "react";
+"use client";
+
+import { Group, Rating, Stack, Text, Textarea, TextInput } from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
+import type { UseFormReturnType } from "@mantine/form";
+import dayjs from "dayjs";
 import Rating1 from "@/assets/icons/rating1";
 import Rating2 from "@/assets/icons/rating2";
 import Rating3 from "@/assets/icons/rating3";
 import Rating4 from "@/assets/icons/rating4";
 import Rating5 from "@/assets/icons/rating5";
-import Modal from "../common/modal/modal";
+import type { BookingStatus } from "@/types/types";
 import SegmentedControl from "../common/segmentedControl";
 import styles from "./TripSurveyModal.module.scss";
 
-export default function TripSurveyModal() {
-  const [formOpen, setFormOpen] = useState(false);
-  const form = useForm({
-    mode: "uncontrolled",
-    initialValues: {
-      destinationAddress: "",
-      timeOfDeparture: "",
-      timeOfArrival: "",
-      startReading: "",
-      endReading: "",
-      differentLocation: "No",
-      passengerFitRating: "",
-      comments: "",
-    },
-    validate: {
-      destinationAddress: (value) =>
-        value.length < 1 ? "Please enter a destination address" : null,
-      timeOfDeparture: (value) => (value.length < 1 ? "Please enter a departure time" : null),
-      timeOfArrival: (value) => (value.length < 1 ? "Please enter an arrival time" : null),
-      startReading: (value) =>
-        value.length < 1 || !Number.isInteger(Number(value))
-          ? "Please enter a valid numerical reading"
-          : null,
-      endReading: (value) =>
-        value.length < 1 || !Number.isInteger(Number(value))
-          ? "Please enter a valid numerical reading"
-          : null,
-    },
-  });
+interface SurveyForm {
+  tripCompletionStatus: BookingStatus;
+  startReading: number | "";
+  endReading: number | "";
+  timeOfDeparture: string;
+  timeOfArrival: string;
+  destinationAddress: string;
+  originalLocationChanged: boolean;
+  passengerFitRating: number | "";
+  comments: string;
+}
+
+interface SurveyFormProps {
+  form: UseFormReturnType<SurveyForm>;
+}
+
+export const TripSurveyModal = ({ form }: SurveyFormProps) => {
+  const now = new Date();
 
   const getIconStyle = (color?: string) => ({
     width: 32,
@@ -80,107 +72,122 @@ export default function TripSurveyModal() {
         return null;
     }
   };
-  const handleConfirm = async () => {
-    const validation = form.validate();
-    const hasErrors = Object.keys(validation.errors).length > 0;
-    if (!hasErrors) {
-      console.log(form.getValues());
-    }
-  };
   return (
     <>
-      <Modal
-        opened={formOpen}
-        onClose={() => setFormOpen(false)}
-        onConfirm={() => {
-          handleConfirm();
-        }}
-        confirmText="Submit Form"
-        size="md"
-        closeOnClickOutside={false}
-        withCloseButton={false}
-        showDefaultFooter
-      >
-        <Text size="xl" fw={700}>
-          Post Ride Survey
+      <Text fw={700}>Drive Details</Text>
+      <Stack gap="sm">
+        <TextInput
+          label="Destination Address"
+          placeholder="123 Somestreet NW"
+          {...form.getInputProps("destinationAddress")}
+          required
+        />
+        <DateTimePicker
+          label="Time of Departure"
+          withAsterisk={true}
+          placeholder="Select departure time"
+          maxDate={now}
+          valueFormat="MMM DD, YYYY hh:mm A"
+          value={form.values.timeOfDeparture ? new Date(form.values.timeOfDeparture) : null}
+          onChange={(value) => {
+            if (!value) {
+              form.setFieldValue("timeOfDeparture", "");
+              return;
+            }
+            const isoString = dayjs(value).toISOString();
+            form.setFieldValue("timeOfDeparture", isoString);
+
+            if (isoString && form.values.timeOfArrival && form.values.timeOfArrival <= isoString) {
+              form.setFieldValue("timeOfArrival", "");
+            }
+          }}
+          timePickerProps={{
+            withDropdown: true,
+            popoverProps: { withinPortal: false },
+            format: "12h",
+          }}
+          clearable
+          error={form.errors.timeOfDeparture}
+        />
+        <DateTimePicker
+          withAsterisk={true}
+          label="Time of Arrival"
+          placeholder="Select arrival time"
+          minDate={form.values.timeOfDeparture ? new Date(form.values.timeOfDeparture) : undefined}
+          maxDate={now}
+          valueFormat="MMM DD, YYYY hh:mm A"
+          value={form.values.timeOfArrival ? new Date(form.values.timeOfArrival) : null}
+          onChange={(value) => {
+            if (!value) {
+              form.setFieldValue("timeOfArrival", "");
+              return;
+            }
+            const isoString = dayjs(value).toISOString();
+            form.setFieldValue("timeOfArrival", isoString);
+          }}
+          timePickerProps={{
+            withDropdown: true,
+            popoverProps: { withinPortal: false },
+            format: "12h",
+          }}
+          clearable
+          error={form.errors.timeOfArrival}
+        />
+        <TextInput
+          label="Odometer start"
+          placeholder="Enter odometer starting value"
+          {...form.getInputProps("startReading")}
+          required
+        />
+        <TextInput
+          label="Odometer end"
+          placeholder="Enter odometer ending value"
+          {...form.getInputProps("endReading")}
+          required
+        />
+        <Text fw={700}>Fit or Not fit</Text>
+        <Text size="sm" fw={600}>
+          Did the rider request to go to a different location than originally booked?
         </Text>
-        <Text fw={700}>Drive Details</Text>
-        <Stack gap="sm">
-          <TextInput
-            label="Destination Address"
-            placeholder="123 Somestreet NW"
-            {...form.getInputProps("destinationAddress")}
-            required
-          />
-          <TextInput
-            label="Time of Departure"
-            placeholder="Enter departure time"
-            {...form.getInputProps("timeOfDeparture")}
-            required
-          />
-          <TextInput
-            label="Time of Arrival"
-            placeholder="Enter arrival time"
-            {...form.getInputProps("timeOfArrival")}
-            required
-          />
-          <TextInput
-            label="Odometer start"
-            placeholder="Enter odometer starting value"
-            {...form.getInputProps("startReading")}
-            required
-          />
-          <TextInput
-            label="Odometer end"
-            placeholder="Enter odometer ending value"
-            {...form.getInputProps("endReading")}
-            required
-          />
-          <Text fw={700}>Fit or Not fit</Text>
-          <Text size="sm" fw={600}>
-            Did the rider request to go to a different location than originally booked?
-          </Text>
-          <SegmentedControl
-            size="sm"
-            leftOption={{ value: "Yes", label: "Yes" }}
-            rightOption={{ value: "No", label: "No" }}
-            color="var(--color-cherry-red)"
-            value={form.values.differentLocation}
-            onChange={(e) => form.setFieldValue("differentLocation", e)}
-          ></SegmentedControl>
-          Rate the passenger’s fitness for transport
-          <div className={styles.rating}>
-            <Rating
-              styles={{
-                root: {
-                  display: "flex",
-                  justifyContent: "space-between",
-                  width: "100%",
-                },
-              }}
-              emptySymbol={getEmptyIcon}
-              fullSymbol={getFullIcon}
-              value={Number(form.values.passengerFitRating)}
-              onChange={(e) => form.setFieldValue("passengerFitRating", String(e))}
-              highlightSelectedOnly
-            ></Rating>
-          </div>
-          <Group justify="space-between" className={styles.ratingLabel}>
-            <Text>Very Poor</Text>
-            <Text>Excellent</Text>
-          </Group>
-          Additional Notes
-          <Textarea
-            autosize
-            minRows={3}
-            placeholder="Add any additional notes on passenger status during the ride (ex: politeness, sobriety)"
-            {...form.getInputProps("comments")}
-          ></Textarea>
-        </Stack>
-      </Modal>
-      <Button onClick={() => setFormOpen(true)} color="cyan">
-        Open Trip Survey Form
-      </Button>
+        <SegmentedControl
+          size="sm"
+          leftOption={{ value: "Yes", label: "Yes" }}
+          rightOption={{ value: "No", label: "No" }}
+          color="var(--color-cherry-red)"
+          value={form.values.originalLocationChanged ? "Yes" : "No"}
+          onChange={(e) =>
+            form.setFieldValue("originalLocationChanged", e === "Yes" ? true : false)
+          }
+        ></SegmentedControl>
+        Rate the passenger’s fitness for transport
+        <div className={styles.rating}>
+          <Rating
+            styles={{
+              root: {
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+              },
+            }}
+            emptySymbol={getEmptyIcon}
+            fullSymbol={getFullIcon}
+            value={Number(form.values.passengerFitRating)}
+            onChange={(e) => form.setFieldValue("passengerFitRating", e)}
+            highlightSelectedOnly
+          ></Rating>
+        </div>
+        <Group justify="space-between" className={styles.ratingLabel}>
+          <Text>Very Poor</Text>
+          <Text>Excellent</Text>
+        </Group>
+        Additional Notes
+        <Textarea
+          autosize
+          minRows={3}
+          placeholder="Add any additional notes on passenger status during the ride (ex: politeness, sobriety)"
+          {...form.getInputProps("comments")}
+        ></Textarea>
+      </Stack>
     </>
   );
-}
+};
