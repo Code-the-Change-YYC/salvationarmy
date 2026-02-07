@@ -11,11 +11,10 @@ import {
   Textarea,
   TextInput,
 } from "@mantine/core";
-import { DateInput } from "@mantine/dates";
+import { DateInput, TimeInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useMemo, useState } from "react";
-import DatePicker from "@/app/_components/common/datepicker/DatePicker";
 import { api } from "@/trpc/react";
 import { ALL_BOOKING_STATUSES, BookingStatus, type BookingStatusValue } from "@/types/types";
 import styles from "./BookingDebugPage.module.scss";
@@ -40,15 +39,15 @@ function formatTimeSlot(startTime: string, endTime: string): string {
   return `${start} – ${end}`;
 }
 
-/** Example pre-filled booking for testing */
+/** Example pre-filled booking for testing. agencyId must be a valid user.id; set dynamically from getCurrentUser. */
 const EXAMPLE_BOOKING = {
   title: "Test Example",
   pickupAddress: "The Inn from the Cold, 110 11 Ave SE, Calgary, AB",
   destinationAddress: "Sheldon M. Chumir Health Centre, 1213 4 St SW, Calgary, AB",
-  passengerInfo: "1 passenger",
-  agencyId: "AGENCY_001",
+  passengerInfo: "John Smith",
+  phoneNumber: "+1 (403) 760-9834",
   purpose: "Medical appointment",
-  start: "2026-02-15T15:00:00.000Z", // Feb 20, 2026 3:00 PM UTC
+  start: "2026-02-12T15:00:00.000Z", // Feb 12, 2026 3:00 PM UTC
 };
 
 function bookingOverlapsDay(booking: { startTime: string; endTime: string }, day: Date): boolean {
@@ -74,8 +73,13 @@ export default function BookingDebugPage() {
     return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
   });
 
-  // Keep DatePicker values exactly like the styleguide: string | null
-  const [startPickerValue, setStartPickerValue] = useState<string | null>(EXAMPLE_BOOKING.start);
+  // Start time of day only (HH:mm) - day comes from selectedDay
+  const [startTimeOfDay, setStartTimeOfDay] = useState<string>(() => {
+    const d = new Date(EXAMPLE_BOOKING.start);
+    const h = d.getUTCHours().toString().padStart(2, "0");
+    const m = d.getUTCMinutes().toString().padStart(2, "0");
+    return `${h}:${m}`;
+  });
   const [endPickerValue, setEndPickerValue] = useState<string | null>(null);
 
   const form = useForm({
@@ -84,9 +88,10 @@ export default function BookingDebugPage() {
       pickupAddress: EXAMPLE_BOOKING.pickupAddress,
       destinationAddress: EXAMPLE_BOOKING.destinationAddress,
       passengerInfo: EXAMPLE_BOOKING.passengerInfo,
+      phoneNumber: EXAMPLE_BOOKING.phoneNumber ?? "",
       start: EXAMPLE_BOOKING.start, // will be kept in sync with picker (string)
       end: "", // will be kept in sync with picker (string), auto-calculated
-      agencyId: EXAMPLE_BOOKING.agencyId,
+      agencyId: "", // set from getCurrentUser (must be valid user.id for FK)
       purpose: EXAMPLE_BOOKING.purpose,
       driverId: "",
       status: BookingStatus.INCOMPLETE as BookingStatusValue,
@@ -114,6 +119,15 @@ export default function BookingDebugPage() {
   });
 
   const listDriversQuery = api.bookings.listDrivers.useQuery();
+  const currentUserQuery = api.bookings.getCurrentUser.useQuery();
+
+  // Set agencyId from current user so it references a valid user (fixes FK constraint)
+  useEffect(() => {
+    if (currentUserQuery.data && !form.values.agencyId) {
+      form.setFieldValue("agencyId", currentUserQuery.data.id);
+    }
+  }, [currentUserQuery.data, form.setFieldValue, form.values.agencyId]);
+
   const driverOptions = useMemo(
     () =>
       (listDriversQuery.data ?? []).map((d) => ({
@@ -130,18 +144,39 @@ export default function BookingDebugPage() {
     }
   }, [driverOptions, form.setFieldValue, form.values.driverId]);
 
+  // Compute full start ISO from selectedDay + startTimeOfDay (naive UTC to match booking storage)
+  const computedStart = useMemo(() => {
+    const day = selectedDay;
+    const time = startTimeOfDay;
+    if (!day || !time) return "";
+    const parts = time.split(":").map(Number);
+    const [h, m] = parts;
+    if (h == null || m == null || Number.isNaN(h) || Number.isNaN(m)) return "";
+    const y = day.getFullYear();
+    const mo = (day.getMonth() + 1).toString().padStart(2, "0");
+    const d = day.getDate().toString().padStart(2, "0");
+    const hh = h.toString().padStart(2, "0");
+    const mm = m.toString().padStart(2, "0");
+    return `${y}-${mo}-${d}T${hh}:${mm}:00.000Z`;
+  }, [selectedDay, startTimeOfDay]);
+
+  // Keep form.start in sync with computedStart
+  useEffect(() => {
+    form.setFieldValue("start", computedStart);
+  }, [computedStart, form.setFieldValue]);
+
   const canCalculateEnd =
     !!form.values.pickupAddress?.trim() &&
     !!form.values.destinationAddress?.trim() &&
-    !!form.values.start;
+    !!computedStart;
 
   const estimatedEndQuery = api.bookings.getEstimatedEndTime.useQuery(
     {
       pickupAddress: form.values.pickupAddress,
       destinationAddress: form.values.destinationAddress,
-      startTime: form.values.start,
+      startTime: computedStart,
     },
-    { enabled: canCalculateEnd },
+    { enabled: canCalculateEnd, staleTime: 0 },
   );
 
   useEffect(() => {
@@ -162,6 +197,8 @@ export default function BookingDebugPage() {
       driverId: form.values.driverId,
       startTime: form.values.start,
       endTime: form.values.end,
+      pickupAddress: form.values.pickupAddress?.trim() || undefined,
+      destinationAddress: form.values.destinationAddress?.trim() || undefined,
     },
     { enabled: canCheckAvailability },
   );
@@ -182,7 +219,9 @@ export default function BookingDebugPage() {
           exampleStartDate.getUTCDate(),
         ),
       );
-      setStartPickerValue(EXAMPLE_BOOKING.start);
+      const h = exampleStartDate.getUTCHours().toString().padStart(2, "0");
+      const m = exampleStartDate.getUTCMinutes().toString().padStart(2, "0");
+      setStartTimeOfDay(`${h}:${m}`);
       setEndPickerValue(null);
     },
     onError: (err) => {
@@ -252,6 +291,7 @@ export default function BookingDebugPage() {
             startTime: values.start,
             endTime: values.end,
             purpose: values.purpose || undefined,
+            phoneNumber: values.phoneNumber?.trim() || null,
             driverId: values.driverId || null,
             status: values.status,
           });
@@ -265,7 +305,13 @@ export default function BookingDebugPage() {
           label="Destination Address"
           {...form.getInputProps("destinationAddress")}
         />
-        <Textarea withAsterisk label="Passenger Info" {...form.getInputProps("passengerInfo")} />
+        <TextInput withAsterisk label="Passenger Info" {...form.getInputProps("passengerInfo")} />
+        <TextInput
+          label="Phone number (optional)"
+          placeholder="+1 (403) 760-9834"
+          maxLength={25}
+          {...form.getInputProps("phoneNumber")}
+        />
         <TextInput withAsterisk label="Agency ID" {...form.getInputProps("agencyId")} />
         <TextInput label="Purpose (optional)" {...form.getInputProps("purpose")} />
 
@@ -363,30 +409,11 @@ export default function BookingDebugPage() {
           </div>
         )}
 
-        {/* ✅ Styleguide DatePicker (date + time) */}
-        <DatePicker
-          label="Starts"
-          placeholder="Select date and time"
-          value={startPickerValue}
-          onChange={(v) => {
-            setStartPickerValue(v);
-            form.setFieldValue("start", v ?? "");
-          }}
-        />
-
-        <TextInput
-          label="Ends"
-          value={
-            endPickerValue
-              ? new Date(endPickerValue).toLocaleString("en-US", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })
-              : ""
-          }
-          placeholder="Enter pickup, destination, and start time to calculate"
-          readOnly
-          styles={{ input: { cursor: "default" } }}
+        <TimeInput
+          label="Start time"
+          placeholder="Select time"
+          value={startTimeOfDay}
+          onChange={(v) => setStartTimeOfDay(v.target.value)}
         />
 
         {canCalculateEnd && estimatedEndQuery.data && (
@@ -409,6 +436,27 @@ export default function BookingDebugPage() {
           </div>
         )}
 
+        <TextInput
+          label="Ends"
+          value={
+            estimatedEndQuery.data?.estimatedEndTime
+              ? new Date(estimatedEndQuery.data.estimatedEndTime).toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                  timeZone: "UTC",
+                })
+              : ""
+          }
+          placeholder={
+            estimatedEndQuery.isLoading
+              ? "Calculating…"
+              : "Enter pickup, destination, and start time to calculate"
+          }
+          readOnly
+          styles={{ input: { cursor: "default" } }}
+        />
+
         {!endAfterStart && (
           <p className={styles.errorMessage}>End time must be after start time.</p>
         )}
@@ -425,7 +473,7 @@ export default function BookingDebugPage() {
           >
             {availabilityQuery.data.available
               ? "Driver is available for this time."
-              : "Driver has another booking at this time."}
+              : (availabilityQuery.data.reason ?? "Driver has another booking at this time.")}
           </Alert>
         )}
         {!canCheckAvailability && form.values.driverId?.trim() && (
