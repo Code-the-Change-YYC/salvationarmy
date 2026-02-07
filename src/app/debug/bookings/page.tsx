@@ -1,26 +1,98 @@
 "use client";
 
-import { Button, Divider, Group, Select, Textarea, TextInput } from "@mantine/core";
+import {
+  Alert,
+  Button,
+  Divider,
+  Group,
+  Select,
+  Table,
+  Text,
+  Textarea,
+  TextInput,
+} from "@mantine/core";
+import { DateInput, TimeInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "@/trpc/react";
 import { ALL_BOOKING_STATUSES, BookingStatus, type BookingStatusValue } from "@/types/types";
 import styles from "./BookingDebugPage.module.scss";
 
+function isEndAfterStart(start: string, end: string) {
+  const a = new Date(start).getTime();
+  const b = new Date(end).getTime();
+  if (Number.isNaN(a) || Number.isNaN(b)) return true; // let backend/zod handle invalid formats
+  return b > a;
+}
+
+function formatTimeSlot(startTime: string, endTime: string): string {
+  // Format in UTC to match stored booking times (e.g. "09:00:00+00" -> "9:00 AM")
+  const opts: Intl.DateTimeFormatOptions = {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "UTC",
+  };
+  const start = new Date(startTime).toLocaleTimeString("en-US", opts);
+  const end = new Date(endTime).toLocaleTimeString("en-US", opts);
+  return `${start} – ${end}`;
+}
+
+/** Example pre-filled booking for testing. agencyId must be a valid user.id; set dynamically from getCurrentUser. */
+const EXAMPLE_BOOKING = {
+  title: "Test Example",
+  pickupAddress: "The Inn from the Cold, 110 11 Ave SE, Calgary, AB",
+  destinationAddress: "Sheldon M. Chumir Health Centre, 1213 4 St SW, Calgary, AB",
+  passengerInfo: "John Smith",
+  phoneNumber: "+1 (403) 760-9834",
+  purpose: "Medical appointment",
+  start: "2026-02-12T15:00:00.000Z", // Feb 12, 2026 3:00 PM UTC
+};
+
+function bookingOverlapsDay(booking: { startTime: string; endTime: string }, day: Date): boolean {
+  const dayStart = new Date(day);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(day);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  const start = new Date(booking.startTime).getTime();
+  const end = new Date(booking.endTime).getTime();
+  const dStart = dayStart.getTime();
+  const dEnd = dayEnd.getTime();
+
+  return start < dEnd && end > dStart;
+}
+
 export default function BookingDebugPage() {
   const [bookingId, setBookingId] = useState<number>(1);
 
+  // Day picker for driver availability (date-only)
+  const [selectedDay, setSelectedDay] = useState<Date | null>(() => {
+    const d = new Date(EXAMPLE_BOOKING.start);
+    return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  });
+
+  // Start time of day only (HH:mm) - day comes from selectedDay
+  const [startTimeOfDay, setStartTimeOfDay] = useState<string>(() => {
+    const d = new Date(EXAMPLE_BOOKING.start);
+    const h = d.getUTCHours().toString().padStart(2, "0");
+    const m = d.getUTCMinutes().toString().padStart(2, "0");
+    return `${h}:${m}`;
+  });
+  const [endPickerValue, setEndPickerValue] = useState<string | null>(null);
+
   const form = useForm({
     initialValues: {
-      title: "",
-      pickupAddress: "",
-      destinationAddress: "",
-      passengerInfo: "",
-      start: "",
-      end: "",
-      agencyId: "",
-      purpose: "",
+      title: EXAMPLE_BOOKING.title,
+      pickupAddress: EXAMPLE_BOOKING.pickupAddress,
+      destinationAddress: EXAMPLE_BOOKING.destinationAddress,
+      passengerInfo: EXAMPLE_BOOKING.passengerInfo,
+      phoneNumber: EXAMPLE_BOOKING.phoneNumber ?? "",
+      start: EXAMPLE_BOOKING.start, // will be kept in sync with picker (string)
+      end: "", // will be kept in sync with picker (string), auto-calculated
+      agencyId: "", // set from getCurrentUser (must be valid user.id for FK)
+      purpose: EXAMPLE_BOOKING.purpose,
       driverId: "",
       status: BookingStatus.INCOMPLETE as BookingStatusValue,
     },
@@ -39,10 +111,97 @@ export default function BookingDebugPage() {
 
   const bookingQuery = api.bookings.getById.useQuery({ id: bookingId }, { enabled: false });
 
+  const canShowDriverAvailability = !!selectedDay && !!form.values.driverId?.trim();
+
   const allBookingsQuery = api.bookings.getAll.useQuery(undefined, {
-    enabled: false,
+    enabled: true, // fetch on load for both driver availability table and Fetch All
     staleTime: 0,
   });
+
+  const listDriversQuery = api.bookings.listDrivers.useQuery();
+  const currentUserQuery = api.bookings.getCurrentUser.useQuery();
+
+  // Set agencyId from current user so it references a valid user (fixes FK constraint)
+  useEffect(() => {
+    if (currentUserQuery.data && !form.values.agencyId) {
+      form.setFieldValue("agencyId", currentUserQuery.data.id);
+    }
+  }, [currentUserQuery.data, form.setFieldValue, form.values.agencyId]);
+
+  const driverOptions = useMemo(
+    () =>
+      (listDriversQuery.data ?? []).map((d) => ({
+        value: d.id,
+        label: `${d.name} (${d.email})`,
+      })),
+    [listDriversQuery.data],
+  );
+
+  // Pre-select first driver when options load (for example pre-fill)
+  useEffect(() => {
+    if (driverOptions.length > 0 && !form.values.driverId) {
+      form.setFieldValue("driverId", driverOptions[0]?.value ?? "");
+    }
+  }, [driverOptions, form.setFieldValue, form.values.driverId]);
+
+  // Compute full start ISO from selectedDay + startTimeOfDay (naive UTC to match booking storage)
+  const computedStart = useMemo(() => {
+    const day = selectedDay;
+    const time = startTimeOfDay;
+    if (!day || !time) return "";
+    const parts = time.split(":").map(Number);
+    const [h, m] = parts;
+    if (h == null || m == null || Number.isNaN(h) || Number.isNaN(m)) return "";
+    const y = day.getFullYear();
+    const mo = (day.getMonth() + 1).toString().padStart(2, "0");
+    const d = day.getDate().toString().padStart(2, "0");
+    const hh = h.toString().padStart(2, "0");
+    const mm = m.toString().padStart(2, "0");
+    return `${y}-${mo}-${d}T${hh}:${mm}:00.000Z`;
+  }, [selectedDay, startTimeOfDay]);
+
+  // Keep form.start in sync with computedStart
+  useEffect(() => {
+    form.setFieldValue("start", computedStart);
+  }, [computedStart, form.setFieldValue]);
+
+  const canCalculateEnd =
+    !!form.values.pickupAddress?.trim() &&
+    !!form.values.destinationAddress?.trim() &&
+    !!computedStart;
+
+  const estimatedEndQuery = api.bookings.getEstimatedEndTime.useQuery(
+    {
+      pickupAddress: form.values.pickupAddress,
+      destinationAddress: form.values.destinationAddress,
+      startTime: computedStart,
+    },
+    { enabled: canCalculateEnd, staleTime: 0 },
+  );
+
+  useEffect(() => {
+    if (estimatedEndQuery.data) {
+      setEndPickerValue(estimatedEndQuery.data.estimatedEndTime);
+      form.setFieldValue("end", estimatedEndQuery.data.estimatedEndTime);
+    }
+  }, [estimatedEndQuery.data, form.setFieldValue]);
+
+  const canCheckAvailability =
+    !!form.values.driverId?.trim() &&
+    !!form.values.start &&
+    !!form.values.end &&
+    isEndAfterStart(form.values.start, form.values.end);
+
+  const availabilityQuery = api.bookings.isDriverAvailable.useQuery(
+    {
+      driverId: form.values.driverId,
+      startTime: form.values.start,
+      endTime: form.values.end,
+      pickupAddress: form.values.pickupAddress?.trim() || undefined,
+      destinationAddress: form.values.destinationAddress?.trim() || undefined,
+    },
+    { enabled: canCheckAvailability },
+  );
 
   const createMutation = api.bookings.create.useMutation({
     onSuccess: async () => {
@@ -52,6 +211,18 @@ export default function BookingDebugPage() {
       await allBookingsQuery.refetch();
 
       form.reset();
+      const exampleStartDate = new Date(EXAMPLE_BOOKING.start);
+      setSelectedDay(
+        new Date(
+          exampleStartDate.getUTCFullYear(),
+          exampleStartDate.getUTCMonth(),
+          exampleStartDate.getUTCDate(),
+        ),
+      );
+      const h = exampleStartDate.getUTCHours().toString().padStart(2, "0");
+      const m = exampleStartDate.getUTCMinutes().toString().padStart(2, "0");
+      setStartTimeOfDay(`${h}:${m}`);
+      setEndPickerValue(null);
     },
     onError: (err) => {
       notifications.show({ color: "red", message: err.message });
@@ -89,49 +260,28 @@ export default function BookingDebugPage() {
     label: s.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase()),
   }));
 
+  const endAfterStart = useMemo(() => {
+    if (!form.values.start || !form.values.end) return true;
+    return isEndAfterStart(form.values.start, form.values.end);
+  }, [form.values.start, form.values.end]);
+
   return (
     <div className={styles.container}>
       <h1>Booking API Debug Panel</h1>
 
-      <Group>
-        <TextInput
-          label="Booking ID"
-          type="number"
-          value={bookingId}
-          onChange={(e) => setBookingId(Number(e.target.value))}
-        />
-        <Button loading={bookingQuery.isFetching} onClick={() => bookingQuery.refetch()}>
-          Fetch Booking
-        </Button>
-      </Group>
-
-      <Divider my="md" />
-
-      {/* UPDATE STATUS */}
-      <Select
-        label="Update Status"
-        value={form.values.status}
-        onChange={(v) => form.setFieldValue("status", v as BookingStatusValue)}
-        data={statusOptions}
-      />
-
-      <Button
-        mt="sm"
-        onClick={() => updateMutation.mutate({ id: bookingId, status: form.values.status })}
-      >
-        Update Status
-      </Button>
-
-      <Button color="red" mt="sm" onClick={() => cancelMutation.mutate({ id: bookingId })}>
-        Cancel Booking
-      </Button>
-
-      <Divider my="xl" />
-
       {/* CREATE FORM */}
       <h2>Create Booking</h2>
       <form
-        onSubmit={form.onSubmit((values) =>
+        onSubmit={form.onSubmit((values) => {
+          // Front-end guard matching backend refine()
+          if (!isEndAfterStart(values.start, values.end)) {
+            notifications.show({
+              color: "red",
+              message: "End time must be after start time.",
+            });
+            return;
+          }
+
           createMutation.mutate({
             title: values.title,
             pickupAddress: values.pickupAddress,
@@ -141,10 +291,11 @@ export default function BookingDebugPage() {
             startTime: values.start,
             endTime: values.end,
             purpose: values.purpose || undefined,
+            phoneNumber: values.phoneNumber?.trim() || null,
             driverId: values.driverId || null,
             status: values.status,
-          }),
-        )}
+          });
+        })}
         className={styles.formGrid}
       >
         <TextInput withAsterisk label="Title" {...form.getInputProps("title")} />
@@ -154,22 +305,182 @@ export default function BookingDebugPage() {
           label="Destination Address"
           {...form.getInputProps("destinationAddress")}
         />
-        <Textarea withAsterisk label="Passenger Info" {...form.getInputProps("passengerInfo")} />
+        <TextInput withAsterisk label="Passenger Info" {...form.getInputProps("passengerInfo")} />
+        <TextInput
+          label="Phone number (optional)"
+          placeholder="+1 (403) 760-9834"
+          maxLength={25}
+          {...form.getInputProps("phoneNumber")}
+        />
         <TextInput withAsterisk label="Agency ID" {...form.getInputProps("agencyId")} />
         <TextInput label="Purpose (optional)" {...form.getInputProps("purpose")} />
-        <TextInput label="Driver ID (optional)" {...form.getInputProps("driverId")} />
-        <TextInput
-          withAsterisk
-          label="Starts"
-          placeholder="2025-01-01T10:00:00Z"
-          {...form.getInputProps("start")}
+
+        <DateInput
+          label="Day"
+          placeholder="Pick a day"
+          value={selectedDay}
+          onChange={(v) => {
+            if (v == null) {
+              setSelectedDay(null);
+              return;
+            }
+            // Parse as local date to avoid UTC-off-by-one (e.g. "2025-02-15" -> Feb 14 in PST)
+            const str = typeof v === "string" ? v : (v as Date).toISOString().slice(0, 10);
+            const parts = str.split("-").map(Number);
+            const [y, m, day] = parts;
+            if (y != null && m != null && day != null) {
+              setSelectedDay(new Date(y, m - 1, day));
+            }
+          }}
+          valueFormat="MMM D, YYYY"
+          clearable
         />
+
+        <Select
+          label="Driver (optional)"
+          placeholder="Select driver"
+          data={driverOptions}
+          searchable
+          clearable
+          {...form.getInputProps("driverId")}
+        />
+
+        {canShowDriverAvailability && (
+          <div className={styles.bookedSlotsTable}>
+            <h4>
+              Driver bookings for{" "}
+              {selectedDay?.toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </h4>
+            {allBookingsQuery.isLoading ? (
+              <Text size="sm" c="dimmed">
+                Loading…
+              </Text>
+            ) : (
+              (() => {
+                const day = selectedDay;
+                const driverId = form.values.driverId;
+                if (!day || !driverId) return null;
+                const bookedSlots = (allBookingsQuery.data ?? [])
+                  .filter(
+                    (b) =>
+                      b.driverId === driverId &&
+                      b.status !== "cancelled" &&
+                      bookingOverlapsDay(b, day),
+                  )
+                  .sort(
+                    (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+                  );
+
+                if (bookedSlots.length === 0) {
+                  return (
+                    <Text size="sm" c="dimmed">
+                      No bookings this day – driver available all day
+                    </Text>
+                  );
+                }
+
+                return (
+                  <Table withTableBorder withColumnBorders className={styles.bookedSlotsTableBody}>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>Time slot</Table.Th>
+                        <Table.Th>Booking</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {bookedSlots.map((b) => (
+                        <Table.Tr key={b.id}>
+                          <Table.Td>{formatTimeSlot(b.startTime, b.endTime)}</Table.Td>
+                          <Table.Td>
+                            Booking #{b.id} – {b.title}
+                          </Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                );
+              })()
+            )}
+          </div>
+        )}
+
+        <TimeInput
+          label="Start time"
+          placeholder="Select time"
+          value={startTimeOfDay}
+          onChange={(v) => setStartTimeOfDay(v.target.value)}
+        />
+
+        {canCalculateEnd && estimatedEndQuery.data && (
+          <div className={styles.debugOutput}>
+            <h4>End time calculation</h4>
+            <pre>
+              {/* Location 1: {estimatedEndQuery.data.location1}
+              {"\n"}
+              Location 2: {estimatedEndQuery.data.location2}
+              {"\n"} */}
+              Calculated driving time: {estimatedEndQuery.data.drivingTimeMinutes} min
+              {"\n"}
+              Total booking time: {estimatedEndQuery.data.totalBookingMinutes} min (15 min pickup
+              wait + {estimatedEndQuery.data.drivingTimeMinutes} min travel)
+              {"\n"}
+              Start time: {estimatedEndQuery.data.startTime}
+              {"\n"}
+              Estimated end time: {estimatedEndQuery.data.estimatedEndTime}
+            </pre>
+          </div>
+        )}
+
         <TextInput
-          withAsterisk
           label="Ends"
-          placeholder="2025-01-01T12:00:00Z"
-          {...form.getInputProps("end")}
+          value={
+            estimatedEndQuery.data?.estimatedEndTime
+              ? new Date(estimatedEndQuery.data.estimatedEndTime).toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                  timeZone: "UTC",
+                })
+              : ""
+          }
+          placeholder={
+            estimatedEndQuery.isLoading
+              ? "Calculating…"
+              : "Enter pickup, destination, and start time to calculate"
+          }
+          readOnly
+          styles={{ input: { cursor: "default" } }}
         />
+
+        {!endAfterStart && (
+          <p className={styles.errorMessage}>End time must be after start time.</p>
+        )}
+
+        {canCheckAvailability && availabilityQuery.isLoading && (
+          <Text size="sm" c="dimmed">
+            Checking availability…
+          </Text>
+        )}
+        {canCheckAvailability && availabilityQuery.data && (
+          <Alert
+            color={availabilityQuery.data.available ? "green" : "red"}
+            title={availabilityQuery.data.available ? "Driver available" : "Driver not available"}
+          >
+            {availabilityQuery.data.available
+              ? "Driver is available for this time."
+              : (availabilityQuery.data.reason ?? "Driver has another booking at this time.")}
+          </Alert>
+        )}
+        {!canCheckAvailability && form.values.driverId?.trim() && (
+          <Text size="sm" c="dimmed">
+            Enter start and end time to check driver availability.
+          </Text>
+        )}
 
         <Button type="submit" className={styles.submitButton}>
           Create
@@ -184,14 +495,45 @@ export default function BookingDebugPage() {
         <pre className={styles.jsonBlock}>{JSON.stringify(createMutation.data, null, 2)}</pre>
       )}
 
-      {/* DATA VIEWS */}
+      <Divider my="xl" />
+
+      {/* SINGLE BOOKING */}
       <section>
         <h3>Single Booking</h3>
+        <Group>
+          <TextInput
+            label="Booking ID"
+            type="number"
+            value={bookingId}
+            onChange={(e) => setBookingId(Number(e.target.value))}
+          />
+          <Button loading={bookingQuery.isFetching} onClick={() => bookingQuery.refetch()}>
+            Fetch Booking
+          </Button>
+        </Group>
+        <Select
+          label="Update Status"
+          value={form.values.status}
+          onChange={(v) => form.setFieldValue("status", v as BookingStatusValue)}
+          data={statusOptions}
+          mt="sm"
+        />
+        <Group mt="sm">
+          <Button
+            onClick={() => updateMutation.mutate({ id: bookingId, status: form.values.status })}
+          >
+            Update Status
+          </Button>
+          <Button color="red" onClick={() => cancelMutation.mutate({ id: bookingId })}>
+            Cancel Booking
+          </Button>
+        </Group>
         <pre className={styles.jsonBlock}>
           {bookingQuery.data ? JSON.stringify(bookingQuery.data, null, 2) : "No data"}
         </pre>
       </section>
 
+      {/* ALL BOOKINGS */}
       <section>
         <h3>All Bookings</h3>
         <Button loading={allBookingsQuery.isFetching} onClick={() => allBookingsQuery.refetch()}>

@@ -2,18 +2,311 @@ import { TRPCError } from "@trpc/server";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import { and, desc, eq, gte, lt, or } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, lt, lte, ne, or } from "drizzle-orm";
 import { z } from "zod";
+import {
+  MAX_GAP_MINUTES_FOR_TRAVEL_CHECK,
+  PICKUP_WAIT_TIME_MINUTES,
+  TRAVEL_BUFFER_MINUTES,
+} from "@/constants/driver-assignment";
+import { roundUpToNearestIncrement } from "@/lib/datetime";
+import { getTravelTimeMinutes } from "@/lib/google-maps";
+import type { db } from "@/server/db";
 import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
+import { user } from "../../db/auth-schema";
 import { BOOKING_STATUS, type BookingInsertType, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 dayjs.extend(utc); //Allows dayjs to work in UTC
 dayjs.extend(timezone); //Allows dayjs to convert dates between time zones
 
+/** Fallback travel minutes per leg when Google Maps API fails */
+const FALLBACK_TRAVEL_MINUTES = 15;
+
 const StatusZ = z.enum(BOOKING_STATUS); // ← uses "cancelled" (double-L)
 
+type DbContext = { db: typeof db };
+
+function assertCanAccessBooking(
+  session: { user: { id: string; role?: string | null } },
+  agencyId: string,
+): void {
+  const role = session.user.role ?? "user";
+  const allowed = role === "admin" || agencyId === session.user.id;
+  if (!allowed) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "You don't have permission to access this booking.",
+    });
+  }
+}
+
+/** Overlap: existing.startTime < endTime AND existing.endTime > startTime */
+async function findOverlappingBooking(
+  ctx: DbContext,
+  params: {
+    driverId: string;
+    startTime: string;
+    endTime: string;
+    excludeBookingId?: number;
+  },
+): Promise<{ id: number } | undefined> {
+  const { driverId, startTime, endTime, excludeBookingId } = params;
+  const baseCondition = and(
+    eq(bookings.driverId, driverId),
+    ne(bookings.status, "cancelled"),
+    lt(bookings.startTime, endTime),
+    gt(bookings.endTime, startTime),
+  );
+  const whereCondition =
+    excludeBookingId !== undefined
+      ? and(baseCondition, ne(bookings.id, excludeBookingId))
+      : baseCondition;
+
+  const [row] = await ctx.db
+    .select({ id: bookings.id })
+    .from(bookings)
+    .where(whereCondition)
+    .limit(1);
+  return row;
+}
+
+/**
+ * Shared helper: validate that the driver has enough time to travel between
+ * adjacent bookings. Uses lte/gte to include back-to-back (touching) times.
+ * Returns { valid, reason } — does not throw.
+ */
+async function validateTravelBetweenAdjacentBookings(
+  ctx: DbContext,
+  params: {
+    driverId: string;
+    startTime: string;
+    endTime: string;
+    pickupAddress: string;
+    destinationAddress: string;
+    excludeBookingId?: number;
+  },
+): Promise<{ valid: boolean; reason?: string }> {
+  const { driverId, startTime, endTime, pickupAddress, destinationAddress, excludeBookingId } =
+    params;
+
+  const baseDriverCondition = and(
+    eq(bookings.driverId, driverId),
+    ne(bookings.status, "cancelled"),
+  );
+  const excludeCond =
+    excludeBookingId !== undefined ? ne(bookings.id, excludeBookingId) : undefined;
+
+  // Previous booking: endTime <= newStartTime (include back-to-back)
+  const [prevBooking] = await ctx.db
+    .select({
+      endTime: bookings.endTime,
+      destinationAddress: bookings.destinationAddress,
+    })
+    .from(bookings)
+    .where(
+      and(
+        baseDriverCondition,
+        lte(bookings.endTime, startTime),
+        ...(excludeCond ? [excludeCond] : []),
+      ),
+    )
+    .orderBy(desc(bookings.endTime))
+    .limit(1);
+
+  if (
+    prevBooking?.endTime &&
+    prevBooking?.destinationAddress &&
+    prevBooking.destinationAddress.trim() !== ""
+  ) {
+    const prevEndMs = new Date(prevBooking.endTime).getTime();
+    const newStartMs = new Date(startTime).getTime();
+    const gapMinutes = (newStartMs - prevEndMs) / (60 * 1000);
+
+    if (gapMinutes <= MAX_GAP_MINUTES_FOR_TRAVEL_CHECK) {
+      const travelMinutes =
+        (await getTravelTimeMinutes(prevBooking.destinationAddress, pickupAddress)) ??
+        FALLBACK_TRAVEL_MINUTES;
+      const requiredMinutes = travelMinutes + TRAVEL_BUFFER_MINUTES;
+
+      if (gapMinutes < requiredMinutes) {
+        return {
+          valid: false,
+          reason: `Driver needs ${travelMinutes} min to travel from previous booking's destination to this pickup (plus ${TRAVEL_BUFFER_MINUTES} min buffer). Not enough time between bookings.`,
+        };
+      }
+    }
+  }
+
+  // Next booking: startTime >= newEndTime (include back-to-back)
+  const [nextBooking] = await ctx.db
+    .select({
+      startTime: bookings.startTime,
+      pickupAddress: bookings.pickupAddress,
+    })
+    .from(bookings)
+    .where(
+      and(
+        baseDriverCondition,
+        gte(bookings.startTime, endTime),
+        ...(excludeCond ? [excludeCond] : []),
+      ),
+    )
+    .orderBy(asc(bookings.startTime))
+    .limit(1);
+
+  if (
+    nextBooking?.startTime &&
+    nextBooking?.pickupAddress &&
+    nextBooking.pickupAddress.trim() !== ""
+  ) {
+    const newEndMs = new Date(endTime).getTime();
+    const nextStartMs = new Date(nextBooking.startTime).getTime();
+    const gapMinutes = (nextStartMs - newEndMs) / (60 * 1000);
+
+    if (gapMinutes <= MAX_GAP_MINUTES_FOR_TRAVEL_CHECK) {
+      const travelMinutes =
+        (await getTravelTimeMinutes(destinationAddress, nextBooking.pickupAddress)) ??
+        FALLBACK_TRAVEL_MINUTES;
+      const requiredMinutes = travelMinutes + TRAVEL_BUFFER_MINUTES;
+
+      if (gapMinutes < requiredMinutes) {
+        return {
+          valid: false,
+          reason: `Driver needs ${travelMinutes} min to travel from this destination to the next booking's pickup (plus ${TRAVEL_BUFFER_MINUTES} min buffer). Not enough time between bookings.`,
+        };
+      }
+    }
+  }
+
+  return { valid: true };
+}
+
+/** Overlap + travel validation; throws TRPCError on failure. */
+async function validateDriverForSlot(
+  ctx: DbContext,
+  params: {
+    driverId: string;
+    startTime: string;
+    endTime: string;
+    pickupAddress: string;
+    destinationAddress: string;
+    excludeBookingId?: number;
+  },
+): Promise<void> {
+  if (await findOverlappingBooking(ctx, params)) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "Driver has another booking at that time.",
+    });
+  }
+  const travelResult = await validateTravelBetweenAdjacentBookings(ctx, params);
+  if (!travelResult.valid) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: travelResult.reason ?? "Not enough travel time between bookings.",
+    });
+  }
+}
+
 export const bookingsRouter = createTRPCRouter({
+  // GET /bookings/current-user (for debug form default agencyId)
+  getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
+    return {
+      id: ctx.session.user.id,
+      role: ctx.session.user.role ?? "user",
+    };
+  }),
+
+  // GET /bookings/drivers (list all drivers)
+  listDrivers: protectedProcedure.query(async ({ ctx }) => {
+    const drivers = await ctx.db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      })
+      .from(user)
+      .where(eq(user.role, "driver"))
+      .orderBy(asc(user.name));
+
+    return drivers;
+  }),
+
+  // GET /bookings/is-driver-available
+  isDriverAvailable: protectedProcedure
+    .input(
+      z.object({
+        driverId: z.string().min(1),
+        startTime: z.string().datetime(),
+        endTime: z.string().datetime(),
+        pickupAddress: z.string().min(1).optional(),
+        destinationAddress: z.string().min(1).optional(),
+        /**
+         * Optional booking ID to exclude from the overlap check.
+         * Useful when editing an existing booking.
+         */
+        excludeBookingId: z.number().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { driverId, startTime, endTime, excludeBookingId, pickupAddress, destinationAddress } =
+        input;
+
+      if (await findOverlappingBooking(ctx, { driverId, startTime, endTime, excludeBookingId })) {
+        return { available: false, reason: "Driver has another booking at that time." };
+      }
+
+      if (pickupAddress && destinationAddress) {
+        const travelResult = await validateTravelBetweenAdjacentBookings(ctx, {
+          driverId,
+          startTime,
+          endTime,
+          pickupAddress,
+          destinationAddress,
+          excludeBookingId,
+        });
+        if (!travelResult.valid) {
+          return { available: false, reason: travelResult.reason };
+        }
+      }
+
+      return { available: true };
+    }),
+
+  // GET /bookings/estimated-end-time
+  // End time = Start + Pickup wait (15 min) + Travel time (Location 1 → Location 2)
+  getEstimatedEndTime: protectedProcedure
+    .input(
+      z.object({
+        pickupAddress: z.string().min(1),
+        destinationAddress: z.string().min(1),
+        startTime: z.string().datetime(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const drivingTimeMinutes =
+        (await getTravelTimeMinutes(input.pickupAddress, input.destinationAddress)) ??
+        FALLBACK_TRAVEL_MINUTES;
+
+      const totalBookingMinutes = PICKUP_WAIT_TIME_MINUTES + drivingTimeMinutes;
+
+      const start = new Date(input.startTime);
+      const end = new Date(start.getTime());
+      end.setMinutes(end.getMinutes() + totalBookingMinutes);
+
+      const estimatedEndTime = roundUpToNearestIncrement(end).toISOString();
+
+      return {
+        location1: input.pickupAddress,
+        location2: input.destinationAddress,
+        drivingTimeMinutes,
+        totalBookingMinutes,
+        startTime: input.startTime,
+        estimatedEndTime,
+      };
+    }),
+
   // POST /bookings (create)
   create: protectedProcedure
     .input(
@@ -31,6 +324,7 @@ export const bookingsRouter = createTRPCRouter({
 
           // Optional fields
           purpose: z.string().optional(),
+          phoneNumber: z.string().max(25).optional().nullable(),
           driverId: z.string().nullable().optional(),
           status: StatusZ.optional(),
         })
@@ -60,8 +354,19 @@ export const bookingsRouter = createTRPCRouter({
 
       // Only include optional fields if they are actually provided
       if (input.purpose !== undefined) bookingData.purpose = input.purpose;
+      if (input.phoneNumber !== undefined) bookingData.phoneNumber = input.phoneNumber;
       if (input.driverId !== undefined) bookingData.driverId = input.driverId;
       if (input.status !== undefined) bookingData.status = input.status;
+
+      if (input.driverId) {
+        await validateDriverForSlot(ctx, {
+          driverId: input.driverId,
+          startTime: input.startTime,
+          endTime: input.endTime,
+          pickupAddress: input.pickupAddress,
+          destinationAddress: input.destinationAddress,
+        });
+      }
 
       const [row] = await ctx.db.insert(bookings).values(bookingData).returning();
 
@@ -88,18 +393,7 @@ export const bookingsRouter = createTRPCRouter({
         message: "Booking not found",
       });
 
-    const userId = ctx.session.user.id;
-    const role = ctx.session.user.role ?? "user"; // default safety
-
-    const allowed = role === "admin" || row.agencyId === userId;
-
-    if (!allowed) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "You don’t have permission to view this booking.",
-      });
-    }
-
+    assertCanAccessBooking(ctx.session, row.agencyId);
     return row;
   }),
 
@@ -120,8 +414,12 @@ export const bookingsRouter = createTRPCRouter({
       let endDate = input?.endDate ?? "";
 
       if (input === undefined || input.endDate === undefined) {
-        //No end date given, assign one to input.endDate
-        endDate = dayjs().utc().add(50, "year").tz("America/Hermosillo").format();
+        // No end date given; use explicit format so result matches isoTimeRegexFourDigitYears (-07:00)
+        endDate = dayjs()
+          .utc()
+          .add(50, "year")
+          .tz("America/Hermosillo")
+          .format("YYYY-MM-DDTHH:mm:ssZ");
       }
 
       let startAndEndDateErrorMessage = "Invalid: ";
@@ -183,6 +481,8 @@ export const bookingsRouter = createTRPCRouter({
         passengerInfo: z.string().optional(),
         driverId: z.string().optional().nullable(),
         status: StatusZ.optional(),
+        startTime: z.string().datetime().optional(),
+        endTime: z.string().datetime().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -203,23 +503,29 @@ export const bookingsRouter = createTRPCRouter({
         });
       }
 
-      // 2) Authorization check
+      assertCanAccessBooking(ctx.session, existing.agencyId);
+
       const userId = ctx.session.user.id;
-      const role = ctx.session.user.role ?? "user";
-
-      const allowed = role === "admin" || existing.agencyId === userId;
-
-      if (!allowed) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You cannot update this booking.",
-        });
-      }
-
       // 3) Filter only defined updates
       const updatesToApply = Object.fromEntries(
         Object.entries(updates).filter(([, v]) => v !== undefined),
       );
+
+      if (updatesToApply.driverId !== undefined && updatesToApply.driverId) {
+        const proposedStart = updatesToApply.startTime ?? existing.startTime;
+        const proposedEnd = updatesToApply.endTime ?? existing.endTime;
+        const proposedPickup = updatesToApply.pickupAddress ?? existing.pickupAddress;
+        const proposedDest = updatesToApply.destinationAddress ?? existing.destinationAddress;
+
+        await validateDriverForSlot(ctx, {
+          driverId: updatesToApply.driverId,
+          startTime: proposedStart,
+          endTime: proposedEnd,
+          pickupAddress: proposedPickup,
+          destinationAddress: proposedDest,
+          excludeBookingId: id,
+        });
+      }
 
       // 4) Perform update with updatedBy field set
       const res = await ctx.db
@@ -252,17 +558,7 @@ export const bookingsRouter = createTRPCRouter({
         });
       }
 
-      const userId = ctx.session.user.id;
-      const role = ctx.session.user.role ?? "user";
-
-      const allowed = role === "admin" || existing.agencyId === userId;
-
-      if (!allowed) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You cannot cancel this booking.",
-        });
-      }
+      assertCanAccessBooking(ctx.session, existing.agencyId);
 
       return ctx.db
         .update(bookings)

@@ -9,7 +9,8 @@
 /coverage
 
 # database
-drizzle/meta 
+drizzle/meta
+drizzle
 
 # next.js
 /.next/
