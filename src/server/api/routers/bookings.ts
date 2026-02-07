@@ -27,6 +27,50 @@ const StatusZ = z.enum(BOOKING_STATUS); // ← uses "cancelled" (double-L)
 
 type DbContext = { db: typeof db };
 
+function assertCanAccessBooking(
+  session: { user: { id: string; role?: string | null } },
+  agencyId: string,
+): void {
+  const role = session.user.role ?? "user";
+  const allowed = role === "admin" || agencyId === session.user.id;
+  if (!allowed) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "You don't have permission to access this booking.",
+    });
+  }
+}
+
+/** Overlap: existing.startTime < endTime AND existing.endTime > startTime */
+async function findOverlappingBooking(
+  ctx: DbContext,
+  params: {
+    driverId: string;
+    startTime: string;
+    endTime: string;
+    excludeBookingId?: number;
+  },
+): Promise<{ id: number } | undefined> {
+  const { driverId, startTime, endTime, excludeBookingId } = params;
+  const baseCondition = and(
+    eq(bookings.driverId, driverId),
+    ne(bookings.status, "cancelled"),
+    lt(bookings.startTime, endTime),
+    gt(bookings.endTime, startTime),
+  );
+  const whereCondition =
+    excludeBookingId !== undefined
+      ? and(baseCondition, ne(bookings.id, excludeBookingId))
+      : baseCondition;
+
+  const [row] = await ctx.db
+    .select({ id: bookings.id })
+    .from(bookings)
+    .where(whereCondition)
+    .limit(1);
+  return row;
+}
+
 /**
  * Shared helper: validate that the driver has enough time to travel between
  * adjacent bookings. Uses lte/gte to include back-to-back (touching) times.
@@ -138,6 +182,33 @@ async function validateTravelBetweenAdjacentBookings(
   return { valid: true };
 }
 
+/** Overlap + travel validation; throws TRPCError on failure. */
+async function validateDriverForSlot(
+  ctx: DbContext,
+  params: {
+    driverId: string;
+    startTime: string;
+    endTime: string;
+    pickupAddress: string;
+    destinationAddress: string;
+    excludeBookingId?: number;
+  },
+): Promise<void> {
+  if (await findOverlappingBooking(ctx, params)) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "Driver has another booking at that time.",
+    });
+  }
+  const travelResult = await validateTravelBetweenAdjacentBookings(ctx, params);
+  if (!travelResult.valid) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: travelResult.reason ?? "Not enough travel time between bookings.",
+    });
+  }
+}
+
 export const bookingsRouter = createTRPCRouter({
   // GET /bookings/current-user (for debug form default agencyId)
   getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
@@ -182,27 +253,7 @@ export const bookingsRouter = createTRPCRouter({
       const { driverId, startTime, endTime, excludeBookingId, pickupAddress, destinationAddress } =
         input;
 
-      // Overlap condition:
-      // existing.startTime < endTime AND existing.endTime > startTime
-      const baseCondition = and(
-        eq(bookings.driverId, driverId),
-        ne(bookings.status, "cancelled"),
-        lt(bookings.startTime, endTime),
-        gt(bookings.endTime, startTime),
-      );
-
-      const whereCondition =
-        excludeBookingId !== undefined
-          ? and(baseCondition, ne(bookings.id, excludeBookingId))
-          : baseCondition;
-
-      const overlapping = await ctx.db
-        .select({ id: bookings.id })
-        .from(bookings)
-        .where(whereCondition)
-        .limit(1);
-
-      if (overlapping.length > 0) {
+      if (await findOverlappingBooking(ctx, { driverId, startTime, endTime, excludeBookingId })) {
         return { available: false, reason: "Driver has another booking at that time." };
       }
 
@@ -307,41 +358,14 @@ export const bookingsRouter = createTRPCRouter({
       if (input.driverId !== undefined) bookingData.driverId = input.driverId;
       if (input.status !== undefined) bookingData.status = input.status;
 
-      // Validate driver availability when assigning a driver (no overlapping bookings)
       if (input.driverId) {
-        const overlapping = await ctx.db
-          .select({ id: bookings.id })
-          .from(bookings)
-          .where(
-            and(
-              eq(bookings.driverId, input.driverId),
-              ne(bookings.status, "cancelled"),
-              lt(bookings.startTime, input.endTime),
-              gt(bookings.endTime, input.startTime),
-            ),
-          )
-          .limit(1);
-
-        if (overlapping.length > 0) {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "Driver has another booking at that time.",
-          });
-        }
-
-        const travelResult = await validateTravelBetweenAdjacentBookings(ctx, {
+        await validateDriverForSlot(ctx, {
           driverId: input.driverId,
           startTime: input.startTime,
           endTime: input.endTime,
           pickupAddress: input.pickupAddress,
           destinationAddress: input.destinationAddress,
         });
-        if (!travelResult.valid) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: travelResult.reason ?? "Not enough travel time between bookings.",
-          });
-        }
       }
 
       const [row] = await ctx.db.insert(bookings).values(bookingData).returning();
@@ -369,18 +393,7 @@ export const bookingsRouter = createTRPCRouter({
         message: "Booking not found",
       });
 
-    const userId = ctx.session.user.id;
-    const role = ctx.session.user.role ?? "user"; // default safety
-
-    const allowed = role === "admin" || row.agencyId === userId;
-
-    if (!allowed) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "You don’t have permission to view this booking.",
-      });
-    }
-
+    assertCanAccessBooking(ctx.session, row.agencyId);
     return row;
   }),
 
@@ -490,53 +503,21 @@ export const bookingsRouter = createTRPCRouter({
         });
       }
 
-      // 2) Authorization check
+      assertCanAccessBooking(ctx.session, existing.agencyId);
+
       const userId = ctx.session.user.id;
-      const role = ctx.session.user.role ?? "user";
-
-      const allowed = role === "admin" || existing.agencyId === userId;
-
-      if (!allowed) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You cannot update this booking.",
-        });
-      }
-
       // 3) Filter only defined updates
       const updatesToApply = Object.fromEntries(
         Object.entries(updates).filter(([, v]) => v !== undefined),
       );
 
-      // 3b) Validate driver availability when assigning/changing driver (no overlapping bookings)
       if (updatesToApply.driverId !== undefined && updatesToApply.driverId) {
         const proposedStart = updatesToApply.startTime ?? existing.startTime;
         const proposedEnd = updatesToApply.endTime ?? existing.endTime;
         const proposedPickup = updatesToApply.pickupAddress ?? existing.pickupAddress;
         const proposedDest = updatesToApply.destinationAddress ?? existing.destinationAddress;
 
-        const overlapping = await ctx.db
-          .select({ id: bookings.id })
-          .from(bookings)
-          .where(
-            and(
-              eq(bookings.driverId, updatesToApply.driverId),
-              ne(bookings.status, "cancelled"),
-              lt(bookings.startTime, proposedEnd),
-              gt(bookings.endTime, proposedStart),
-              ne(bookings.id, id),
-            ),
-          )
-          .limit(1);
-
-        if (overlapping.length > 0) {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "Driver has another booking at that time.",
-          });
-        }
-
-        const travelResult = await validateTravelBetweenAdjacentBookings(ctx, {
+        await validateDriverForSlot(ctx, {
           driverId: updatesToApply.driverId,
           startTime: proposedStart,
           endTime: proposedEnd,
@@ -544,12 +525,6 @@ export const bookingsRouter = createTRPCRouter({
           destinationAddress: proposedDest,
           excludeBookingId: id,
         });
-        if (!travelResult.valid) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: travelResult.reason ?? "Not enough travel time between bookings.",
-          });
-        }
       }
 
       // 4) Perform update with updatedBy field set
@@ -583,17 +558,7 @@ export const bookingsRouter = createTRPCRouter({
         });
       }
 
-      const userId = ctx.session.user.id;
-      const role = ctx.session.user.role ?? "user";
-
-      const allowed = role === "admin" || existing.agencyId === userId;
-
-      if (!allowed) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You cannot cancel this booking.",
-        });
-      }
+      assertCanAccessBooking(ctx.session, existing.agencyId);
 
       return ctx.db
         .update(bookings)
