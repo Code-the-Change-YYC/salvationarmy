@@ -70,6 +70,7 @@ function transformBookingsToEvents(bookingsList: Booking[]): CalendarEvent[] {
       driverId: booking.driverId,
       createdAt: booking.createdAt,
       updatedAt: booking.updatedAt,
+      originalBooking: booking,
     },
   }));
 }
@@ -79,6 +80,7 @@ interface CalendarViewProps {
   currentDate?: Date;
   setIsDayView?: (isDayView: boolean) => void;
   includeButtons?: boolean;
+  onBookingClick?: (booking: Booking) => void;
 }
 
 export default function CalendarView({
@@ -86,6 +88,7 @@ export default function CalendarView({
   currentDate,
   setIsDayView,
   includeButtons,
+  onBookingClick,
 }: CalendarViewProps) {
   const events = useMemo(() => transformBookingsToEvents(bookings ?? []), [bookings]);
   const calendarRef = useRef<FullCalendar>(null);
@@ -143,6 +146,10 @@ export default function CalendarView({
     const event = clickInfo.event;
     const extendedProps = event.extendedProps;
 
+    if (onBookingClick && extendedProps.originalBooking) {
+      onBookingClick(extendedProps.originalBooking);
+      return;
+    }
     // Format the event details for display
     const startTime = event.start
       ? new Date(event.start).toLocaleTimeString("en-US", {

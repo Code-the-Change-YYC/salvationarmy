@@ -11,21 +11,33 @@ import Modal from "@/app/_components/common/modal/modal";
 import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
-import { ViewMode } from "@/types/types";
+import { type Booking, ViewMode } from "@/types/types";
 import { validateStringLength, validateTimeRange } from "@/types/validation";
 import TableView from "../agencypage/table-view";
 import styles from "./agency-interactive-area.module.scss";
 
+type BookingModalMode = "create" | "edit";
+
 interface Props {
   initialViewMode?: ViewMode;
+  modalMode?: BookingModalMode;
+  booking?: Booking;
+  onBookingChange?: () => void;
 }
 
 const GOOGLE_MAPS_LIBRARIES_ARRAY: Libraries = ["places"]; //Add more to this array if you need to import more libraries from the API
 const CHERRY_RED = "#A03145";
 
-export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: Props) => {
+export const BookingInteractiveArea = ({
+  initialViewMode = ViewMode.CALENDAR,
+  modalMode = "create",
+  booking,
+  onBookingChange,
+}: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
+  const [currentModalMode, setCurrentModalMode] = useState<BookingModalMode>(modalMode);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | undefined>(booking);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [isDayView, setIsDayView] = useState<boolean>(false);
   const [validationAddressGood, setValidationAddressGood] = useState<boolean>(false);
@@ -39,13 +51,24 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
   const createBookingMutation = api.trip.create.useMutation({
     onSuccess: () => {
       notify.success("Booking successfully created");
-      form.reset();
-      setShowBookingModal(false);
-      setValidationAddressGood(false);
+      handleModalCleanup();
       void utils.bookings.getAll.invalidate();
+      onBookingChange?.();
     },
     onError: (error) => {
       notify.error(error.message || "Failed to create a booking");
+    },
+  });
+
+  const updateBookingMutation = api.bookings.update.useMutation({
+    onSuccess: () => {
+      notify.success("Booking successfully updated");
+      handleModalCleanup();
+      void utils.bookings.getAll.invalidate();
+      onBookingChange?.();
+    },
+    onError: (error) => {
+      notify.error(error.message || "Failed to update booking");
     },
   });
 
@@ -101,6 +124,35 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
       destinationAddress: (value) => validateStringLength(value, 1, 300, "Destination address"),
     },
   });
+
+  useEffect(() => {
+    if (selectedBooking && currentModalMode === "edit") {
+      let residentName = "";
+      let phoneNumber = "";
+      let additionalInfo = "";
+
+      if (selectedBooking.passengerInfo) {
+        const parts = selectedBooking.passengerInfo.split("|");
+        residentName = parts[0] || "";
+        phoneNumber = parts[1] || "";
+        additionalInfo = parts[2] || "";
+      }
+
+      form.setValues({
+        title: selectedBooking.title,
+        residentName,
+        phoneNumber,
+        additionalInfo,
+        startTime: selectedBooking.startTime,
+        endTime: selectedBooking.endTime,
+        purpose: selectedBooking.purpose || "",
+        pickupAddress: selectedBooking.pickupAddress,
+        destinationAddress: selectedBooking.destinationAddress,
+      });
+
+      setValidationAddressGood(true);
+    }
+  }, [selectedBooking, currentModalMode, form.setValues]);
 
   //Run the following every time inputElement.current gets a new value (occurs whenever destinationAddress field changes in mantine form)
   // biome-ignore lint: inputElement.current does change and needs to be changed in order for useEffect() to run
@@ -176,17 +228,56 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
       return;
     }
 
-    createBookingMutation.mutate({
-      title: form.values.title,
-      residentName: form.values.residentName,
-      phoneNumber: form.values.phoneNumber,
-      additionalInfo: form.values.additionalInfo,
-      pickupAddress: form.values.pickupAddress,
-      destinationAddress: inputElement.current?.value || "",
-      startTime: form.values.startTime,
-      endTime: form.values.endTime,
-      purpose: form.values.purpose,
-    });
+    if (currentModalMode === "create") {
+      createBookingMutation.mutate({
+        title: form.values.title,
+        residentName: form.values.residentName,
+        phoneNumber: form.values.phoneNumber,
+        additionalInfo: form.values.additionalInfo,
+        pickupAddress: form.values.pickupAddress,
+        destinationAddress: inputElement.current?.value || "",
+        startTime: form.values.startTime,
+        endTime: form.values.endTime,
+        purpose: form.values.purpose,
+      });
+    } else if (currentModalMode === "edit" && selectedBooking) {
+      const passengerInfo = `${form.values.residentName}|${form.values.phoneNumber}|${form.values.additionalInfo}`;
+
+      updateBookingMutation.mutate({
+        id: selectedBooking.id,
+        title: form.values.title,
+        pickupAddress: form.values.pickupAddress,
+        destinationAddress: inputElement.current?.value || "",
+        purpose: form.values.purpose,
+        passengerInfo,
+      });
+    }
+  };
+
+  const handleModalCleanup = () => {
+    form.reset();
+    setShowBookingModal(false);
+    setValidationAddressGood(false);
+    setSelectedBooking(undefined);
+  };
+
+  const handleOpenCreateModal = () => {
+    setCurrentModalMode("create");
+    setSelectedBooking(undefined);
+    form.reset();
+    setValidationAddressGood(false);
+    setShowBookingModal(true);
+  };
+
+  const handleOpenEditModal = (booking: Booking) => {
+    setCurrentModalMode("edit");
+    setSelectedBooking(booking);
+    setShowBookingModal(true);
+  };
+
+  const handleCloseModal = () => {
+    form.clearErrors();
+    handleModalCleanup();
   };
 
   //If the script hasn't loaded yet, don't render anything until it does
@@ -203,7 +294,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
   return (
     <>
       <ViewController
-        setShowBookingModal={setShowBookingModal}
+        setShowBookingModal={handleOpenCreateModal}
         viewMode={viewMode}
         setViewMode={setViewMode}
         currentDate={currentDate}
@@ -227,6 +318,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
             bookings={bookings ?? []}
             currentDate={currentDate}
             setIsDayView={setIsDayView}
+            onBookingClick={handleOpenEditModal}
           />
         ) : (
           <TableView bookings={bookings ?? []} />
@@ -235,23 +327,19 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
 
       <Modal
         opened={showBookingModal}
-        onClose={() => {
-          form.clearErrors();
-          form.setFieldValue("destinationAddress", "");
-          setShowBookingModal(false);
-        }}
+        onClose={handleCloseModal}
         onConfirm={() => {
           handleConfirm();
         }}
         title={
           <Box fw={600} fz="xl">
-            Add a booking
+            {currentModalMode === "create" ? "Add a booking" : "Edit booking"}
           </Box>
         }
         size="xl"
         showDefaultFooter
-        confirmText="Confirm Booking"
-        loading={createBookingMutation.isPending}
+        confirmText={currentModalMode === "create" ? "Confirm Booking" : "Save Changes"}
+        loading={createBookingMutation.isPending || updateBookingMutation.isPending}
       >
         <AgencyForm form={form} destinationAddressRef={inputElement} />
       </Modal>
