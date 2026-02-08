@@ -73,6 +73,7 @@ function transformBookingsToEvents(bookingsList: Booking[]): CalendarEvent[] {
       driverId: booking.driverId,
       createdAt: booking.createdAt,
       updatedAt: booking.updatedAt,
+      originalBooking: booking,
     },
   }));
 }
