@@ -250,6 +250,8 @@ export const BookingInteractiveArea = ({
         destinationAddress: inputElement.current?.value || "",
         purpose: form.values.purpose,
         passengerInfo,
+        startTime: form.values.startTime,
+        endTime: form.values.endTime,
       });
     }
   };
