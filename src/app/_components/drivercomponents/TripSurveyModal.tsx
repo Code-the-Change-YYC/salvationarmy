@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Rating, Stack, Text, Textarea, TextInput } from "@mantine/core";
+import { Group, Radio, Rating, Stack, Text, Textarea, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
 import dayjs from "dayjs";
@@ -9,7 +9,7 @@ import Rating2 from "@/assets/icons/rating2";
 import Rating3 from "@/assets/icons/rating3";
 import Rating4 from "@/assets/icons/rating4";
 import Rating5 from "@/assets/icons/rating5";
-import type { BookingStatus } from "@/types/types";
+import { BookingStatus } from "@/types/types";
 import SegmentedControl from "../common/segmentedControl";
 import styles from "./TripSurveyModal.module.scss";
 
@@ -76,6 +76,21 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
     <>
       <Text fw={700}>Drive Details</Text>
       <Stack gap="sm">
+        <div className={`${styles.formRow}`}>
+          <Radio.Group
+            withAsterisk
+            label="Trip Completion Status"
+            key={form.key("tripCompletionStatus")}
+            {...form.getInputProps("tripCompletionStatus")}
+            error={form.errors.tripCompletionStatus}
+          >
+            <div className={styles.radioGrid}>
+              <Radio value={BookingStatus.COMPLETED} label="Completed" />
+              <Radio value={BookingStatus.INCOMPLETE} label="Incomplete" />
+              <Radio value={BookingStatus.CANCELLED} label="Cancelled" />
+            </div>
+          </Radio.Group>
+        </div>
         <TextInput
           label="Destination Address"
           placeholder="123 Somestreet NW"
@@ -101,6 +116,7 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
               form.setFieldValue("timeOfArrival", "");
             }
           }}
+          disabled={form.values.tripCompletionStatus === BookingStatus.CANCELLED}
           timePickerProps={{
             withDropdown: true,
             popoverProps: { withinPortal: false },
@@ -125,6 +141,10 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
             const isoString = dayjs(value).toISOString();
             form.setFieldValue("timeOfArrival", isoString);
           }}
+          disabled={
+            form.values.tripCompletionStatus === BookingStatus.CANCELLED ||
+            !form.values.timeOfDeparture
+          }
           timePickerProps={{
             withDropdown: true,
             popoverProps: { withinPortal: false },
@@ -138,12 +158,14 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
           placeholder="Enter odometer starting value"
           {...form.getInputProps("startReading")}
           required
+          disabled={form.values.tripCompletionStatus === BookingStatus.CANCELLED}
         />
         <TextInput
           label="Odometer end"
           placeholder="Enter odometer ending value"
           {...form.getInputProps("endReading")}
           required
+          disabled={form.values.tripCompletionStatus === BookingStatus.CANCELLED}
         />
         <Text fw={700}>Fit or Not fit</Text>
         <Text size="sm" fw={600}>
@@ -158,6 +180,7 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
           onChange={(e) =>
             form.setFieldValue("originalLocationChanged", e === "Yes" ? true : false)
           }
+          disabled={form.values.tripCompletionStatus === BookingStatus.CANCELLED}
         ></SegmentedControl>
         Rate the passenger’s fitness for transport
         <div className={styles.rating}>
@@ -174,6 +197,7 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
             value={Number(form.values.passengerFitRating)}
             onChange={(e) => form.setFieldValue("passengerFitRating", e)}
             highlightSelectedOnly
+            readOnly={form.values.tripCompletionStatus === BookingStatus.CANCELLED}
           ></Rating>
         </div>
         <Group justify="space-between" className={styles.ratingLabel}>
