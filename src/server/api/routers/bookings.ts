@@ -190,6 +190,17 @@ export const bookingsRouter = createTRPCRouter({
         })
         .refine(
           (data) => {
+            const hasBoth = data.startTime !== undefined && data.endTime !== undefined;
+            const hasNeither = data.startTime === undefined && data.endTime === undefined;
+            return hasBoth || hasNeither;
+          },
+          {
+            message: "Must provide both startTime and endTime together",
+            path: ["startTime"],
+          },
+        )
+        .refine(
+          (data) => {
             if (data.startTime && data.endTime) {
               return new Date(data.endTime) > new Date(data.startTime);
             }
