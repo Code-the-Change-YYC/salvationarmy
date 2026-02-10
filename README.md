@@ -200,15 +200,18 @@ yarn db:migrate
 ## Initializing an Admin Account
 
 Before running the seed script, ensure the following setup is complete:
+
 - Bun installed and available in your terminal
 - Local Supabase instance running
 - Database migrations have been applied. Run:
+
 ```bash
 yarn db:migrate
 ```
 
 Once your database schema is up to date, run the seed script to create a default administrator user:
-``` bash
+
+```bash
 yarn seed
 ```
 
@@ -217,6 +220,168 @@ Use these credentials on the `/login` page to sign in.
 
 Once logged in, the session persists across the app, allowing you to test authentication, protected routes, and role-based access during development.
 
+## Other seeding documentation
+
+# Seeding Script Documentation
+
+This seeding script helps you populate your database with test data for development.
+
+## Quick Start
+
+```bash
+# First time setup - creates all users, organizations, and bookings
+bun seed
+
+# Or run specific parts:
+bun seed --users       # Only create users and organizations
+bun seed --bookings    # Only create bookings (requires users to exist)
+bun seed --bookings --clear  # Clear existing bookings and create new ones
+```
+
+## What Gets Created
+
+### Users & Organizations (--users flag)
+
+**Admin User:**
+
+- Email: `admin@salvationarmy.com` (or from `ADMIN_EMAIL` env var)
+- Password: `Password123!` (or from `ADMIN_PASSWORD` env var)
+- Role: `admin`
+- Organization: Member of all organizations as `owner`
+
+**Organizations:**
+
+1. Admins (`admins`)
+2. Drivers (`drivers`)
+3. Agency One (`agency-one`)
+4. Agency Two (`agency-two`)
+5. Agency Three (`agency-three`)
+
+**Driver User:**
+
+- Email: `driver@salvationarmy.com`
+- Password: `Password123!`
+- Role: `driver`
+- Organization: Drivers organization as `member`
+
+**Agency Users:**
+
+1. Email: `agency-one@salvationarmy.com`
+   - Role: `agency`
+   - Organization: Agency One as `member`
+
+2. Email: `agency-two@salvationarmy.com`
+   - Role: `agency`
+   - Organization: Agency Two as `member`
+
+3. Email: `agency-three@salvationarmy.com`
+   - Role: `agency`
+   - Organization: Agency Three as `member`
+
+Password for all agency users: `Password123!`
+
+### Bookings (--bookings flag)
+
+Creates ~18 test bookings distributed across the three agencies, all assigned to the driver user:
+
+**Time Distribution:**
+
+- **25% Past** (1-7 days ago): Status is either `completed` or `cancelled`
+- **50% Today/Tomorrow**: Status is either `incomplete` or `in-progress`
+- **25% Future** (2-8 days ahead): Status is `incomplete`
+
+**Booking Details:**
+
+- All bookings are assigned to the driver user
+- Created by the respective agency users
+- Realistic Calgary addresses and purposes
+- Random phone numbers
+- 1-hour duration slots
+- Survey completion status varies for completed bookings
+
+## Command Line Flags
+
+- `--users` - Create users and organizations
+- `--bookings` - Create bookings
+- `--clear` - Clear existing bookings before creating new ones (only works with `--bookings`)
+- No flags - Runs both `--users` and `--bookings`
+
+## Usage Examples
+
+```bash
+# Initial setup - create everything
+yarn seed
+
+# Just create users and organizations (first time)
+yarn seed --users
+
+# Add bookings to existing users
+yarn seed --bookings
+
+# Clear all bookings and create fresh ones (useful for testing)
+yarn seed --bookings --clear
+
+# Recreate everything from scratch
+yarn seed --users --bookings --clear
+```
+
+## Environment Variables
+
+You can customize the admin user credentials via environment variables:
+
+```bash
+ADMIN_EMAIL=custom@email.com
+ADMIN_PASSWORD=CustomPassword123!
+ADMIN_NAME="Custom Admin Name"
+```
+
+If not provided, defaults to:
+
+- Email: `admin@salvationarmy.com`
+- Password: `Password123!`
+- Name: `Admin User`
+
+## Important Notes
+
+⚠️ **Production Warning**: Remember to change all default passwords before deploying to production!
+
+⚠️ **Dependencies**: The `--bookings` flag requires users to exist first. If you get an error about missing users, run with `--users` flag first.
+
+⚠️ **Idempotent**: Running `--users` multiple times is safe - it won't create duplicates. Running `--bookings` without `--clear` will add more bookings.
+
+## Workflow Recommendations
+
+**For Development:**
+
+1. Initial setup: `bun seed` (creates users + bookings)
+2. When you want fresh bookings: `bun seed --bookings --clear`
+3. When testing with different data: `bun seed --bookings` (appends new bookings)
+
+**For Testing:**
+
+- Use `--clear` flag frequently to ensure clean state
+- Create users once, recreate bookings as needed
+
+## Troubleshooting
+
+**"Driver not found" error:**
+
+- Solution: Run `bun seed --users` first
+
+**"No agency users found" error:**
+
+- Solution: Run `bun seed --users` first
+
+**Users already exist:**
+
+- This is normal - the script checks for existing users and skips creation
+
+**Want to reset everything:**
+
+```bash
+# Manually clear database tables, then:
+yarn seed
+```
 
 ## Enabling typesense for SCSS modules
 
