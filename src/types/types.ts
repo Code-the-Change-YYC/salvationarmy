@@ -86,6 +86,7 @@ export interface CalendarEvent {
     updatedAt?: Date | string | null;
     createdBy?: string;
     updatedBy?: string;
+    originalBooking?: Booking;
   };
 }
 
