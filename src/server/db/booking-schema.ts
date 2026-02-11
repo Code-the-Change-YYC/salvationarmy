@@ -1,9 +1,7 @@
-import { relations } from "drizzle-orm";
-import { index, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { type InferInsertModel, type InferSelectModel, relations } from "drizzle-orm";
+import { boolean, index, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { BOOKING_STATUSES, BookingStatus } from "@/types/types";
 import { user } from "./auth-schema";
-
-export const BOOKING_STATUS = ["incomplete", "completed", "in-progress", "cancelled"] as const;
-export type BookingStatus = (typeof BOOKING_STATUS)[number];
 
 export const bookings = pgTable(
   "bookings",
@@ -15,7 +13,8 @@ export const bookings = pgTable(
     purpose: text("purpose"),
     passengerInfo: text("passenger_info").notNull(),
     phoneNumber: varchar("phone_number", { length: 25 }),
-    status: text("status", { enum: BOOKING_STATUS }).notNull().default("incomplete"),
+    surveyCompleted: boolean("survey_completed").default(false).notNull(),
+    status: text("status", { enum: BOOKING_STATUSES }).notNull().default(BookingStatus.INCOMPLETE),
     // the agency that created the booking
     agencyId: text("agency_id")
       .notNull()
@@ -39,9 +38,7 @@ export const bookings = pgTable(
     updatedBy: text("updated_by").references(() => user.id),
   },
   //Runs after the table is created
-  (table) => ({
-    startTimeIndex: index("bookings_s_time").on(table.startTime),
-  }),
+  (table) => [index("bookings_start_time_idx").on(table.startTime)],
 );
 
 export const bookingsRelations = relations(bookings, ({ one }) => ({
@@ -56,3 +53,6 @@ export const bookingsRelations = relations(bookings, ({ one }) => ({
     relationName: "driverBookings",
   }),
 }));
+
+export type BookingSelectType = InferSelectModel<typeof bookings>;
+export type BookingInsertType = InferInsertModel<typeof bookings>;
