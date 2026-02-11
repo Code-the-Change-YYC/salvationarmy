@@ -18,7 +18,11 @@ import ui from "./Login.module.scss";
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { data: session, isPending: sessionLoading } = authClient.useSession();
+  const {
+    data: session,
+    isPending: sessionLoading,
+    isRefetching: alreadyFetchedSession,
+  } = authClient.useSession();
   const hasRedirected = useRef(false);
 
   const { mutate } = api.organization.redirectToDashboard.useMutation({
@@ -71,7 +75,7 @@ export default function LoginPage() {
     }
   };
 
-  if (sessionLoading || (!sessionLoading && session)) {
+  if (!alreadyFetchedSession && (sessionLoading || (!sessionLoading && session))) {
     return <LoadingScreen message="Redirecting..." />;
   }
 
