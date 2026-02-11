@@ -4,14 +4,15 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { and, desc, eq, gte, lt, or } from "drizzle-orm";
 import { z } from "zod";
+import { BOOKING_STATUSES, BookingStatus } from "@/types/types";
 import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
-import { BOOKING_STATUS, type BookingInsertType, bookings } from "../../db/booking-schema";
+import { type BookingInsertType, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 dayjs.extend(utc); //Allows dayjs to work in UTC
 dayjs.extend(timezone); //Allows dayjs to convert dates between time zones
 
-const StatusZ = z.enum(BOOKING_STATUS); // ← uses "cancelled" (double-L)
+const StatusZ = z.enum(BOOKING_STATUSES); // ← uses "cancelled" (double-L)
 
 export const bookingsRouter = createTRPCRouter({
   // POST /bookings (create)
@@ -266,7 +267,10 @@ export const bookingsRouter = createTRPCRouter({
 
       return ctx.db
         .update(bookings)
-        .set({ status: "cancelled", updatedBy: ctx.session.user.id })
+        .set({
+          status: BookingStatus.CANCELLED,
+          updatedBy: ctx.session.user.id,
+        })
         .where(eq(bookings.id, input.id))
         .returning()
         .then((r) => r[0]);
