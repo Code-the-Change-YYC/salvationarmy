@@ -1,4 +1,5 @@
-import type { bookings } from "@/server/db/booking-schema";
+import type { BookingSelectType } from "@/server/db/booking-schema";
+import type { SurveySelectType } from "@/server/db/post-trip-schema";
 
 export enum Role {
   ADMIN = "admin",
@@ -57,14 +58,14 @@ export enum BookingStatus {
   CANCELLED = "cancelled",
 }
 
-export const ALL_BOOKING_STATUSES = [
+export const BOOKING_STATUSES = [
   BookingStatus.INCOMPLETE,
   BookingStatus.IN_PROGRESS,
   BookingStatus.COMPLETED,
   BookingStatus.CANCELLED,
 ] as const;
 
-export type BookingStatusValue = (typeof ALL_BOOKING_STATUSES)[number];
+export type BookingStatusValue = (typeof BOOKING_STATUSES)[number];
 
 export interface CalendarEvent {
   id: string;
@@ -88,7 +89,9 @@ export interface CalendarEvent {
   };
 }
 
-export type Booking = typeof bookings.$inferSelect;
+// the reason that we do this is because it being named selectType causes confusion
+export type Booking = BookingSelectType;
+export type Survey = SurveySelectType;
 
 export interface ScheduleInformation {
   CREATED_AT: string; // string or date type?

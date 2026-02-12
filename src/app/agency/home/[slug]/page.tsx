@@ -1,13 +1,10 @@
 import { BookingInteractiveArea } from "@/app/_components/agencycomponents/agency-interactive-area";
 import Navbar from "@/app/_components/common/navbar";
-import { api, HydrateClient } from "@/trpc/server";
+import { HydrateClient } from "@/trpc/server";
 import { ViewMode } from "@/types/types";
 import styles from "./agency-page.module.scss";
 
 export default async function AgencyHome() {
-  // server side call
-  await api.form.hello({ text: "from tRPC" });
-
   return (
     <HydrateClient>
       <Navbar view="agency" />
