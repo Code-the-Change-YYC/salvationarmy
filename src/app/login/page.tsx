@@ -18,12 +18,20 @@ import ui from "./Login.module.scss";
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const {
-    data: session,
-    isPending: sessionLoading,
-    isRefetching: alreadyFetchedSession,
-  } = authClient.useSession();
+  const { data: session, isPending: sessionLoading } = authClient.useSession();
   const hasRedirected = useRef(false);
+  const [hideLoginModal, setHideLoginModal] = useState(true);
+
+  if (!sessionLoading) {
+    //Done checking session
+    if (!session && hideLoginModal) {
+      //Not logged in and login modal is hidden
+      setHideLoginModal(false);
+    } else if (session && !hideLoginModal) {
+      //Logged in and login modal is not hidden
+      setHideLoginModal(true);
+    }
+  }
 
   const { mutate } = api.organization.redirectToDashboard.useMutation({
     onSuccess: (data) => {
@@ -75,7 +83,7 @@ export default function LoginPage() {
     }
   };
 
-  if (!alreadyFetchedSession && (sessionLoading || (!sessionLoading && session))) {
+  if (hideLoginModal) {
     return <LoadingScreen message="Redirecting..." />;
   }
 
