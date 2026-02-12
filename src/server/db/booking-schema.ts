@@ -1,9 +1,7 @@
 import { type InferInsertModel, type InferSelectModel, relations } from "drizzle-orm";
 import { boolean, index, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { BOOKING_STATUSES, BookingStatus } from "@/types/types";
 import { user } from "./auth-schema";
-
-export const BOOKING_STATUS = ["incomplete", "completed", "in-progress", "cancelled"] as const;
-export type BookingStatus = (typeof BOOKING_STATUS)[number];
 
 export const bookings = pgTable(
   "bookings",
@@ -16,7 +14,7 @@ export const bookings = pgTable(
     passengerInfo: text("passenger_info").notNull(),
     phoneNumber: varchar("phone_number", { length: 25 }),
     surveyCompleted: boolean("survey_completed").default(false).notNull(),
-    status: text("status", { enum: BOOKING_STATUS }).notNull().default("incomplete"),
+    status: text("status", { enum: BOOKING_STATUSES }).notNull().default(BookingStatus.INCOMPLETE),
     // the agency that created the booking
     agencyId: text("agency_id")
       .notNull()
