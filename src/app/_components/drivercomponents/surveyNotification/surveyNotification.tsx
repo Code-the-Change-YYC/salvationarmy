@@ -8,24 +8,33 @@ import Button from "@/app/_components/common/button/Button";
 import Modal from "@/app/_components/common/modal/modal";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
-import { type Booking, BookingStatus, type Survey } from "@/types/types";
+import { BookingStatus, type Survey } from "@/types/types";
 import { validateStringLength, validateTimeRange } from "@/types/validation";
 import { TripSurveyModal } from "../TripSurveyModal";
 
 type SurveyNotificationProps = {
   survey: Partial<Survey>;
-  additionalInformation?: Partial<Booking>;
   completed?: boolean;
 };
 
-export default function SurveyNotification({
-  survey,
-  additionalInformation = {},
-  completed = false,
-}: SurveyNotificationProps) {
+export default function SurveyNotification({ survey, completed = false }: SurveyNotificationProps) {
   const [showSurveyModal, setShowSurveyModal] = useState<boolean>(false);
 
   const utils = api.useUtils();
+
+  const mapSurveyToFormValues = (inputSurvey: Partial<Survey>) => ({
+    tripCompletionStatus: inputSurvey.tripCompletionStatus || BookingStatus.COMPLETED,
+    startReading: inputSurvey.startReading || ("" as number | ""),
+    endReading: inputSurvey.endReading || ("" as number | ""),
+    timeOfDeparture: inputSurvey.timeOfDeparture
+      ? dayjs(inputSurvey.timeOfDeparture).toISOString()
+      : "",
+    timeOfArrival: inputSurvey.timeOfArrival ? dayjs(inputSurvey.timeOfArrival).toISOString() : "",
+    destinationAddress: inputSurvey.destinationAddress || "",
+    originalLocationChanged: inputSurvey.originalLocationChanged ?? false,
+    passengerFitRating: inputSurvey.passengerFitRating || ("" as number | ""),
+    comments: inputSurvey.comments || "",
+  });
 
   const submitSurveyMutation = api.surveys.create.useMutation({
     onSuccess: () => {
@@ -40,19 +49,25 @@ export default function SurveyNotification({
     },
   });
 
+  const updateSurveyMutation = api.surveys.update.useMutation({
+    onSuccess: (updatedSurvey) => {
+      notify.success("Survey successfully updated");
+      form.setValues(mapSurveyToFormValues(updatedSurvey));
+      setShowSurveyModal(false);
+      void utils.surveys.getAll.invalidate();
+      void utils.surveys.getAll.setData(undefined, (current) => {
+        if (!current) return current;
+        return current.map((item) => (item.id === updatedSurvey.id ? updatedSurvey : item));
+      });
+    },
+    onError: (error) => {
+      notify.error(error.message || "Failed to update survey");
+    },
+  });
+
   // under the hood mantine numberInput is a string.
   const form = useForm({
-    initialValues: {
-      tripCompletionStatus: survey.tripCompletionStatus || BookingStatus.COMPLETED,
-      startReading: survey.startReading || ("" as number | ""),
-      endReading: survey.endReading || ("" as number | ""),
-      timeOfDeparture: survey.timeOfDeparture ? dayjs(survey.timeOfDeparture).toISOString() : "",
-      timeOfArrival: survey.timeOfArrival ? dayjs(survey.timeOfArrival).toISOString() : "",
-      destinationAddress: survey.destinationAddress || "",
-      originalLocationChanged: survey.originalLocationChanged ?? false,
-      passengerFitRating: survey.passengerFitRating || ("" as number | ""),
-      comments: survey.comments || "",
-    },
+    initialValues: mapSurveyToFormValues(survey),
 
     validate: {
       tripCompletionStatus: (value) => {
@@ -112,12 +127,6 @@ export default function SurveyNotification({
     const validation = form.validate();
     const hasErrors = Object.keys(validation.errors).length > 0;
 
-    // TODO: Make sure that updates work (eventually)
-    if (completed) {
-      setShowSurveyModal(false);
-      return;
-    }
-
     if (hasErrors) {
       notify.error("Please fix the errors in the form before submitting");
       return;
@@ -126,11 +135,10 @@ export default function SurveyNotification({
     const isCancelled = form.values.tripCompletionStatus === BookingStatus.CANCELLED;
 
     // if the trip is cancelled don't need to pass any of the other fields.
-    const formData = {
-      bookingId: survey.bookingId as number, // TODO: will remove eventually!
-      driverId: survey.driverId as string,
+    const basePayload = {
       tripCompletionStatus: form.values.tripCompletionStatus,
       destinationAddress: form.values.destinationAddress,
+      passengerInfo: survey.passengerInfo || "",
       comments: form.values.comments,
       ...(!isCancelled && {
         startReading: Number(form.values.startReading),
@@ -142,11 +150,28 @@ export default function SurveyNotification({
       }),
     };
 
-    submitSurveyMutation.mutate(formData);
+    if (completed) {
+      if (!survey.id) {
+        notify.error("Unable to update survey: missing survey id");
+        return;
+      }
+
+      updateSurveyMutation.mutate({
+        id: survey.id,
+        ...basePayload,
+      });
+      return;
+    }
+
+    submitSurveyMutation.mutate({
+      bookingId: survey.bookingId as number, // TODO: will remove eventually!
+      driverId: survey.driverId as string, // TODO: will remove castin eveentually
+      ...basePayload,
+    });
   };
 
-  const rideDate = survey.createdAt
-    ? dayjs(survey.createdAt).format("MMM D, YYYY")
+  const rideDate = survey.timeOfArrival
+    ? dayjs(survey.timeOfArrival).format("MMM D, YYYY")
     : "Unknown date";
 
   return (
@@ -156,13 +181,19 @@ export default function SurveyNotification({
           <Stack gap={4}>
             <Text fw={600}>
               {completed ? "Survey completed" : "Fill out post ride survey"}{" "}
-              {additionalInformation.passengerInfo && `for ${additionalInformation.passengerInfo}`}
+              {survey.passengerInfo && `for ${survey.passengerInfo}`}
             </Text>
             <Text size="sm" c="dimmed" mb="sm">
               {completed ? "Ride was completed on: " : "Fill out the survey for your ride on "}
               {rideDate}
             </Text>
-            <Button width={150} onClick={() => setShowSurveyModal(true)}>
+            <Button
+              width={150}
+              onClick={() => {
+                form.setValues(mapSurveyToFormValues(survey));
+                setShowSurveyModal(true);
+              }}
+            >
               {completed ? "View survey results" : "Fill out survey"}
             </Button>
           </Stack>
@@ -186,8 +217,8 @@ export default function SurveyNotification({
         }
         size="xl"
         showDefaultFooter
-        confirmText="Submit Survey"
-        loading={submitSurveyMutation.isPending}
+        confirmText={completed ? "Update Survey" : "Submit Survey"}
+        loading={submitSurveyMutation.isPending || updateSurveyMutation.isPending}
       >
         <TripSurveyModal form={form} />
       </Modal>
