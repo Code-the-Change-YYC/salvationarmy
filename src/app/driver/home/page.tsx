@@ -1,11 +1,9 @@
-import CalendarView from "@/app/_components/common/calendar/calendar-view";
-import { api } from "@/trpc/server";
+import { DriverDashboard } from "@/app/_components/drivercomponents/driver-dashboard";
 
 export default async function DriverHome() {
-  const initialBookings = await api.bookings.getAll();
   return (
     <main>
-      <CalendarView bookings={initialBookings} includeButtons={true}></CalendarView>
+      <DriverDashboard />
     </main>
   );
 }

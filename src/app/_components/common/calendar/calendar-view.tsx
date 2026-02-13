@@ -79,6 +79,7 @@ interface CalendarViewProps {
   currentDate?: Date;
   setIsDayView?: (isDayView: boolean) => void;
   includeButtons?: boolean;
+  onDateChangeFunction?: (...args: any[]) => void;
 }
 
 export default function CalendarView({
@@ -86,6 +87,7 @@ export default function CalendarView({
   currentDate,
   setIsDayView,
   includeButtons,
+  onDateChangeFunction,
 }: CalendarViewProps) {
   const events = useMemo(() => transformBookingsToEvents(bookings ?? []), [bookings]);
   const calendarRef = useRef<FullCalendar>(null);
@@ -237,6 +239,14 @@ export default function CalendarView({
         firstDay={1}
         height={700}
         weekends={false}
+        datesSet={(date) => {
+          if (onDateChangeFunction) {
+            onDateChangeFunction({
+              startDate: date.startStr,
+              endDate: date.endStr,
+            });
+          }
+        }}
       />
     </Box>
   );
