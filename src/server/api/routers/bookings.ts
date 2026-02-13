@@ -297,7 +297,7 @@ export const bookingsRouter = createTRPCRouter({
 
       if (user.role !== Role.DRIVER) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
+          code: "FORBIDDEN",
           message: "User is not a driver",
         });
       }
