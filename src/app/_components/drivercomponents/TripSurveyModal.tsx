@@ -158,6 +158,7 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
           placeholder="Enter odometer starting value"
           {...form.getInputProps("startReading")}
           required
+          value={form.values.startReading ? form.values.startReading : ""}
           disabled={form.values.tripCompletionStatus === BookingStatus.CANCELLED}
         />
         <TextInput
@@ -165,6 +166,7 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
           placeholder="Enter odometer ending value"
           {...form.getInputProps("endReading")}
           required
+          value={form.values.endReading ? form.values.endReading : ""}
           disabled={form.values.tripCompletionStatus === BookingStatus.CANCELLED}
         />
         <Text fw={700}>Fit or Not fit</Text>
