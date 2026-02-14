@@ -40,6 +40,9 @@ export const postTripSurveys = pgTable(
     passengerFitRating: integer("passenger_fit_rating"),
     comments: text("comments"),
 
+    // Metadata
+    passengerInfo: text("passenger_info"),
+
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
