@@ -14,6 +14,7 @@ import { api } from "@/trpc/react";
 import { ViewMode } from "@/types/types";
 import { validateStringLength, validateTimeRange } from "@/types/validation";
 import TableView from "../agencypage/table-view";
+import LoadingScreen from "../common/loadingscreen";
 import styles from "./agency-interactive-area.module.scss";
 
 interface Props {
@@ -191,13 +192,7 @@ export const BookingInteractiveArea = ({ initialViewMode = ViewMode.CALENDAR }: 
 
   //If the script hasn't loaded yet, don't render anything until it does
   if (!isLoaded) {
-    return (
-      <div style={{ maxWidth: "250px", margin: "4rem auto", padding: "0 1rem" }}>
-        <Paper shadow="sm" p="xl" radius="md">
-          <Title>Loading...</Title>
-        </Paper>
-      </div>
-    );
+    return <LoadingScreen message="Loading..." />;
   }
 
   return (
