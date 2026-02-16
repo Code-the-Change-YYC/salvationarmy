@@ -4,7 +4,8 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/server/db";
 import { member, organization, type User, user } from "@/server/db/auth-schema";
-import { type BookingStatus, bookings } from "@/server/db/booking-schema";
+import { bookings } from "@/server/db/booking-schema";
+import { BookingStatus } from "@/types/types";
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -326,7 +327,8 @@ async function seedBookings() {
       const endTime = new Date(startTime);
       endTime.setHours(endTime.getHours() + 1);
 
-      const status: BookingStatus = Math.random() > 0.3 ? "completed" : "cancelled";
+      const status: BookingStatus =
+        Math.random() > 0.3 ? BookingStatus.COMPLETED : BookingStatus.CANCELLED;
       const agencyUser = agencyUsers[i % agencyUsers.length];
 
       if (!agencyUser) continue;
@@ -338,7 +340,7 @@ async function seedBookings() {
         purpose: purposes[i % purposes.length],
         passengerInfo: passengerNames[i % passengerNames.length]!,
         phoneNumber: `+1 (403) ${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 9000 + 1000)}`,
-        surveyCompleted: status === "completed" ? Math.random() > 0.5 : false,
+        surveyCompleted: status === BookingStatus.COMPLETED ? Math.random() > 0.5 : false,
         status,
         agencyId: agencyUser.id,
         startTime: startTime.toISOString(),
@@ -358,7 +360,8 @@ async function seedBookings() {
       const endTime = new Date(startTime);
       endTime.setHours(endTime.getHours() + 1);
 
-      const status: BookingStatus = Math.random() > 0.7 ? "in-progress" : "incomplete";
+      const status: BookingStatus =
+        Math.random() > 0.7 ? BookingStatus.IN_PROGRESS : BookingStatus.INCOMPLETE;
       const agencyUser = agencyUsers[(pastCount + i) % agencyUsers.length];
 
       if (!agencyUser) continue;

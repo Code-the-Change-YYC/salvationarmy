@@ -64,14 +64,14 @@ export enum BookingStatus {
   CANCELLED = "cancelled",
 }
 
-export const ALL_BOOKING_STATUSES = [
+export const BOOKING_STATUSES = [
   BookingStatus.INCOMPLETE,
   BookingStatus.IN_PROGRESS,
   BookingStatus.COMPLETED,
   BookingStatus.CANCELLED,
 ] as const;
 
-export type BookingStatusValue = (typeof ALL_BOOKING_STATUSES)[number];
+export type BookingStatusValue = (typeof BOOKING_STATUSES)[number];
 
 export interface CalendarEvent {
   id: string;
