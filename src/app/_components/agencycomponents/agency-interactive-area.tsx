@@ -11,14 +11,14 @@ import Modal from "@/app/_components/common/modal/modal";
 import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
-import { type CalendarViewType, ViewMode } from "@/types/types";
+import { type CalendarUserView, ViewMode } from "@/types/types";
 import { validateStringLength, validateTimeRange } from "@/types/validation";
 import TableView from "../agencypage/table-view";
 import styles from "./agency-interactive-area.module.scss";
 
 interface Props {
   initialViewMode?: ViewMode;
-  viewType?: CalendarViewType;
+  viewType?: CalendarUserView;
 }
 
 const GOOGLE_MAPS_LIBRARIES_ARRAY: Libraries = ["places"]; //Add more to this array if you need to import more libraries from the API

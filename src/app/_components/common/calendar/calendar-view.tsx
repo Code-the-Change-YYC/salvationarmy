@@ -13,7 +13,7 @@ import {
   TABLE_SLOT_MAX_TIME,
   TABLE_SLOT_MIN_TIME,
 } from "@/constants/TableScheduleConstants";
-import type { Booking, BookingStatus, CalendarEvent, CalendarViewType } from "@/types/types";
+import type { Booking, BookingStatus, CalendarEvent, CalendarUserView } from "@/types/types";
 
 import styles from "./calendar-view.module.scss";
 import EventBlock from "./event-block";
@@ -81,7 +81,7 @@ interface CalendarViewProps {
   currentDate?: Date;
   setIsDayView?: (isDayView: boolean) => void;
   includeButtons?: boolean;
-  viewType?: CalendarViewType;
+  viewType?: CalendarUserView;
 }
 
 export default function CalendarView({

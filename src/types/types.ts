@@ -49,7 +49,11 @@ export enum ViewMode {
   TABLE = "table",
 }
 
-export type CalendarViewType = "admin" | "driver" | "agency";
+export enum CalendarUserView {
+  ADMIN = "admin",
+  DRIVER = "driver",
+  AGENCY = "agency",
+}
 
 export type { ViewMode as IViewMode };
 

@@ -4,7 +4,7 @@ import { Calendar, ClipboardList, Clock, MapPin, Pencil, Trash2, User } from "lu
 
 import Button from "@/app/_components/common/button/Button";
 import { getBookingStatusColor, getBookingStatusIcon, getBookingStatusLabel } from "@/lib/utils";
-import type { BookingStatus, CalendarViewType } from "@/types/types";
+import { type BookingStatus, CalendarUserView } from "@/types/types";
 
 interface EventDetailsProps {
   title: string;
@@ -15,7 +15,7 @@ interface EventDetailsProps {
   destinationAddress?: string;
   passengerInfo?: string;
   purpose?: string | null;
-  viewType?: CalendarViewType;
+  viewType?: CalendarUserView;
 }
 
 export default function EventDetails({
@@ -111,7 +111,7 @@ export default function EventDetails({
         )}
       </Stack>
 
-      {viewType === "admin" && (
+      {viewType === CalendarUserView.ADMIN && (
         <Group gap="sm" mt="md">
           <Button variant="secondary" icon={<Pencil size={14} />} onClick={() => {}}>
             Edit
@@ -122,7 +122,7 @@ export default function EventDetails({
         </Group>
       )}
 
-      {viewType === "driver" && (
+      {viewType === CalendarUserView.DRIVER && (
         <Box mt="md">
           <Button
             variant="primary"
