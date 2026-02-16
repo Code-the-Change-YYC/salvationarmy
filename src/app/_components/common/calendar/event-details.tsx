@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, Group, Stack, Text, Tooltip } from "@mantine/core";
+import { Anchor, Box, Divider, Flex, Group, Stack, Text, Tooltip } from "@mantine/core";
 import dayjs from "dayjs";
 import { Calendar, ClipboardList, Clock, MapPin, Pencil, Trash2, User } from "lucide-react";
 
@@ -73,7 +73,17 @@ export default function EventDetails({ event, viewType }: EventDetailsProps) {
             <MapPin size={14} />
             <Text size="xs">Pickup</Text>
           </Group>
-          <Text size="sm">{pickupAddress || "-"}</Text>
+          {pickupAddress ? (
+            <Anchor
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pickupAddress)}`}
+              target="_blank"
+              size="sm"
+            >
+              {pickupAddress}
+            </Anchor>
+          ) : (
+            <Text size="sm">-</Text>
+          )}
         </Stack>
 
         <Stack gap="0.25rem">
@@ -81,7 +91,17 @@ export default function EventDetails({ event, viewType }: EventDetailsProps) {
             <MapPin size={14} />
             <Text size="xs">Dropoff</Text>
           </Group>
-          <Text size="sm">{destinationAddress || "-"}</Text>
+          {destinationAddress ? (
+            <Anchor
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destinationAddress)}`}
+              target="_blank"
+              size="sm"
+            >
+              {destinationAddress}
+            </Anchor>
+          ) : (
+            <Text size="sm">-</Text>
+          )}
         </Stack>
 
         <Stack gap="0.25rem">
