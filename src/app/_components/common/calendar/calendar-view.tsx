@@ -95,7 +95,7 @@ export default function CalendarView({
   const events = useMemo(() => transformBookingsToEvents(bookings ?? []), [bookings]);
   const calendarRef = useRef<FullCalendar>(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
-  const initialDate = getInitialDate(currentDate);
+  const initialDate = useMemo(() => getInitialDate(currentDate), [currentDate]);
   const toolbar = includeButtons
     ? {
         left: "",
@@ -109,13 +109,6 @@ export default function CalendarView({
     if (!openedEventId) return null;
     return events.find((e) => e.id === openedEventId) ?? null;
   }, [openedEventId, events]);
-
-  // Notify parent of view state changes
-  useEffect(() => {
-    if (setIsDayView) {
-      setIsDayView(isMobile ?? false);
-    }
-  }, [isMobile, setIsDayView]);
 
   // Update calendar date when currentDate prop changes
   useEffect(() => {
@@ -175,7 +168,11 @@ export default function CalendarView({
     return (
       <Popover
         opened={popoverOpened}
-        onChange={(opened) => !opened && setOpenedEventId(null)}
+        onChange={(opened) => {
+          if (!opened) {
+            setOpenedEventId((prev) => (prev === event.id ? null : prev));
+          }
+        }}
         width={280}
         position="left"
         shadow="md"

@@ -21,6 +21,17 @@ export default function EventDetails({ event, viewType }: EventDetailsProps) {
   const StatusIcon = getBookingStatusIcon(status);
   const statusColor = getBookingStatusColor(status);
 
+  function handleEdit() {
+    console.log("edit"); // TODO: Implement edit
+  }
+
+  function handleDelete() {
+    console.log("delete"); // TODO: Implement delete
+  }
+  function handleFillOutRideSurvey() {
+    console.log("fill out ride survey"); // TODO: Implement fill out ride survey
+  }
+
   return (
     <Stack gap="sm" justify="space-between" h="100%">
       <Stack gap="sm">
@@ -92,10 +103,15 @@ export default function EventDetails({ event, viewType }: EventDetailsProps) {
 
       {viewType === CalendarUserView.ADMIN && (
         <Group gap="sm" mt="md">
-          <Button variant="secondary" icon={<Pencil size={14} />} onClick={() => {}}>
+          <Button variant="secondary" icon={<Pencil size={14} />} onClick={handleEdit}>
             Edit
           </Button>
-          <Button variant="primary" color="#E03131" icon={<Trash2 size={14} />} onClick={() => {}}>
+          <Button
+            variant="primary"
+            color="#E03131"
+            icon={<Trash2 size={14} />}
+            onClick={handleDelete}
+          >
             Delete
           </Button>
         </Group>
@@ -107,7 +123,7 @@ export default function EventDetails({ event, viewType }: EventDetailsProps) {
             variant="primary"
             icon={<ClipboardList size={14} />}
             width="100%"
-            onClick={() => {}}
+            onClick={handleFillOutRideSurvey}
           >
             Fill Out Ride Survey
           </Button>
