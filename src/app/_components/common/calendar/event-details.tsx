@@ -57,47 +57,37 @@ export default function EventDetails({ event, viewType }: EventDetailsProps) {
           </Text>
         </Stack>
 
-        {pickupAddress && (
-          <Stack gap="0.25rem">
-            <Group gap="0.35rem" wrap="nowrap" c="dimmed">
-              <MapPin size={14} />
-              <Text size="xs">Pickup</Text>
-            </Group>
-            <Text size="sm">{pickupAddress}</Text>
-          </Stack>
-        )}
+        <Stack gap="0.25rem">
+          <Group gap="0.35rem" wrap="nowrap" c="dimmed">
+            <MapPin size={14} />
+            <Text size="xs">Pickup</Text>
+          </Group>
+          <Text size="sm">{pickupAddress || "-"}</Text>
+        </Stack>
 
-        {destinationAddress && (
-          <Stack gap="0.25rem">
-            <Group gap="0.35rem" wrap="nowrap" c="dimmed">
-              <MapPin size={14} />
-              <Text size="xs">Dropoff</Text>
-            </Group>
-            <Text size="sm">{destinationAddress}</Text>
-          </Stack>
-        )}
+        <Stack gap="0.25rem">
+          <Group gap="0.35rem" wrap="nowrap" c="dimmed">
+            <MapPin size={14} />
+            <Text size="xs">Dropoff</Text>
+          </Group>
+          <Text size="sm">{destinationAddress || "-"}</Text>
+        </Stack>
 
-        {passengerInfo && (
-          <Stack gap="0.25rem">
-            <Group gap="0.35rem" wrap="nowrap" c="dimmed">
-              <User size={14} />
-              <Text size="xs">Passenger</Text>
-            </Group>
-            <Text size="sm">{passengerInfo}</Text>
-          </Stack>
-        )}
+        <Stack gap="0.25rem">
+          <Group gap="0.35rem" wrap="nowrap" c="dimmed">
+            <User size={14} />
+            <Text size="xs">Passenger</Text>
+          </Group>
+          <Text size="sm">{passengerInfo || "-"}</Text>
+        </Stack>
 
-        {purpose && (
-          <>
-            <Divider />
-            <Stack gap="0.25rem">
-              <Text size="xs" c="dimmed">
-                Purpose
-              </Text>
-              <Text size="sm">{purpose}</Text>
-            </Stack>
-          </>
-        )}
+        <Divider />
+        <Stack gap="0.25rem">
+          <Text size="xs" c="dimmed">
+            Purpose
+          </Text>
+          <Text size="sm">{purpose || "-"}</Text>
+        </Stack>
       </Stack>
 
       {viewType === CalendarUserView.ADMIN && (
