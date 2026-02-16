@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { Calendar, ClipboardList, Clock, MapPin, Pencil, Trash2, User } from "lucide-react";
 
 import Button from "@/app/_components/common/button/Button";
-import { getStatusColor, getStatusIcon, getStatusLabel } from "@/lib/utils";
+import { getBookingStatusColor, getBookingStatusIcon, getBookingStatusLabel } from "@/lib/utils";
 import type { BookingStatus, CalendarViewType } from "@/types/types";
 
 interface EventDetailsProps {
@@ -29,8 +29,8 @@ export default function EventDetails({
   purpose,
   viewType,
 }: EventDetailsProps) {
-  const StatusIcon = getStatusIcon(status);
-  const statusColor = getStatusColor(status);
+  const StatusIcon = getBookingStatusIcon(status);
+  const statusColor = getBookingStatusColor(status);
 
   return (
     <Stack gap="sm" justify="space-between" h="100%">
@@ -40,7 +40,7 @@ export default function EventDetails({
             {title}
           </Text>
           {StatusIcon && (
-            <Tooltip label={getStatusLabel(status)} withArrow>
+            <Tooltip label={getBookingStatusLabel(status)} withArrow>
               <Flex justify="center" align="center" c={statusColor}>
                 <StatusIcon size={20} />
               </Flex>

@@ -2,7 +2,7 @@ import { Box, Flex, Group, Text, Tooltip } from "@mantine/core";
 import dayjs from "dayjs";
 import { forwardRef } from "react";
 
-import { getStatusIcon, getStatusLabel } from "@/lib/utils";
+import { getBookingStatusIcon, getBookingStatusLabel } from "@/lib/utils";
 import type { BookingStatus } from "@/types/types";
 
 interface EventBlockProps {
@@ -15,7 +15,7 @@ interface EventBlockProps {
 
 const EventBlock = forwardRef<HTMLDivElement, EventBlockProps>(
   ({ title, start, end, status, showTime = true }, ref) => {
-    const StatusIcon = getStatusIcon(status);
+    const StatusIcon = getBookingStatusIcon(status);
 
     return (
       <Group ref={ref} p="0.25rem" justify="between" align="start" w="100%">
@@ -32,7 +32,7 @@ const EventBlock = forwardRef<HTMLDivElement, EventBlockProps>(
 
         <Box style={{ flex: "0 0 auto" }}>
           {StatusIcon && (
-            <Tooltip label={getStatusLabel(status)} withArrow>
+            <Tooltip label={getBookingStatusLabel(status)} withArrow>
               <Flex justify="center" align="center">
                 <StatusIcon size={16} />
               </Flex>

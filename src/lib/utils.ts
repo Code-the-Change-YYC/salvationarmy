@@ -2,7 +2,7 @@ import { CircleCheck, CircleX } from "lucide-react";
 
 import { BookingStatus } from "@/types/types";
 
-export function getStatusIcon(status: BookingStatus | null) {
+export function getBookingStatusIcon(status: BookingStatus | null) {
   switch (status) {
     case BookingStatus.COMPLETED:
       return CircleCheck;
@@ -13,7 +13,7 @@ export function getStatusIcon(status: BookingStatus | null) {
   }
 }
 
-export function getStatusColor(status: BookingStatus | null) {
+export function getBookingStatusColor(status: BookingStatus | null) {
   switch (status) {
     case BookingStatus.COMPLETED:
       return "#1A641E";
@@ -24,7 +24,7 @@ export function getStatusColor(status: BookingStatus | null) {
   }
 }
 
-export function getStatusLabel(status: BookingStatus | null) {
+export function getBookingStatusLabel(status: BookingStatus | null) {
   if (!status) return "";
   return status
     .split("-")
