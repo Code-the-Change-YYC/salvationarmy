@@ -152,7 +152,8 @@ export default function CalendarView({
   // Custom event content renderer
   const renderEventContent = (eventInfo: EventContentArg) => {
     const event = eventInfo.event;
-    const status = event.extendedProps.status as BookingStatus | null;
+    const calendarEvent = events.find((e) => e.id === event.id);
+    const status = calendarEvent?.extendedProps?.status ?? null;
     const popoverOpened = openedEventId === event.id;
 
     const eventBlock = (
@@ -184,17 +185,7 @@ export default function CalendarView({
       >
         <Popover.Target>{eventBlock}</Popover.Target>
         <Popover.Dropdown>
-          <EventDetails
-            title={event.title}
-            start={event.start}
-            end={event.end}
-            status={status}
-            pickupAddress={event.extendedProps.pickupAddress}
-            destinationAddress={event.extendedProps.destinationAddress}
-            passengerInfo={event.extendedProps.passengerInfo}
-            purpose={event.extendedProps.purpose}
-            viewType={viewType}
-          />
+          {calendarEvent && <EventDetails event={calendarEvent} viewType={viewType} />}
         </Popover.Dropdown>
       </Popover>
     );
@@ -249,19 +240,7 @@ export default function CalendarView({
         withCloseButton={false}
         classNames={{ body: styles.drawerBody }}
       >
-        {selectedEvent && (
-          <EventDetails
-            title={selectedEvent.title}
-            start={selectedEvent.start ? new Date(selectedEvent.start) : null}
-            end={selectedEvent.end ? new Date(selectedEvent.end) : null}
-            status={selectedEvent.extendedProps?.status ?? null}
-            pickupAddress={selectedEvent.extendedProps?.pickupAddress}
-            destinationAddress={selectedEvent.extendedProps?.destinationAddress}
-            passengerInfo={selectedEvent.extendedProps?.passengerInfo}
-            purpose={selectedEvent.extendedProps?.purpose}
-            viewType={viewType}
-          />
-        )}
+        {selectedEvent && <EventDetails event={selectedEvent} viewType={viewType} />}
       </Drawer>
     </Box>
   );

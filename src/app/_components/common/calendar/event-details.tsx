@@ -4,31 +4,20 @@ import { Calendar, ClipboardList, Clock, MapPin, Pencil, Trash2, User } from "lu
 
 import Button from "@/app/_components/common/button/Button";
 import { getBookingStatusColor, getBookingStatusIcon, getBookingStatusLabel } from "@/lib/utils";
-import { type BookingStatus, CalendarUserView } from "@/types/types";
+import { type CalendarEvent, CalendarUserView } from "@/types/types";
 
 interface EventDetailsProps {
-  title: string;
-  start: Date | null;
-  end: Date | null;
-  status: BookingStatus | null;
-  pickupAddress?: string;
-  destinationAddress?: string;
-  passengerInfo?: string;
-  purpose?: string | null;
+  event: CalendarEvent;
   viewType?: CalendarUserView;
 }
 
-export default function EventDetails({
-  title,
-  start,
-  end,
-  status,
-  pickupAddress,
-  destinationAddress,
-  passengerInfo,
-  purpose,
-  viewType,
-}: EventDetailsProps) {
+export default function EventDetails({ event, viewType }: EventDetailsProps) {
+  const { title, start, end, extendedProps } = event;
+  const status = extendedProps?.status ?? null;
+  const pickupAddress = extendedProps?.pickupAddress;
+  const destinationAddress = extendedProps?.destinationAddress;
+  const passengerInfo = extendedProps?.passengerInfo;
+  const purpose = extendedProps?.purpose;
   const StatusIcon = getBookingStatusIcon(status);
   const statusColor = getBookingStatusColor(status);
 
