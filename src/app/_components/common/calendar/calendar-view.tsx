@@ -4,9 +4,10 @@ import type { EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { Box, Drawer, Popover } from "@mantine/core";
+import { Box, Popover } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Drawer } from "vaul";
 
 import {
   TABLE_SLOT_DURATION,
@@ -98,6 +99,10 @@ export default function CalendarView({
   const calendarRef = useRef<FullCalendar>(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
   const initialDate = useMemo(() => getInitialDate(currentDate), [currentDate]);
+  const selectedEvent = useMemo(() => {
+    if (!openedEventId) return null;
+    return events.find((e) => e.id === openedEventId) ?? null;
+  }, [openedEventId, events]);
   const toolbar = includeButtons
     ? {
         left: "",
@@ -105,12 +110,6 @@ export default function CalendarView({
         right: "prev,next",
       }
     : false;
-
-  // Find the selected event for the mobile drawer
-  const selectedEvent = useMemo(() => {
-    if (!openedEventId) return null;
-    return events.find((e) => e.id === openedEventId) ?? null;
-  }, [openedEventId, events]);
 
   // Update calendar date when currentDate prop changes
   useEffect(() => {
@@ -161,7 +160,7 @@ export default function CalendarView({
       />
     );
 
-    // On mobile, just render the event block (drawer handles the details)
+    // On mobile, just render the event block (drawer is controlled via eventClick)
     if (isMobile) {
       return eventBlock;
     }
@@ -237,18 +236,28 @@ export default function CalendarView({
         }}
       />
 
-      <Drawer
-        opened={isMobile === true && openedEventId !== null}
-        onClose={() => setOpenedEventId(null)}
-        position="bottom"
-        size="80%"
-        radius="md"
-        padding="lg"
-        withCloseButton={false}
-        classNames={{ body: styles.drawerBody }}
+      <Drawer.Root
+        open={isMobile === true && openedEventId !== null}
+        onOpenChange={(open) => {
+          if (!open) setOpenedEventId(null);
+        }}
       >
-        {selectedEvent && <EventDetails event={selectedEvent} viewType={viewType} />}
-      </Drawer>
+        <Drawer.Portal>
+          <Drawer.Overlay className={styles.drawerOverlay} />
+          <Drawer.Content aria-describedby={undefined} className={styles.drawerContent}>
+            {/* Invisible title for accessibility */}
+            <Drawer.Title className={styles.srOnly}>
+              {selectedEvent?.title ?? "Event Details"}
+            </Drawer.Title>
+            <Drawer.Handle />
+            {selectedEvent && (
+              <Box py="1rem">
+                <EventDetails event={selectedEvent} viewType={viewType} />
+              </Box>
+            )}
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
     </Box>
   );
 }

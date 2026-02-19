@@ -92,9 +92,33 @@
   letter-spacing: 0.5px;
 }
 
-// Make drawer body take full height for event details
-.drawerBody {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+
+.drawerContent {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 101;
+  background: white;
+  border-radius: 12px 12px 0 0;
+  padding: 1rem;
+  max-height: 85vh;
+  outline: none;
+}
+
+// Visually hidden but still accessible to screen readers.
+// Using 1px dimensions instead of 0 because some screen readers skip zero-sized elements.
+// display:none or visibility:hidden would remove the element from the accessibility tree entirely.
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
 }
