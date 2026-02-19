@@ -4,23 +4,26 @@ import type { EventClickArg, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { Box, Text } from "@mantine/core";
+import { Box, Popover } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { useEffect, useMemo, useRef } from "react";
-import Check from "@/assets/icons/check";
-import Cross from "@/assets/icons/cross";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Drawer } from "vaul";
+
 import {
   TABLE_SLOT_DURATION,
   TABLE_SLOT_MAX_TIME,
   TABLE_SLOT_MIN_TIME,
 } from "@/constants/TableScheduleConstants";
-import { type Booking, BookingStatus, type CalendarEvent } from "@/types/types";
+import type { Booking, BookingStatus, CalendarEvent, CalendarUserView } from "@/types/types";
+
 import styles from "./calendar-view.module.scss";
+import EventBlock from "./event-block";
+import EventDetails from "./event-details";
 
 // Event color constants
 const CHERRY_RED = "#A03145"; // Red for current day
 const COBALT_BLUE = "#375A87"; // Blue for future dates
-const LIGHT_GREY = "#BFBFBF"; // Grey for past dates
+const DARK_GREY = "#434343"; // Grey for past dates
 
 // Get the initial date, adjusting Sunday to the next Monday
 function getInitialDate(date?: Date): Date {
@@ -45,7 +48,7 @@ function getEventColor(startDate: string): string {
   eventDate.setHours(0, 0, 0, 0); // Reset to start of day for comparison
 
   if (eventDate < today) {
-    return LIGHT_GREY;
+    return DARK_GREY;
   }
   if (eventDate.getTime() === today.getTime()) {
     return CHERRY_RED;
@@ -79,6 +82,7 @@ interface CalendarViewProps {
   currentDate?: Date;
   setIsDayView?: (isDayView: boolean) => void;
   includeButtons?: boolean;
+  viewType?: CalendarUserView;
   onDateChangeFunction?: (...args: any[]) => void;
 }
 
@@ -87,12 +91,18 @@ export default function CalendarView({
   currentDate,
   setIsDayView,
   includeButtons,
+  viewType,
   onDateChangeFunction,
 }: CalendarViewProps) {
+  const [openedEventId, setOpenedEventId] = useState<string | null>(null);
   const events = useMemo(() => transformBookingsToEvents(bookings ?? []), [bookings]);
   const calendarRef = useRef<FullCalendar>(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
-  const initialDate = getInitialDate(currentDate);
+  const initialDate = useMemo(() => getInitialDate(currentDate), [currentDate]);
+  const selectedEvent = useMemo(() => {
+    if (!openedEventId) return null;
+    return events.find((e) => e.id === openedEventId) ?? null;
+  }, [openedEventId, events]);
   const toolbar = includeButtons
     ? {
         left: "",
@@ -100,13 +110,6 @@ export default function CalendarView({
         right: "prev,next",
       }
     : false;
-
-  // Notify parent of view state changes
-  useEffect(() => {
-    if (setIsDayView) {
-      setIsDayView(isMobile);
-    }
-  }, [isMobile, setIsDayView]);
 
   // Update calendar date when currentDate prop changes
   useEffect(() => {
@@ -136,71 +139,53 @@ export default function CalendarView({
     }
     // Notify parent of view change
     if (setIsDayView) {
-      setIsDayView(isMobile);
+      setIsDayView(isMobile ?? false);
     }
   }, [isMobile, setIsDayView]);
-
-  // Handle event click
-  const handleEventClick = (clickInfo: EventClickArg) => {
-    const event = clickInfo.event;
-    const extendedProps = event.extendedProps;
-
-    // Format the event details for display
-    const startTime = event.start
-      ? new Date(event.start).toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })
-      : "N/A";
-    const endTime = event.end
-      ? new Date(event.end).toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })
-      : "N/A";
-
-    const alertMessage = [
-      `Title: ${event.title}`,
-      `Time: ${startTime} - ${endTime}`,
-      extendedProps.pickupAddress ? `Pickup: ${extendedProps.pickupAddress}` : "",
-      extendedProps.destinationAddress ? `Dropoff: ${extendedProps.destinationAddress}` : "",
-      extendedProps.status ? `Status: ${extendedProps.status}` : "",
-      extendedProps.driverId ? `Driver ID: ${extendedProps.driverId}` : "",
-      extendedProps.passengerInfo ? `Passenger: ${extendedProps.passengerInfo}` : "",
-      extendedProps.purpose ? `Purpose: ${extendedProps.purpose}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    alert(alertMessage);
-  };
 
   // Custom event content renderer
   const renderEventContent = (eventInfo: EventContentArg) => {
     const event = eventInfo.event;
-    const status = eventInfo.event.extendedProps.status;
+    const calendarEvent = events.find((e) => e.id === event.id);
+    const status = calendarEvent?.extendedProps?.status ?? null;
+    const popoverOpened = openedEventId === event.id;
 
-    const statusIcon =
-      status === BookingStatus.COMPLETED ? (
-        <Check width="12px" height="12px" />
-      ) : status === BookingStatus.INCOMPLETE ? (
-        <Cross width="12px" height="12px" />
-      ) : null;
+    const eventBlock = (
+      <EventBlock
+        title={event.title}
+        start={event.start}
+        end={event.end}
+        status={status}
+        showTime={!!eventInfo.timeText}
+      />
+    );
 
+    // On mobile, just render the event block (drawer is controlled via eventClick)
+    if (isMobile) {
+      return eventBlock;
+    }
+
+    // On desktop, wrap with Popover
     return (
-      <Box p="0.25rem">
-        <Box className={styles.eventContentContainer}>
-          <Box>
-            <Text fw={600} size="sm" truncate="end">
-              {event.title}
-            </Text>
-            {eventInfo.timeText && <Text size="xs">{eventInfo.timeText}</Text>}
-          </Box>
-          <Box>{statusIcon}</Box>
-        </Box>
-      </Box>
+      <Popover
+        opened={popoverOpened}
+        onChange={(opened) => {
+          if (!opened) {
+            setOpenedEventId((prev) => (prev === event.id ? null : prev));
+          }
+        }}
+        width={280}
+        position="left"
+        shadow="md"
+        clickOutsideEvents={["mousedown", "touchstart"]}
+        transitionProps={{ duration: 100, transition: "pop" }}
+        radius={8}
+      >
+        <Popover.Target>{eventBlock}</Popover.Target>
+        <Popover.Dropdown>
+          {calendarEvent && <EventDetails event={calendarEvent} viewType={viewType} />}
+        </Popover.Dropdown>
+      </Popover>
     );
   };
 
@@ -213,7 +198,10 @@ export default function CalendarView({
         initialDate={initialDate}
         headerToolbar={toolbar}
         events={events}
-        eventClick={handleEventClick}
+        eventClick={(clickInfo: EventClickArg) => {
+          const eventId = clickInfo.event.id;
+          setOpenedEventId((prev) => (prev === eventId ? null : eventId));
+        }}
         eventContent={renderEventContent}
         slotMinTime={TABLE_SLOT_MIN_TIME}
         slotMaxTime={TABLE_SLOT_MAX_TIME}
@@ -234,7 +222,6 @@ export default function CalendarView({
         )}
         allDaySlot={false}
         expandRows={true}
-        nowIndicator={true}
         scrollTime="09:00:00"
         firstDay={1}
         height={700}
@@ -248,6 +235,29 @@ export default function CalendarView({
           }
         }}
       />
+
+      <Drawer.Root
+        open={isMobile === true && openedEventId !== null}
+        onOpenChange={(open) => {
+          if (!open) setOpenedEventId(null);
+        }}
+      >
+        <Drawer.Portal>
+          <Drawer.Overlay className={styles.drawerOverlay} />
+          <Drawer.Content aria-describedby={undefined} className={styles.drawerContent}>
+            {/* Invisible title for accessibility */}
+            <Drawer.Title className={styles.srOnly}>
+              {selectedEvent?.title ?? "Event Details"}
+            </Drawer.Title>
+            <Drawer.Handle />
+            {selectedEvent && (
+              <Box py="1rem">
+                <EventDetails event={selectedEvent} viewType={viewType} />
+              </Box>
+            )}
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
     </Box>
   );
 }
