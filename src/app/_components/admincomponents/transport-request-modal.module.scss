@@ -1,0 +1,37 @@
+@use "@/styles/_variables" as *;
+
+/*Variables in this file*/
+$headings-font-weight: 1000;
+$padding-bottom-amount: 1rem;
+
+/*Styles*/
+.title {
+  font-weight: $headings-font-weight;
+  font-size: x-large;
+}
+
+.agencyName {  
+  word-break: break-word;
+  font-size: larger;
+  font-weight: $headings-font-weight;
+}
+
+.fieldHeadings {
+  color: $color-cherry-red;
+  font-weight: $headings-font-weight;
+  font-size: large;
+  padding-bottom: $padding-bottom-amount;
+}
+
+.pastHistoryHeading {
+  @extend .fieldHeadings;
+  padding-bottom: 0rem;
+}
+
+.grid {
+  padding-bottom: $padding-bottom-amount;
+}
+
+.ratingText {
+  font-size: small;
+}
