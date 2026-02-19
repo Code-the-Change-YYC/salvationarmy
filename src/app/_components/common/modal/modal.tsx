@@ -42,7 +42,7 @@ export default function Modal({
 }: ModalProps) {
   const isMobile = useMediaQuery("(max-width: 50em)");
   const defaultFooter = showDefaultFooter && (
-    <Group justify="flex-end" mt="md">
+    <Group justify="flex-end" mt="xl">
       <Button variant="secondary" onClick={onClose} disabled={loading}>
         {cancelText}
       </Button>
