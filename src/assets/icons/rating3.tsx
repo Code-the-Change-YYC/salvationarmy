@@ -6,14 +6,14 @@ const SvgComponent = ({ width = "32px", height = "32px", ...props }: SVGProps<SV
     xmlns="http://www.w3.org/2000/svg"
     width={width}
     height={height}
-    fill="currentcolor"
+    fill="white"
     viewBox="0 0 32 32"
     aria-label="Rating3"
     {...props}
   >
     <title>Rating3</title>
     <path
-      stroke="#424242"
+      stroke="#d8df00"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={3}

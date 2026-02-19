@@ -16,7 +16,7 @@ export default function EventDetails({ event, viewType }: EventDetailsProps) {
   const status = extendedProps?.status ?? null;
   const pickupAddress = extendedProps?.pickupAddress;
   const destinationAddress = extendedProps?.destinationAddress;
-  const passengerInfo = extendedProps?.passengerInfo;
+  const passengerName = extendedProps?.passengerName;
   const purpose = extendedProps?.purpose;
   const StatusIcon = getBookingStatusIcon(status);
   const statusColor = getBookingStatusColor(status);
@@ -109,7 +109,7 @@ export default function EventDetails({ event, viewType }: EventDetailsProps) {
             <User size={14} />
             <Text size="xs">Passenger</Text>
           </Group>
-          <Text size="sm">{passengerInfo || "-"}</Text>
+          <Text size="sm">{passengerName || "-"}</Text>
         </Stack>
 
         <Divider />

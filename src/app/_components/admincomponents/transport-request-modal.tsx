@@ -15,7 +15,7 @@ interface TransportRequestProps {
   onApprove: (...args: any[]) => void;
   agencyName: string;
   residentName: string;
-  contactInfo: string;
+  phoneNumber?: string;
   additionalInfo: string;
   dateAndTime: string;
   purpose: string;
@@ -32,7 +32,7 @@ export default function TransportRequestModal({
   onApprove,
   agencyName,
   residentName,
-  contactInfo,
+  phoneNumber,
   additionalInfo,
   dateAndTime,
   purpose,
@@ -79,15 +79,19 @@ export default function TransportRequestModal({
         </GridCol>
       </Grid>
 
-      <Grid gutter={"xl"} className={ui.grid}>
-        <GridCol span={4}>
-          <Textarea variant="unstyled" readOnly autosize maxRows={2} value={"Contact Info"} />
-        </GridCol>
+      {phoneNumber && (
+        <>
+          <Grid gutter={"xl"} className={ui.grid}>
+            <GridCol span={4}>
+              <Textarea variant="unstyled" readOnly autosize maxRows={2} value={"Phone Number"} />
+            </GridCol>
 
-        <GridCol span={8}>
-          <Textarea readOnly autosize maxRows={2} value={contactInfo} />
-        </GridCol>
-      </Grid>
+            <GridCol span={8}>
+              <Textarea readOnly autosize maxRows={2} value={phoneNumber} />
+            </GridCol>
+          </Grid>
+        </>
+      )}
 
       <Grid gutter={"xl"} className={ui.grid}>
         <GridCol span={4}>

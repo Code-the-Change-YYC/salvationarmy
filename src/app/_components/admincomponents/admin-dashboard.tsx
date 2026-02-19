@@ -99,7 +99,7 @@ export const AdminDashboard = () => {
         }}
         agencyName="Amazing Agency"
         residentName="John Doe"
-        contactInfo="123-456-7890"
+        phoneNumber="123-456-7890"
         additionalInfo="Requires support entering and exiting due to wheelchair use."
         dateAndTime="September 26, 2025 | 11:30 AM"
         purpose="Doctor's Appointment"

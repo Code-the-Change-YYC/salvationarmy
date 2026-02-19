@@ -59,7 +59,7 @@ interface TableViewProps {
 function transformBookingsToScheduleInfo(bookingsList: Booking[]): ScheduleInformation[] {
   return bookingsList.map((booking) => ({
     CREATED_AT: booking.createdAt?.toISOString() ?? "",
-    CLIENT_NAME: booking.passengerInfo,
+    CLIENT_NAME: booking.passengerName,
     TELEPHONE: booking.phoneNumber ?? "-",
     DATE_BOOKED: booking.startTime,
     TIME_BOOKED: booking.startTime,

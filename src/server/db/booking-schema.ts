@@ -11,7 +11,7 @@ export const bookings = pgTable(
     pickupAddress: text("pickup_address").notNull(),
     destinationAddress: text("destination_address").notNull(),
     purpose: text("purpose"),
-    passengerInfo: text("passenger_info").notNull(),
+    passengerName: text("passenger_name").notNull(),
     phoneNumber: varchar("phone_number", { length: 25 }),
     surveyCompleted: boolean("survey_completed").default(false).notNull(),
     status: text("status", { enum: BOOKING_STATUSES }).notNull().default(BookingStatus.INCOMPLETE),

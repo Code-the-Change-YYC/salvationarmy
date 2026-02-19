@@ -41,7 +41,7 @@ export const postTripSurveys = pgTable(
     comments: text("comments"),
 
     // Metadata
-    passengerInfo: text("passenger_info"),
+    passengerName: text("passenger_name"),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
