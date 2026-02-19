@@ -12,6 +12,7 @@ import User from "@/assets/icons/user";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { OrganizationRole, Role } from "@/types/types";
+import { emailRegex } from "@/types/validation";
 
 type InviteType = "user" | "agency" | null;
 
@@ -56,7 +57,6 @@ export const AdminDashboard = () => {
     validate: {
       email: (value) => {
         if (value.trim().length === 0) return "Email is required";
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) return "Invalid email address";
         return null;
       },
@@ -126,7 +126,6 @@ export const AdminDashboard = () => {
       organizationId,
     };
 
-    console.log("submit user", submitData);
     inviteUserMutation.mutate(submitData);
   };
 
@@ -139,7 +138,6 @@ export const AdminDashboard = () => {
     }
 
     const formValues = agencyForm.getValues();
-    console.log("submit agency", formValues);
     createAgencyMutation.mutate(formValues);
   };
 
@@ -194,7 +192,7 @@ export const AdminDashboard = () => {
               fontSize="18px"
               icon={<Home width="24" height="24" stroke="white" />}
             >
-              Invite Agency
+              Create Agency
             </Button>
           </Box>
         </Modal>
@@ -221,7 +219,7 @@ export const AdminDashboard = () => {
         </Modal>
       )}
 
-      {/* Invite Agency Form Modal */}
+      {/* Create Agency Form Modal */}
       {inviteType === "agency" && (
         <Modal
           opened={showInviteModal}
@@ -229,13 +227,13 @@ export const AdminDashboard = () => {
           onConfirm={handleAgencyConfirm}
           title={
             <Box fw={600} fz="xl">
-              Invite an Agency
+              Create an Agency
             </Box>
           }
           size="lg"
           showDefaultFooter
-          confirmText="Invite to Navigation Centre"
-          cancelText="Cancel Invite"
+          confirmText="Create Agency"
+          cancelText="Cancel"
           loading={createAgencyMutation.isPending}
         >
           <InviteAgencyForm form={agencyForm} />

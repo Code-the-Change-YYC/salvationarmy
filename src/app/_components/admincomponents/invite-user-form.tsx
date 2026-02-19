@@ -50,8 +50,8 @@ export const InviteUserForm = ({ form, organizations }: InviteUserFormProps) => 
         </Box>
         <TextInput
           withAsterisk
-          label="Email Address (Gmail only)"
-          placeholder="Example@gmail.com"
+          label="Email Address"
+          placeholder="example@gmail.com"
           key={form.key("email")}
           {...form.getInputProps("email")}
         />
