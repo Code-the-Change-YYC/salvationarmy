@@ -49,6 +49,12 @@ export enum ViewMode {
   TABLE = "table",
 }
 
+export enum CalendarUserView {
+  ADMIN = "admin",
+  DRIVER = "driver",
+  AGENCY = "agency",
+}
+
 export type { ViewMode as IViewMode };
 
 export enum BookingStatus {
@@ -71,7 +77,7 @@ export interface CalendarEvent {
   id: string;
   title: string;
   start: string;
-  end?: string;
+  end: string;
   allDay?: boolean;
   color?: string;
   extendedProps?: {
