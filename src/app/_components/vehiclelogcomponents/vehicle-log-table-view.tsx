@@ -3,7 +3,7 @@ import type { ColDef, IHeaderParams } from "ag-grid-community";
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Arrow from "@/assets/icons/arrow";
 import Calendar from "@/assets/icons/calendar";
 import CirclePause from "@/assets/icons/circle-pause";
@@ -18,6 +18,7 @@ import {
   MIN_COLUMN_WIDTH,
   TABLE_THEME_PARAMS,
 } from "@/constants/VehicleLogTableConstants";
+import { api } from "@/trpc/react";
 import styles from "./vehicle-log-table-view.module.scss";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -75,8 +76,8 @@ export default function VehicleLogTableView({ onRowClick }: VehicleLogTableViewP
   // Custom theme for the table
   const theme = themeQuartz.withParams(TABLE_THEME_PARAMS);
 
-  // TODO: Replace with tRPC query to fetch vehicle logs from database
-  const [vehicleLogs] = useState<VehicleLogData[]>([]);
+  // Fetch vehicle logs from database (bookings + post-trip surveys joined)
+  const { data: vehicleLogs = [] } = api.vehicleLogs.getAll.useQuery();
 
   const columnDefs: ColDef[] = useMemo(
     () => [
