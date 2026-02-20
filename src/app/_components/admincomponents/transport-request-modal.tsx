@@ -10,9 +10,9 @@ import ui from "./transport-request-modal.module.scss";
 
 interface TransportRequestProps {
   isOpen: boolean;
-  onClose: (...args: any[]) => void;
-  onDecline: (...args: any[]) => void;
-  onApprove: (...args: any[]) => void;
+  onClose: () => void;
+  onDecline: () => void;
+  onApprove: () => void;
   agencyName: string;
   residentName: string;
   phoneNumber?: string;
@@ -42,12 +42,10 @@ export default function TransportRequestModal({
   requestedDiffLocation,
 }: TransportRequestProps) {
   const isMobile = useMediaQuery("(max-width: 50em)");
-  let showPastHistory = true;
-
-  if (!transportRating || !prevDriverNotes || !requestedDiffLocation) {
-    //One of the optional fields left blank
-    showPastHistory = false;
-  }
+  const showPastHistory =
+    transportRating !== undefined &&
+    prevDriverNotes !== undefined &&
+    requestedDiffLocation !== undefined; //False if one of these optional fields are left blank
 
   return (
     <MantineModal
