@@ -67,7 +67,7 @@ function transformBookingsToEvents(bookingsList: Booking[]): CalendarEvent[] {
       pickupAddress: booking.pickupAddress,
       destinationAddress: booking.destinationAddress,
       purpose: booking.purpose,
-      passengerInfo: booking.passengerInfo,
+      passengerName: booking.passengerName,
       status: booking.status as BookingStatus,
       agencyId: booking.agencyId,
       driverId: booking.driverId,

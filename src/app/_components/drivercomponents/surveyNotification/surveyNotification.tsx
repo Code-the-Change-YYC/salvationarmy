@@ -138,7 +138,7 @@ export default function SurveyNotification({ survey, completed = false }: Survey
     const basePayload = {
       tripCompletionStatus: form.values.tripCompletionStatus,
       destinationAddress: form.values.destinationAddress,
-      passengerInfo: survey.passengerInfo || "",
+      passengerName: survey.passengerName || "",
       comments: form.values.comments,
       ...(!isCancelled && {
         startReading: Number(form.values.startReading),
@@ -181,7 +181,7 @@ export default function SurveyNotification({ survey, completed = false }: Survey
           <Stack gap={4}>
             <Text fw={600}>
               {completed ? "Survey completed" : "Fill out post ride survey"}{" "}
-              {survey.passengerInfo && `for ${survey.passengerInfo}`}
+              {survey.passengerName && `for ${survey.passengerName}`}
             </Text>
             <Text size="sm" c="dimmed" mb="sm">
               {completed ? "Ride was completed on: " : "Fill out the survey for your ride on "}

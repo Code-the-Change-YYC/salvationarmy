@@ -63,7 +63,7 @@ export default function SurveyViewToggle({
                     destinationAddress: booking.destinationAddress,
                     bookingId: booking.id,
                     driverId: booking.driverId, // there should hopefully always be an assigned driver...
-                    passengerInfo: booking.passengerInfo,
+                    passengerName: booking.passengerName,
                   } as Survey // TODO: remove
                 }
               />

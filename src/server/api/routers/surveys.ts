@@ -32,7 +32,7 @@ export const surveysRouter = createTRPCRouter({
           destinationAddress: z.string().optional(),
           originalLocationChanged: z.boolean().optional(),
           passengerFitRating: z.number().int().min(1).max(5).optional(),
-          passengerInfo: z.string().optional(),
+          passengerName: z.string().optional(),
           comments: z.string().optional(),
         })
         .superRefine((data, ctx) => {
@@ -165,7 +165,7 @@ export const surveysRouter = createTRPCRouter({
           originalLocationChanged: input.originalLocationChanged,
           passengerFitRating: input.passengerFitRating,
           comments: input.comments,
-          passengerInfo: input.passengerInfo,
+          passengerName: input.passengerName,
         })
         .returning();
 
@@ -344,7 +344,7 @@ export const surveysRouter = createTRPCRouter({
         originalLocationChanged: z.boolean().optional(),
         passengerFitRating: z.number().int().min(1).max(5).optional(),
         comments: z.string().optional(),
-        passengerInfo: z.string().optional(),
+        passengerName: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -424,8 +424,8 @@ export const surveysRouter = createTRPCRouter({
       if (updates.comments !== undefined) {
         updatesToApply.comments = updates.comments;
       }
-      if (updates.passengerInfo !== undefined) {
-        updatesToApply.passengerInfo = updates.passengerInfo;
+      if (updates.passengerName !== undefined) {
+        updatesToApply.passengerName = updates.passengerName;
       }
 
       // 5) Perform update

@@ -16,7 +16,7 @@ export default function BookingDebugPage() {
       title: "",
       pickupAddress: "",
       destinationAddress: "",
-      passengerInfo: "",
+      passengerName: "",
       start: "",
       end: "",
       agencyId: "",
@@ -28,7 +28,7 @@ export default function BookingDebugPage() {
       title: (v) => (!v.trim() ? "Title is required" : null),
       pickupAddress: (v) => (!v.trim() ? "Pickup required" : null),
       destinationAddress: (v) => (!v.trim() ? "Dropoff required" : null),
-      passengerInfo: (v) => (!v.trim() ? "Passenger info required" : null),
+      passengerName: (v) => (!v.trim() ? "Passenger name required" : null),
       agencyId: (v) => (!v.trim() ? "Agency ID required" : null),
       start: (v) => (!v.trim() ? "Start date/time required" : null),
       end: (v) => (!v.trim() ? "End date/time required" : null),
@@ -136,7 +136,7 @@ export default function BookingDebugPage() {
             title: values.title,
             pickupAddress: values.pickupAddress,
             destinationAddress: values.destinationAddress,
-            passengerInfo: values.passengerInfo,
+            passengerName: values.passengerName,
             agencyId: values.agencyId,
             startTime: values.start,
             endTime: values.end,
@@ -154,7 +154,7 @@ export default function BookingDebugPage() {
           label="Destination Address"
           {...form.getInputProps("destinationAddress")}
         />
-        <Textarea withAsterisk label="Passenger Info" {...form.getInputProps("passengerInfo")} />
+        <Textarea withAsterisk label="Passenger Name" {...form.getInputProps("passengerName")} />
         <TextInput withAsterisk label="Agency ID" {...form.getInputProps("agencyId")} />
         <TextInput label="Purpose (optional)" {...form.getInputProps("purpose")} />
         <TextInput label="Driver ID (optional)" {...form.getInputProps("driverId")} />

@@ -23,7 +23,7 @@ export const bookingsRouter = createTRPCRouter({
           title: z.string().min(1),
           pickupAddress: z.string().min(1),
           destinationAddress: z.string().min(1),
-          passengerInfo: z.string().min(1),
+          passengerName: z.string().min(1),
           agencyId: z.string().min(1),
 
           // Required because DB has .notNull()
@@ -51,7 +51,7 @@ export const bookingsRouter = createTRPCRouter({
         title: input.title,
         pickupAddress: input.pickupAddress,
         destinationAddress: input.destinationAddress,
-        passengerInfo: input.passengerInfo,
+        passengerName: input.passengerName,
         agencyId,
         startTime: input.startTime,
         endTime: input.endTime,
@@ -181,7 +181,7 @@ export const bookingsRouter = createTRPCRouter({
         pickupAddress: z.string().optional(),
         destinationAddress: z.string().optional(),
         purpose: z.string().optional(),
-        passengerInfo: z.string().optional(),
+        passengerName: z.string().optional(),
         driverId: z.string().optional().nullable(),
         status: StatusZ.optional(),
       }),

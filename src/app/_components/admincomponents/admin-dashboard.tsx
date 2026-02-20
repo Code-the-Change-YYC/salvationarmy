@@ -9,9 +9,11 @@ import Modal from "@/app/_components/common/modal/modal";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { OrganizationRole } from "@/types/types";
+import TransportRequestModal from "./transport-request-modal";
 
 export const AdminDashboard = () => {
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
+  const [showTransportRequestModal, setShowTransportRequestModal] = useState<boolean>(false);
 
   const organizations = api.organization.getAll.useQuery();
 
@@ -78,6 +80,34 @@ export const AdminDashboard = () => {
       >
         <InviteUserForm organizations={organizations.data ?? []} form={form} />
       </Modal>
+
+      <Button onClick={() => setShowTransportRequestModal(true)}>
+        temp review transport modal button
+      </Button>
+      <TransportRequestModal
+        isOpen={showTransportRequestModal}
+        onClose={() => {
+          setShowTransportRequestModal(false);
+          console.log("closed");
+        }}
+        onDecline={() => {
+          setShowTransportRequestModal(false);
+          console.log("declined");
+        }}
+        onApprove={() => {
+          console.log("approved");
+        }}
+        agencyName="Amazing Agency"
+        residentName="John Doe"
+        phoneNumber="123-456-7890"
+        additionalInfo="Requires support entering and exiting due to wheelchair use."
+        dateAndTime="September 26, 2025 | 11:30 AM"
+        purpose="Doctor's Appointment"
+        destinationAddress="123 Someplace St SW"
+        transportRating={2}
+        prevDriverNotes="Passenger was visibly intoxicated during the ride, and requested to be dropped off at a different location than the requested address."
+        requestedDiffLocation={true}
+      />
     </>
   );
 };
