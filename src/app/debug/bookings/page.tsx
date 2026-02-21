@@ -19,6 +19,7 @@ import { api } from "@/trpc/react";
 import { ALL_BOOKING_STATUSES, BookingStatus, type BookingStatusValue } from "@/types/types";
 import styles from "./BookingDebugPage.module.scss";
 
+/** Returns true if end is after start (or invalid); used for form validation. */
 function isEndAfterStart(start: string, end: string) {
   const a = new Date(start).getTime();
   const b = new Date(end).getTime();
@@ -26,6 +27,7 @@ function isEndAfterStart(start: string, end: string) {
   return b > a;
 }
 
+/** Formats start and end as a time range string in UTC (e.g. 9:00 AM – 10:30 AM). */
 function formatTimeSlot(startTime: string, endTime: string): string {
   // Format in UTC to match stored booking times (e.g. "09:00:00+00" -> "9:00 AM")
   const opts: Intl.DateTimeFormatOptions = {
@@ -50,6 +52,7 @@ const EXAMPLE_BOOKING = {
   start: "2026-02-12T15:00:00.000Z", // Feb 12, 2026 3:00 PM UTC
 };
 
+/** Returns true if the booking overlaps the given UTC day (day boundaries in UTC). */
 function bookingOverlapsDay(booking: { startTime: string; endTime: string }, day: Date): boolean {
   const y = day.getUTCFullYear();
   const m = day.getUTCMonth();
@@ -72,6 +75,7 @@ type BookingForSchedule = {
   title: string;
 };
 
+/** Table of a driver's bookings for the selected day; shows time slot and title. */
 function DriverScheduleTable({
   bookings,
   day,
@@ -118,6 +122,7 @@ function DriverScheduleTable({
   );
 }
 
+/** Debug page for creating/editing bookings and viewing driver availability. */
 export default function BookingDebugPage() {
   const [bookingId, setBookingId] = useState<number>(1);
 

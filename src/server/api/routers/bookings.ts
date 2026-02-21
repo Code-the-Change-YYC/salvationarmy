@@ -32,6 +32,12 @@ const StatusZ = z.enum(BOOKING_STATUS); // ← uses "cancelled" (double-L)
 
 type DbContext = { db: typeof db };
 
+/**
+ * Throws if the session user is not admin and not the booking's agency.
+ * @param session - Session with user id and role
+ * @param agencyId - Booking's agency id
+ * @throws TRPCError FORBIDDEN when not allowed
+ */
 function assertCanAccessBooking(
   session: { user: { id: string; role?: string | null } },
   agencyId: string,
@@ -233,7 +239,7 @@ async function validateDriverForSlot(
 }
 
 export const bookingsRouter = createTRPCRouter({
-  // GET /bookings/current-user (for debug form default agencyId)
+  /** Returns the current user id and role for the debug form default agencyId. */
   getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
     return {
       id: ctx.session.user.id,
@@ -241,7 +247,7 @@ export const bookingsRouter = createTRPCRouter({
     };
   }),
 
-  // GET /bookings/drivers (list all drivers)
+  /** Returns all drivers (id, name; email only for admins). */
   listDrivers: protectedProcedure.query(async ({ ctx }) => {
     const isAdmin = ctx.session.user.role === "admin";
     const drivers = await ctx.db
@@ -257,7 +263,7 @@ export const bookingsRouter = createTRPCRouter({
     return drivers;
   }),
 
-  // GET /bookings/is-driver-available
+  /** Checks driver availability for a time range (overlap and travel time). */
   isDriverAvailable: protectedProcedure
     .input(
       z.object({
@@ -298,8 +304,7 @@ export const bookingsRouter = createTRPCRouter({
       return { available: true };
     }),
 
-  // GET /bookings/estimated-end-time
-  // End time = Start + Pickup wait (15 min) + Travel time (Location 1 → Location 2)
+  /** Returns estimated end time from start + pickup wait + travel time (cached). */
   getEstimatedEndTime: protectedProcedure
     .input(
       z.object({
@@ -342,7 +347,7 @@ export const bookingsRouter = createTRPCRouter({
       };
     }),
 
-  // POST /bookings (create)
+  /** Creates a booking; validates driver slot when driverId is set. */
   create: protectedProcedure
     .input(
       z
@@ -419,6 +424,7 @@ export const bookingsRouter = createTRPCRouter({
       return row;
     }),
 
+  /** Returns a single booking by id after access check. */
   getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
     const row = await ctx.db
       .select()
@@ -437,6 +443,7 @@ export const bookingsRouter = createTRPCRouter({
     return row;
   }),
 
+  /** Returns bookings (filtered by date and optional survey flag); access by agency. */
   getAll: protectedProcedure
     .input(
       z
@@ -509,7 +516,7 @@ export const bookingsRouter = createTRPCRouter({
         .orderBy(desc(bookings.createdAt));
     }),
 
-  // PATCH /bookings/:id
+  /** Updates a booking; re-validates driver when driver or time/address changes. */
   update: protectedProcedure
     .input(
       z.object({
@@ -595,7 +602,7 @@ export const bookingsRouter = createTRPCRouter({
       return res[0];
     }),
 
-  // PATCH /bookings/:id/cancel
+  /** Sets booking status to cancelled. */
   cancel: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
