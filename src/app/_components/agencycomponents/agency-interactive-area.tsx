@@ -11,7 +11,7 @@ import Modal from "@/app/_components/common/modal/modal";
 import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
-import { type CalendarUserView, type Booking, ViewMode } from "@/types/types";
+import { type Booking, type CalendarUserView, ViewMode } from "@/types/types";
 import { validateStringLength, validateTimeRange } from "@/types/validation";
 import TableView from "../agencypage/table-view";
 import LoadingScreen from "../common/loadingscreen";
@@ -318,7 +318,7 @@ export const BookingInteractiveArea = ({
             currentDate={currentDate}
             setIsDayView={setIsDayView}
             viewType={viewType}
-            onBookingClick={handleOpenEditModal}
+            onEditBooking={handleOpenEditModal}
           />
         ) : (
           <TableView bookings={bookings ?? []} />

@@ -85,6 +85,7 @@ interface CalendarViewProps {
   includeButtons?: boolean;
   viewType?: CalendarUserView;
   onDateChangeFunction?: (...args: any[]) => void;
+  onEditBooking?: (booking: Booking) => void;
 }
 
 export default function CalendarView({
@@ -94,6 +95,7 @@ export default function CalendarView({
   includeButtons,
   viewType,
   onDateChangeFunction,
+  onEditBooking,
 }: CalendarViewProps) {
   const [openedEventId, setOpenedEventId] = useState<string | null>(null);
   const events = useMemo(() => transformBookingsToEvents(bookings ?? []), [bookings]);
@@ -144,6 +146,11 @@ export default function CalendarView({
     }
   }, [isMobile, setIsDayView]);
 
+  function handleEdit(booking: Booking) {
+    setOpenedEventId(null);
+    onEditBooking?.(booking);
+  }
+
   // Custom event content renderer
   const renderEventContent = (eventInfo: EventContentArg) => {
     const event = eventInfo.event;
@@ -184,7 +191,9 @@ export default function CalendarView({
       >
         <Popover.Target>{eventBlock}</Popover.Target>
         <Popover.Dropdown>
-          {calendarEvent && <EventDetails event={calendarEvent} viewType={viewType} />}
+          {calendarEvent && (
+            <EventDetails event={calendarEvent} viewType={viewType} onEdit={handleEdit} />
+          )}
         </Popover.Dropdown>
       </Popover>
     );
