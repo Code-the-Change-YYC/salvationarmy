@@ -6,21 +6,12 @@ import { useState } from "react";
 import Button from "@/app/_components/common/button/Button";
 import Modal from "@/app/_components/common/modal/modal";
 import { VehicleLogForm } from "@/app/_components/vehiclelogcomponents/vehicle-log-form";
-import VehicleLogTableView from "@/app/_components/vehiclelogcomponents/vehicle-log-table-view";
+import VehicleLogTableView, {
+  type VehicleLogData,
+} from "@/app/_components/vehiclelogcomponents/vehicle-log-table-view";
 import Grid from "@/assets/icons/grid";
 import Plus from "@/assets/icons/plus";
 import { notify } from "@/lib/notifications";
-
-interface VehicleLogData {
-  DATE: string;
-  DESTINATION: string;
-  DEPARTURE_TIME: string;
-  ARRIVAL_TIME: string;
-  ODOMETER_START: number;
-  ODOMETER_END: number;
-  KM_DRIVEN: number;
-  DRIVER: string;
-}
 
 export default function VehicleLogsPage() {
   const [showModal, setShowModal] = useState(false);

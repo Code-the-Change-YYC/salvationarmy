@@ -23,7 +23,7 @@ import styles from "./vehicle-log-table-view.module.scss";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-interface VehicleLogData {
+export interface VehicleLogData {
   DATE: string;
   DESTINATION: string;
   DEPARTURE_TIME: string;
