@@ -262,7 +262,7 @@ export default function CalendarView({
             <Drawer.Handle />
             {selectedEvent && (
               <Box py="1rem">
-                <EventDetails event={selectedEvent} viewType={viewType} />
+                <EventDetails event={selectedEvent} viewType={viewType} onEdit={handleEdit} />
               </Box>
             )}
           </Drawer.Content>

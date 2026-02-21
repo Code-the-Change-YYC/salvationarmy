@@ -131,23 +131,27 @@ export const BookingInteractiveArea = ({
   useEffect(() => {
     if (selectedBooking && currentModalMode === "edit") {
       let residentName = "";
-      let phoneNumber = "";
+      let phoneNumberFallback = "";
       let additionalInfo = "";
 
       if (selectedBooking.passengerInfo) {
         const parts = selectedBooking.passengerInfo.split("|");
         residentName = parts[0] || "";
-        phoneNumber = parts[1] || "";
+        phoneNumberFallback = parts[1] || "";
         additionalInfo = parts[2] || "";
       }
+
+      const phoneNumber = selectedBooking.phoneNumber?.trim()
+        ? selectedBooking.phoneNumber
+        : phoneNumberFallback;
 
       form.setValues({
         title: selectedBooking.title,
         residentName,
         phoneNumber,
         additionalInfo,
-        startTime: selectedBooking.startTime,
-        endTime: selectedBooking.endTime,
+        startTime: new Date(selectedBooking.startTime).toISOString(),
+        endTime: new Date(selectedBooking.endTime).toISOString(),
         purpose: selectedBooking.purpose || "",
         pickupAddress: selectedBooking.pickupAddress,
         destinationAddress: selectedBooking.destinationAddress,
@@ -253,6 +257,7 @@ export const BookingInteractiveArea = ({
         destinationAddress: inputElement.current?.value || "",
         purpose: form.values.purpose,
         passengerInfo,
+        phoneNumber: form.values.phoneNumber,
         startTime: form.values.startTime,
         endTime: form.values.endTime,
       });

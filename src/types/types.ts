@@ -84,7 +84,7 @@ export interface CalendarEvent {
     pickupAddress: string;
     destinationAddress: string;
     purpose?: string | null;
-    passengerInfo: string;
+    passengerInfo: string | null;
     status: BookingStatus;
     agencyId: string;
     driverId?: string | null;
