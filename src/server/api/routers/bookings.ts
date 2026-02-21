@@ -124,9 +124,18 @@ async function validateTravelBetweenAdjacentBookings(
     const gapMinutes = (newStartMs - prevEndMs) / (60 * 1000);
 
     if (gapMinutes <= MAX_GAP_MINUTES_FOR_TRAVEL_CHECK) {
-      const travelMinutes =
-        (await getTravelTimeMinutes(prevBooking.destinationAddress, pickupAddress)) ??
-        FALLBACK_TRAVEL_MINUTES;
+      const travelMinutesResult = await getTravelTimeMinutes(
+        prevBooking.destinationAddress,
+        pickupAddress,
+      );
+      const travelMinutes = travelMinutesResult ?? FALLBACK_TRAVEL_MINUTES;
+      if (travelMinutesResult === null) {
+        console.warn(
+          "Travel time lookup failed, using fallback:",
+          { from: prevBooking.destinationAddress, to: pickupAddress },
+          `Using ${FALLBACK_TRAVEL_MINUTES} min fallback`,
+        );
+      }
       const requiredMinutes = travelMinutes + TRAVEL_BUFFER_MINUTES;
 
       if (gapMinutes < requiredMinutes) {
@@ -165,9 +174,18 @@ async function validateTravelBetweenAdjacentBookings(
     const gapMinutes = (nextStartMs - newEndMs) / (60 * 1000);
 
     if (gapMinutes <= MAX_GAP_MINUTES_FOR_TRAVEL_CHECK) {
-      const travelMinutes =
-        (await getTravelTimeMinutes(destinationAddress, nextBooking.pickupAddress)) ??
-        FALLBACK_TRAVEL_MINUTES;
+      const travelMinutesResult = await getTravelTimeMinutes(
+        destinationAddress,
+        nextBooking.pickupAddress,
+      );
+      const travelMinutes = travelMinutesResult ?? FALLBACK_TRAVEL_MINUTES;
+      if (travelMinutesResult === null) {
+        console.warn(
+          "Travel time lookup failed, using fallback:",
+          { from: destinationAddress, to: nextBooking.pickupAddress },
+          `Using ${FALLBACK_TRAVEL_MINUTES} min fallback`,
+        );
+      }
       const requiredMinutes = travelMinutes + TRAVEL_BUFFER_MINUTES;
 
       if (gapMinutes < requiredMinutes) {

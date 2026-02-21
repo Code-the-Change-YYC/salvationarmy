@@ -51,17 +51,71 @@ const EXAMPLE_BOOKING = {
 };
 
 function bookingOverlapsDay(booking: { startTime: string; endTime: string }, day: Date): boolean {
-  const dayStart = new Date(day);
-  dayStart.setHours(0, 0, 0, 0);
-  const dayEnd = new Date(day);
-  dayEnd.setHours(23, 59, 59, 999);
+  const y = day.getUTCFullYear();
+  const m = day.getUTCMonth();
+  const d = day.getUTCDate();
+  const dStart = Date.UTC(y, m, d, 0, 0, 0, 0);
+  const dEnd = Date.UTC(y, m, d, 23, 59, 59, 999);
 
   const start = new Date(booking.startTime).getTime();
   const end = new Date(booking.endTime).getTime();
-  const dStart = dayStart.getTime();
-  const dEnd = dayEnd.getTime();
 
   return start < dEnd && end > dStart;
+}
+
+type BookingForSchedule = {
+  id: number;
+  driverId: string | null;
+  status: string;
+  startTime: string;
+  endTime: string;
+  title: string;
+};
+
+function DriverScheduleTable({
+  bookings,
+  day,
+  driverId,
+}: {
+  bookings: BookingForSchedule[];
+  day: Date | null;
+  driverId: string;
+}) {
+  if (!day || !driverId) return null;
+  const bookedSlots = bookings
+    .filter(
+      (b) => b.driverId === driverId && b.status !== "cancelled" && bookingOverlapsDay(b, day),
+    )
+    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+
+  if (bookedSlots.length === 0) {
+    return (
+      <Text size="sm" c="dimmed">
+        No bookings this day – driver available all day
+      </Text>
+    );
+  }
+
+  return (
+    <Table withTableBorder withColumnBorders className={styles.bookedSlotsTableBody}>
+      <Table.Thead>
+        <Table.Tr>
+          <Table.Th>Time slot</Table.Th>
+          <Table.Th>Booking</Table.Th>
+        </Table.Tr>
+      </Table.Thead>
+      <Table.Tbody>
+        {bookedSlots.map((b) => (
+          <Table.Tr key={b.id}>
+            <Table.Td>{formatTimeSlot(b.startTime, b.endTime)}</Table.Td>
+            <Table.Td>
+              Booking #{b.id} – {b.title}
+            </Table.Td>
+          </Table.Tr>
+        ))}
+      </Table.Tbody>
+    </Table>
+  );
 }
 
 export default function BookingDebugPage() {
@@ -362,50 +416,11 @@ export default function BookingDebugPage() {
                 Loading…
               </Text>
             ) : (
-              (() => {
-                const day = selectedDay;
-                const driverId = form.values.driverId;
-                if (!day || !driverId) return null;
-                const bookedSlots = (allBookingsQuery.data ?? [])
-                  .filter(
-                    (b) =>
-                      b.driverId === driverId &&
-                      b.status !== "cancelled" &&
-                      bookingOverlapsDay(b, day),
-                  )
-                  .sort(
-                    (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-                  );
-
-                if (bookedSlots.length === 0) {
-                  return (
-                    <Text size="sm" c="dimmed">
-                      No bookings this day – driver available all day
-                    </Text>
-                  );
-                }
-
-                return (
-                  <Table withTableBorder withColumnBorders className={styles.bookedSlotsTableBody}>
-                    <Table.Thead>
-                      <Table.Tr>
-                        <Table.Th>Time slot</Table.Th>
-                        <Table.Th>Booking</Table.Th>
-                      </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                      {bookedSlots.map((b) => (
-                        <Table.Tr key={b.id}>
-                          <Table.Td>{formatTimeSlot(b.startTime, b.endTime)}</Table.Td>
-                          <Table.Td>
-                            Booking #{b.id} – {b.title}
-                          </Table.Td>
-                        </Table.Tr>
-                      ))}
-                    </Table.Tbody>
-                  </Table>
-                );
-              })()
+              <DriverScheduleTable
+                bookings={allBookingsQuery.data ?? []}
+                day={selectedDay}
+                driverId={form.values.driverId ?? ""}
+              />
             )}
           </div>
         )}
