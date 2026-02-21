@@ -441,6 +441,9 @@ export default function BookingDebugPage() {
           <div className={styles.debugOutput}>
             <h4>End time calculation</h4>
             <pre>
+              {estimatedEndQuery.data.usedFallback &&
+                "Using fallback travel time (API unavailable).\n"}
+              {estimatedEndQuery.data.usedCached && "(From cache)\n"}
               Calculated driving time: {estimatedEndQuery.data.drivingTimeMinutes} min
               {"\n"}
               Total booking time: {estimatedEndQuery.data.totalBookingMinutes} min (15 min pickup

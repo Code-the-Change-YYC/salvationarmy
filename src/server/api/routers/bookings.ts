@@ -318,10 +318,16 @@ export const bookingsRouter = createTRPCRouter({
       const now = Date.now();
       const cached = travelTimeCache.get(cacheKey);
       let drivingTimeMinutes: number;
+      let usedCached: boolean;
+      let usedFallback: boolean;
       if (cached && cached.expiresAt > now) {
         drivingTimeMinutes = cached.value;
+        usedCached = true;
+        usedFallback = false;
       } else {
         const apiResult = await getTravelTimeMinutes(input.pickupAddress, input.destinationAddress);
+        usedCached = false;
+        usedFallback = apiResult === null;
         drivingTimeMinutes = apiResult ?? FALLBACK_TRAVEL_MINUTES;
         travelTimeCache.set(cacheKey, {
           value: drivingTimeMinutes,
@@ -344,6 +350,8 @@ export const bookingsRouter = createTRPCRouter({
         totalBookingMinutes,
         startTime: input.startTime,
         estimatedEndTime,
+        usedCached,
+        usedFallback,
       };
     }),
 
