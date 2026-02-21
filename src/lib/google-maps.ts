@@ -38,7 +38,7 @@ export interface TravelTimeOptions {
  * @param destinationAddress - Destination address as a string
  * @param options - Optional travel mode and unit settings
  * @returns Travel duration in minutes, or null if calculation fails
- * @throws Error if API key is missing or API request fails critically
+ * @throws Error if GOOGLE_MAPS_API_KEY is not configured
  */
 export async function getTravelTimeMinutes(
   originAddress: string,

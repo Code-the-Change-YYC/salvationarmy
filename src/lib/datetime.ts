@@ -6,7 +6,8 @@ import { TIME_SLOT_ROUNDING_MINUTES } from "@/constants/driver-assignment";
  * - 14:07 → 14:15
  * - 14:15 → 14:15
  * - 14:16 → 14:30
- * - 14:45 → 15:00
+ * - 14:45 → 14:45
+ * - 14:46 → 15:00
  *
  * @param date - The date to round up
  * @param incrementMinutes - The increment in minutes (default: 15)

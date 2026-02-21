@@ -80,8 +80,6 @@ export default function BookingDebugPage() {
     const m = d.getUTCMinutes().toString().padStart(2, "0");
     return `${h}:${m}`;
   });
-  const [endPickerValue, setEndPickerValue] = useState<string | null>(null);
-
   const form = useForm({
     initialValues: {
       title: EXAMPLE_BOOKING.title,
@@ -181,7 +179,6 @@ export default function BookingDebugPage() {
 
   useEffect(() => {
     if (estimatedEndQuery.data) {
-      setEndPickerValue(estimatedEndQuery.data.estimatedEndTime);
       form.setFieldValue("end", estimatedEndQuery.data.estimatedEndTime);
     }
   }, [estimatedEndQuery.data, form.setFieldValue]);
@@ -222,7 +219,6 @@ export default function BookingDebugPage() {
       const h = exampleStartDate.getUTCHours().toString().padStart(2, "0");
       const m = exampleStartDate.getUTCMinutes().toString().padStart(2, "0");
       setStartTimeOfDay(`${h}:${m}`);
-      setEndPickerValue(null);
     },
     onError: (err) => {
       notifications.show({ color: "red", message: err.message });
@@ -324,12 +320,17 @@ export default function BookingDebugPage() {
               setSelectedDay(null);
               return;
             }
-            // Parse as local date to avoid UTC-off-by-one (e.g. "2025-02-15" -> Feb 14 in PST)
-            const str = typeof v === "string" ? v : (v as Date).toISOString().slice(0, 10);
-            const parts = str.split("-").map(Number);
-            const [y, m, day] = parts;
-            if (y != null && m != null && day != null) {
-              setSelectedDay(new Date(y, m - 1, day));
+            const value = v as unknown;
+            if (value instanceof Date) {
+              setSelectedDay(new Date(value.getFullYear(), value.getMonth(), value.getDate()));
+            } else {
+              const str = (typeof value === "string" ? value : "").trim();
+              if (!str) return;
+              const parts = str.split("-").map(Number);
+              const [y, m, day] = parts;
+              if (y != null && m != null && day != null) {
+                setSelectedDay(new Date(y, m - 1, day));
+              }
             }
           }}
           valueFormat="MMM D, YYYY"
@@ -420,10 +421,6 @@ export default function BookingDebugPage() {
           <div className={styles.debugOutput}>
             <h4>End time calculation</h4>
             <pre>
-              {/* Location 1: {estimatedEndQuery.data.location1}
-              {"\n"}
-              Location 2: {estimatedEndQuery.data.location2}
-              {"\n"} */}
               Calculated driving time: {estimatedEndQuery.data.drivingTimeMinutes} min
               {"\n"}
               Total booking time: {estimatedEndQuery.data.totalBookingMinutes} min (15 min pickup
