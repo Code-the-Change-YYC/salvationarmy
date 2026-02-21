@@ -102,7 +102,7 @@ export type Survey = SurveySelectType;
 
 export interface ScheduleInformation {
   CREATED_AT: string; // string or date type?
-  CLIENT_NAME: string;
+  CLIENT_NAME: string | null;
   TELEPHONE: string;
   DATE_BOOKED: string; // Eventually this will be a date type
   TIME_BOOKED: string; // Eventually this will be a time type
