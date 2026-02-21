@@ -46,6 +46,7 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
           maxDate={now}
           key={form.key("date")}
           {...form.getInputProps("date")}
+          onBlur={() => form.validateField("date")}
           timePickerProps={{
             withDropdown: true,
             popoverProps: { withinPortal: false },
@@ -88,6 +89,7 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
                 form.setFieldValue("arrivalTime", null);
               }
             }}
+            onBlur={() => form.validateField("departureTime")}
             timePickerProps={{
               withDropdown: true,
               popoverProps: { withinPortal: false },
@@ -108,6 +110,7 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
             disabled={!form.values.departureTime}
             key={form.key("arrivalTime")}
             {...form.getInputProps("arrivalTime")}
+            onBlur={() => form.validateField("arrivalTime")}
             timePickerProps={{
               withDropdown: true,
               popoverProps: { withinPortal: false },
