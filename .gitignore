@@ -8,6 +8,9 @@
 # testing
 /coverage
 
+# database
+drizzle/meta 
+
 # next.js
 /.next/
 /out/
