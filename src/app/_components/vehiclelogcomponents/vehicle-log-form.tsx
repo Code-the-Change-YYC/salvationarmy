@@ -21,6 +21,8 @@ interface VehicleLogFormProps {
 
 export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
   const now = new Date();
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(now.getDate() - 90);
 
   // Calculate KM driven
   const calculateKmDriven = () => {
@@ -40,7 +42,8 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
           withAsterisk
           label="Date"
           placeholder="Select date"
-          minDate={now}
+          minDate={ninetyDaysAgo}
+          maxDate={now}
           key={form.key("date")}
           {...form.getInputProps("date")}
           timePickerProps={{
@@ -74,7 +77,8 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
             withAsterisk
             label="Departure Time"
             placeholder="Select departure time"
-            minDate={now}
+            minDate={ninetyDaysAgo}
+            maxDate={now}
             value={form.values.departureTime}
             onChange={(value) => {
               form.setFieldValue("departureTime", value);
@@ -99,7 +103,8 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
             withAsterisk
             label="Arrival Time"
             placeholder="Select arrival time"
-            minDate={form.values.departureTime || now}
+            minDate={form.values.departureTime || ninetyDaysAgo}
+            maxDate={now}
             disabled={!form.values.departureTime}
             key={form.key("arrivalTime")}
             {...form.getInputProps("arrivalTime")}
