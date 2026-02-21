@@ -159,7 +159,7 @@ export default function VehicleLogTableView({ onRowClick }: VehicleLogTableViewP
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         pagination={false}
-        onRowClicked={(event) => onRowClick?.(event.data)}
+        onRowClicked={(event) => event.data && onRowClick?.(event.data)}
       />
     </div>
   );
