@@ -220,11 +220,12 @@ export const bookingsRouter = createTRPCRouter({
 
   // GET /bookings/drivers (list all drivers)
   listDrivers: protectedProcedure.query(async ({ ctx }) => {
+    const isAdmin = ctx.session.user.role === "admin";
     const drivers = await ctx.db
       .select({
         id: user.id,
         name: user.name,
-        email: user.email,
+        ...(isAdmin ? { email: user.email } : {}),
       })
       .from(user)
       .where(eq(user.role, "driver"))
@@ -511,14 +512,25 @@ export const bookingsRouter = createTRPCRouter({
         Object.entries(updates).filter(([, v]) => v !== undefined),
       );
 
-      if (updatesToApply.driverId !== undefined && updatesToApply.driverId) {
+      const driverId =
+        updatesToApply.driverId !== undefined ? updatesToApply.driverId : existing.driverId;
+      const needsDriverValidation =
+        driverId != null &&
+        driverId !== "" &&
+        (updatesToApply.driverId !== undefined ||
+          updatesToApply.startTime !== undefined ||
+          updatesToApply.endTime !== undefined ||
+          updatesToApply.pickupAddress !== undefined ||
+          updatesToApply.destinationAddress !== undefined);
+
+      if (needsDriverValidation) {
         const proposedStart = updatesToApply.startTime ?? existing.startTime;
         const proposedEnd = updatesToApply.endTime ?? existing.endTime;
         const proposedPickup = updatesToApply.pickupAddress ?? existing.pickupAddress;
         const proposedDest = updatesToApply.destinationAddress ?? existing.destinationAddress;
 
         await validateDriverForSlot(ctx, {
-          driverId: updatesToApply.driverId,
+          driverId,
           startTime: proposedStart,
           endTime: proposedEnd,
           pickupAddress: proposedPickup,

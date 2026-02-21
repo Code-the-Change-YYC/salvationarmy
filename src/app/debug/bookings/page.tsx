@@ -130,7 +130,7 @@ export default function BookingDebugPage() {
     () =>
       (listDriversQuery.data ?? []).map((d) => ({
         value: d.id,
-        label: `${d.name} (${d.email})`,
+        label: "email" in d && d.email != null ? `${d.name} (${d.email})` : d.name,
       })),
     [listDriversQuery.data],
   );
