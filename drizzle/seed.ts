@@ -478,8 +478,6 @@ async function seedLogs() {
     const logsToCreate = 25;
     const logsData = [];
 
-    let cumulativeOdometer = 45000; // Starting odometer reading
-
     for (let i = 0; i < logsToCreate; i++) {
       // Random day in past 30 days
       const daysAgo = Math.floor(Math.random() * 30);
@@ -499,17 +497,13 @@ async function seedLogs() {
 
       // Trip distance: 10-60 km
       const tripDistance = Math.floor(Math.random() * 50) + 10;
-      const startOdometer = cumulativeOdometer;
-      const endOdometer = cumulativeOdometer + tripDistance;
-      cumulativeOdometer = endOdometer;
 
       logsData.push({
         date: logDate.toISOString().split("T")[0]!, // YYYY-MM-DD format
         travelLocation: destinations[i % destinations.length]!,
         departureTime: departureTime.toISOString(),
         arrivalTime: arrivalTime.toISOString(),
-        odometerStart: startOdometer,
-        odometerEnd: endOdometer,
+        tripDistance,
         driverId: driver.id,
         driverName: driver.name || "Driver User",
         vehicle: vehicles[i % vehicles.length]!,
@@ -520,15 +514,37 @@ async function seedLogs() {
     // Sort by date (oldest first)
     logsData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+    let cumulativeOdometer = 45000; // Starting odometer reading
+    const logsWithOdometer = logsData.map((log) => {
+      const startOdometer = cumulativeOdometer;
+      const endOdometer = cumulativeOdometer + log.tripDistance;
+      cumulativeOdometer = endOdometer;
+
+      return {
+        date: log.date,
+        travelLocation: log.travelLocation,
+        departureTime: log.departureTime,
+        arrivalTime: log.arrivalTime,
+        odometerStart: startOdometer,
+        odometerEnd: endOdometer,
+        driverId: log.driverId,
+        driverName: log.driverName,
+        vehicle: log.vehicle,
+        createdBy: log.createdBy,
+      };
+    });
+
     // Insert all logs
-    console.log(`Creating ${logsData.length} vehicle logs...`);
-    await db.insert(logs).values(logsData);
+    console.log(`Creating ${logsWithOdometer.length} vehicle logs...`);
+    await db.insert(logs).values(logsWithOdometer);
 
     console.log("\n✅ Vehicle logs seeded successfully!\n");
-    console.log(`  Total logs created: ${logsData.length}`);
-    console.log(`  Date range: ${logsData[0]?.date} to ${logsData[logsData.length - 1]?.date}`);
+    console.log(`  Total logs created: ${logsWithOdometer.length}`);
     console.log(
-      `  Odometer range: ${logsData[0]?.odometerStart} km to ${logsData[logsData.length - 1]?.odometerEnd} km`,
+      `  Date range: ${logsWithOdometer[0]?.date} to ${logsWithOdometer[logsWithOdometer.length - 1]?.date}`,
+    );
+    console.log(
+      `  Odometer range: ${logsWithOdometer[0]?.odometerStart} km to ${logsWithOdometer[logsWithOdometer.length - 1]?.odometerEnd} km`,
     );
   } catch (error) {
     console.error("❌ Failed to seed vehicle logs:", error);
