@@ -228,7 +228,7 @@ export default function BookingDebugPage() {
       destinationAddress: form.values.destinationAddress,
       startTime: computedStart,
     },
-    { enabled: canCalculateEnd, staleTime: 0 },
+    { enabled: canCalculateEnd, staleTime: 5 * 60 * 1000 },
   );
 
   useEffect(() => {

@@ -48,6 +48,7 @@ export const bookings = pgTable(
       table.startTime,
       table.endTime,
     ),
+    index("bookings_driver_end_time_idx").on(table.driverId, table.endTime),
   ],
 );
 

@@ -23,6 +23,11 @@ dayjs.extend(timezone); //Allows dayjs to convert dates between time zones
 /** Fallback travel minutes per leg when Google Maps API fails */
 const FALLBACK_TRAVEL_MINUTES = 15;
 
+/** TTL for in-memory travel time cache (10 minutes) */
+const TRAVEL_TIME_CACHE_TTL_MS = 10 * 60 * 1000;
+
+const travelTimeCache = new Map<string, { value: number; expiresAt: number }>();
+
 const StatusZ = z.enum(BOOKING_STATUS); // ← uses "cancelled" (double-L)
 
 type DbContext = { db: typeof db };
@@ -304,9 +309,20 @@ export const bookingsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const drivingTimeMinutes =
-        (await getTravelTimeMinutes(input.pickupAddress, input.destinationAddress)) ??
-        FALLBACK_TRAVEL_MINUTES;
+      const cacheKey = `${input.pickupAddress}|${input.destinationAddress}`;
+      const now = Date.now();
+      const cached = travelTimeCache.get(cacheKey);
+      let drivingTimeMinutes: number;
+      if (cached && cached.expiresAt > now) {
+        drivingTimeMinutes = cached.value;
+      } else {
+        const apiResult = await getTravelTimeMinutes(input.pickupAddress, input.destinationAddress);
+        drivingTimeMinutes = apiResult ?? FALLBACK_TRAVEL_MINUTES;
+        travelTimeCache.set(cacheKey, {
+          value: drivingTimeMinutes,
+          expiresAt: now + TRAVEL_TIME_CACHE_TTL_MS,
+        });
+      }
 
       const totalBookingMinutes = PICKUP_WAIT_TIME_MINUTES + drivingTimeMinutes;
 
@@ -377,17 +393,22 @@ export const bookingsRouter = createTRPCRouter({
       if (input.driverId !== undefined) bookingData.driverId = input.driverId;
       if (input.status !== undefined) bookingData.status = input.status;
 
-      if (input.driverId) {
-        await validateDriverForSlot(ctx, {
-          driverId: input.driverId,
-          startTime: input.startTime,
-          endTime: input.endTime,
-          pickupAddress: input.pickupAddress,
-          destinationAddress: input.destinationAddress,
-        });
-      }
-
-      const [row] = await ctx.db.insert(bookings).values(bookingData).returning();
+      const rows = await ctx.db.transaction(async (tx) => {
+        if (input.driverId) {
+          await validateDriverForSlot(
+            { db: tx as unknown as typeof db },
+            {
+              driverId: input.driverId,
+              startTime: input.startTime,
+              endTime: input.endTime,
+              pickupAddress: input.pickupAddress,
+              destinationAddress: input.destinationAddress,
+            },
+          );
+        }
+        return tx.insert(bookings).values(bookingData).returning();
+      });
+      const row = rows[0];
 
       if (!row) {
         throw new TRPCError({
@@ -541,31 +562,35 @@ export const bookingsRouter = createTRPCRouter({
           updatesToApply.pickupAddress !== undefined ||
           updatesToApply.destinationAddress !== undefined);
 
-      if (needsDriverValidation) {
-        const proposedStart = updatesToApply.startTime ?? existing.startTime;
-        const proposedEnd = updatesToApply.endTime ?? existing.endTime;
-        const proposedPickup = updatesToApply.pickupAddress ?? existing.pickupAddress;
-        const proposedDest = updatesToApply.destinationAddress ?? existing.destinationAddress;
+      const res = await ctx.db.transaction(async (tx) => {
+        if (needsDriverValidation) {
+          const proposedStart = updatesToApply.startTime ?? existing.startTime;
+          const proposedEnd = updatesToApply.endTime ?? existing.endTime;
+          const proposedPickup = updatesToApply.pickupAddress ?? existing.pickupAddress;
+          const proposedDest = updatesToApply.destinationAddress ?? existing.destinationAddress;
 
-        await validateDriverForSlot(ctx, {
-          driverId,
-          startTime: proposedStart,
-          endTime: proposedEnd,
-          pickupAddress: proposedPickup,
-          destinationAddress: proposedDest,
-          excludeBookingId: id,
-        });
-      }
+          await validateDriverForSlot(
+            { db: tx as unknown as typeof db },
+            {
+              driverId,
+              startTime: proposedStart,
+              endTime: proposedEnd,
+              pickupAddress: proposedPickup,
+              destinationAddress: proposedDest,
+              excludeBookingId: id,
+            },
+          );
+        }
 
-      // 4) Perform update with updatedBy field set
-      const res = await ctx.db
-        .update(bookings)
-        .set({
-          ...updatesToApply,
-          updatedBy: userId,
-        })
-        .where(eq(bookings.id, id))
-        .returning();
+        return tx
+          .update(bookings)
+          .set({
+            ...updatesToApply,
+            updatedBy: userId,
+          })
+          .where(eq(bookings.id, id))
+          .returning();
+      });
 
       return res[0];
     }),
