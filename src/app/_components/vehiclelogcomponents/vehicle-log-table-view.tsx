@@ -24,6 +24,7 @@ import styles from "./vehicle-log-table-view.module.scss";
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export interface VehicleLogData {
+  ID: number;
   DATE: string;
   DESTINATION: string;
   DEPARTURE_TIME: string;
@@ -32,6 +33,7 @@ export interface VehicleLogData {
   ODOMETER_END: number;
   KM_DRIVEN: number;
   DRIVER: string;
+  VEHICLE: string;
 }
 
 interface VehicleLogTableViewProps {

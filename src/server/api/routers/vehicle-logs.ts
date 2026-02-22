@@ -16,12 +16,14 @@ export const vehicleLogsRouter = createTRPCRouter({
         odometerEnd: logs.odometerEnd,
         kilometersDriven: logs.kilometersDriven,
         driverName: logs.driverName,
+        vehicle: logs.vehicle,
       })
       .from(logs)
       .orderBy(desc(logs.date));
 
     // transform to match frontend interface
     return results.map((row) => ({
+      ID: row.id,
       DATE: row.date || "",
       DESTINATION: row.destination || "",
       DEPARTURE_TIME: row.departureTime || "",
@@ -30,6 +32,7 @@ export const vehicleLogsRouter = createTRPCRouter({
       ODOMETER_END: row.odometerEnd || 0,
       KM_DRIVEN: row.kilometersDriven || 0,
       DRIVER: row.driverName || "Unknown",
+      VEHICLE: row.vehicle || "",
     }));
   }),
 });
