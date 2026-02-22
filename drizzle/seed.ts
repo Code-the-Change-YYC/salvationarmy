@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/server/db";
 import { member, organization, type User, user } from "@/server/db/auth-schema";
 import { bookings } from "@/server/db/booking-schema";
+import { logs } from "@/server/db/vehicle-log";
 import { BookingStatus } from "@/types/types";
 
 // Parse command line arguments
@@ -12,13 +13,15 @@ const args = process.argv.slice(2);
 const flags = {
   users: args.includes("--users"),
   bookings: args.includes("--bookings"),
+  logs: args.includes("--logs"),
   clear: args.includes("--clear"),
 };
 
-// If no flags provided, run both
-if (!flags.users && !flags.bookings) {
+// If no flags provided, run all
+if (!flags.users && !flags.bookings && !flags.logs) {
   flags.users = true;
   flags.bookings = true;
+  flags.logs = true;
 }
 
 const DEFAULT_PASSWORD = "Password123!";
@@ -431,6 +434,124 @@ async function seedBookings() {
   }
 }
 
+// ==================== SEED VEHICLE LOGS ====================
+async function seedLogs() {
+  console.log("\n=== SEEDING VEHICLE LOGS ===\n");
+
+  try {
+    // Clear existing logs if flag is set
+    if (flags.clear) {
+      console.log("Clearing existing vehicle logs...");
+      await db.delete(logs);
+      console.log("Existing vehicle logs cleared.\n");
+    }
+
+    // Get the driver
+    const driverEmail = "driver@salvationarmy.com";
+    const driverResult = await db.select().from(user).where(eq(user.email, driverEmail)).limit(1);
+
+    if (!driverResult[0]) {
+      throw new Error("Driver not found. Please run with --users flag first to create users.");
+    }
+    const driver = driverResult[0];
+
+    console.log(`Found driver: ${driver.email}\n`);
+
+    // Sample destinations for vehicle logs
+    const destinations = [
+      "Downtown Medical Center, Calgary, AB",
+      "Foothills Hospital, Calgary, AB",
+      "Salvation Army Community Center, Calgary, AB",
+      "Calgary Food Bank, 5000 11 St SE",
+      "South Health Campus, 4448 Front St SE",
+      "Peter Lougheed Centre, 3500 26 Ave NE",
+      "Calgary Job Resource Centre, 816 4 Ave SW",
+      "Calgary Public Library - Central",
+      "Calgary Social Services, 1111 11 Ave SW",
+      "Warehouse District, 1234 10 Ave SE",
+    ];
+
+    const vehicles = ["Toyota Sienna 2019", "Honda Odyssey 2020", "Chrysler Pacifica 2021"];
+
+    // Generate logs for past 30 days
+    const now = new Date();
+    const logsToCreate = 25;
+    const logsData = [];
+
+    for (let i = 0; i < logsToCreate; i++) {
+      // Random day in past 30 days
+      const daysAgo = Math.floor(Math.random() * 30);
+      const logDate = new Date(now);
+      logDate.setDate(logDate.getDate() - daysAgo);
+
+      // Random departure time between 8 AM and 4 PM
+      const departureHour = Math.floor(Math.random() * 8) + 8;
+      const departureMinute = Math.floor(Math.random() * 4) * 15;
+      const departureTime = new Date(logDate);
+      departureTime.setHours(departureHour, departureMinute, 0, 0);
+
+      // Trip duration: 30 minutes to 2 hours
+      const tripDurationMinutes = Math.floor(Math.random() * 90) + 30;
+      const arrivalTime = new Date(departureTime);
+      arrivalTime.setMinutes(arrivalTime.getMinutes() + tripDurationMinutes);
+
+      // Trip distance: 10-60 km
+      const tripDistance = Math.floor(Math.random() * 50) + 10;
+
+      logsData.push({
+        date: logDate.toISOString().split("T")[0]!, // YYYY-MM-DD format
+        travelLocation: destinations[i % destinations.length]!,
+        departureTime: departureTime.toISOString(),
+        arrivalTime: arrivalTime.toISOString(),
+        tripDistance,
+        driverId: driver.id,
+        driverName: driver.name || "Driver User",
+        vehicle: vehicles[i % vehicles.length]!,
+        createdBy: driver.id,
+      });
+    }
+
+    // Sort by date (oldest first)
+    logsData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    let cumulativeOdometer = 45000; // Starting odometer reading
+    const logsWithOdometer = logsData.map((log) => {
+      const startOdometer = cumulativeOdometer;
+      const endOdometer = cumulativeOdometer + log.tripDistance;
+      cumulativeOdometer = endOdometer;
+
+      return {
+        date: log.date,
+        travelLocation: log.travelLocation,
+        departureTime: log.departureTime,
+        arrivalTime: log.arrivalTime,
+        odometerStart: startOdometer,
+        odometerEnd: endOdometer,
+        driverId: log.driverId,
+        driverName: log.driverName,
+        vehicle: log.vehicle,
+        createdBy: log.createdBy,
+      };
+    });
+
+    // Insert all logs
+    console.log(`Creating ${logsWithOdometer.length} vehicle logs...`);
+    await db.insert(logs).values(logsWithOdometer);
+
+    console.log("\n✅ Vehicle logs seeded successfully!\n");
+    console.log(`  Total logs created: ${logsWithOdometer.length}`);
+    console.log(
+      `  Date range: ${logsWithOdometer[0]?.date} to ${logsWithOdometer[logsWithOdometer.length - 1]?.date}`,
+    );
+    console.log(
+      `  Odometer range: ${logsWithOdometer[0]?.odometerStart} km to ${logsWithOdometer[logsWithOdometer.length - 1]?.odometerEnd} km`,
+    );
+  } catch (error) {
+    console.error("❌ Failed to seed vehicle logs:", error);
+    throw error;
+  }
+}
+
 async function main() {
   console.log("\nStarting seed process...");
   console.log(`Flags: ${JSON.stringify(flags, null, 2)}\n`);
@@ -442,6 +563,10 @@ async function main() {
 
     if (flags.bookings) {
       await seedBookings();
+    }
+
+    if (flags.logs) {
+      await seedLogs();
     }
 
     console.log("\n" + "=".repeat(50));
