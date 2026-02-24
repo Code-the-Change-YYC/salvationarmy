@@ -27,6 +27,7 @@ export default function VehicleLogsPage() {
       odometerStart: "",
       odometerEnd: "",
       driver: "",
+      vehicle: "",
     },
 
     validate: {
@@ -53,6 +54,7 @@ export default function VehicleLogsPage() {
         return null;
       },
       driver: (value) => (value.trim().length > 0 ? null : "Driver is required"),
+      vehicle: (value) => (value.trim().length > 0 ? null : "Vehicle is required"),
     },
   });
 
@@ -72,6 +74,7 @@ export default function VehicleLogsPage() {
       odometerStart: log.ODOMETER_START.toString(),
       odometerEnd: log.ODOMETER_END.toString(),
       driver: log.DRIVER,
+      vehicle: log.VEHICLE,
     });
     setShowModal(true);
   };

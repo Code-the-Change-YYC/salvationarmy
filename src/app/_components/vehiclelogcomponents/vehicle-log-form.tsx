@@ -13,6 +13,7 @@ interface VehicleLogFormData {
   odometerStart: string;
   odometerEnd: string;
   driver: string;
+  vehicle: string;
 }
 
 interface VehicleLogFormProps {
@@ -169,6 +170,16 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
           placeholder="Enter driver name"
           key={form.key("driver")}
           {...form.getInputProps("driver")}
+        />
+      </div>
+
+      <div className={classes.formRow}>
+        <TextInput
+          withAsterisk
+          label="Vehicle"
+          placeholder="Enter vehicle name"
+          key={form.key("vehicle")}
+          {...form.getInputProps("vehicle")}
         />
       </div>
     </Stack>
