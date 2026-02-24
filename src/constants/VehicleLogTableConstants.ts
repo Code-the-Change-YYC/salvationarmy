@@ -12,6 +12,7 @@ export const COLUMN_IDS = {
   ODOMETER_END: "ODOMETER_END",
   KM_DRIVEN: "KM_DRIVEN",
   DRIVER: "DRIVER",
+  VEHICLE: "VEHICLE",
 } as const;
 
 export const COLUMN_HEADERS = {
@@ -23,6 +24,7 @@ export const COLUMN_HEADERS = {
   [COLUMN_IDS.ODOMETER_END]: "Odometer End",
   [COLUMN_IDS.KM_DRIVEN]: "KM Driven",
   [COLUMN_IDS.DRIVER]: "Driver",
+  [COLUMN_IDS.VEHICLE]: "Vehicle",
 } as const;
 
 export const createColumnDef = (columnId: keyof typeof COLUMN_IDS): Partial<ColDef> => ({

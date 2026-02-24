@@ -11,6 +11,7 @@ import Clock from "@/assets/icons/clock";
 import Location from "@/assets/icons/location";
 import Play from "@/assets/icons/play";
 import User from "@/assets/icons/user";
+import Vehicle from "@/assets/icons/vehicle";
 import {
   COLUMN_IDS,
   createColumnDef,
@@ -61,6 +62,8 @@ const HeaderWithIcon = (params: IHeaderParams) => {
         return <Arrow width="16px" height="16px" strokeWidth="3" />;
       case COLUMN_IDS.DRIVER:
         return <User width="16px" height="16px" />;
+      case COLUMN_IDS.VEHICLE:
+        return <Vehicle width="16px" height="16px" />;
       default:
         return null;
     }
@@ -138,6 +141,10 @@ export default function VehicleLogTableView({ onRowClick }: VehicleLogTableViewP
       },
       {
         ...createColumnDef(COLUMN_IDS.DRIVER),
+        headerComponent: HeaderWithIcon,
+      },
+      {
+        ...createColumnDef(COLUMN_IDS.VEHICLE),
         headerComponent: HeaderWithIcon,
       },
     ],
