@@ -1,0 +1,10 @@
+@use "@/styles/variables" as *;
+
+.formRow {
+  width: 100%;
+
+  input,
+  textarea {
+    width: 100%;
+  }
+}
