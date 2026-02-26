@@ -20,6 +20,7 @@ export default function VehicleLogsPage() {
 
   const form = useForm({
     initialValues: {
+      id: null as number | null,
       date: null as string | null,
       destination: "",
       departureTime: null as string | null,
@@ -67,6 +68,7 @@ export default function VehicleLogsPage() {
   const handleRowClick = (log: VehicleLogData) => {
     setIsEditMode(true);
     form.setValues({
+      id: log.ID,
       date: log.DATE || null,
       destination: log.DESTINATION,
       departureTime: log.DEPARTURE_TIME || null,
