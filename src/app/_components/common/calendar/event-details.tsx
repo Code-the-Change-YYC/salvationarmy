@@ -4,25 +4,29 @@ import { Calendar, ClipboardList, Clock, MapPin, Pencil, Trash2, User } from "lu
 
 import Button from "@/app/_components/common/button/Button";
 import { getBookingStatusColor, getBookingStatusIcon, getBookingStatusLabel } from "@/lib/utils";
-import { type CalendarEvent, CalendarUserView } from "@/types/types";
+import { type Booking, type CalendarEvent, CalendarUserView } from "@/types/types";
 
 interface EventDetailsProps {
   event: CalendarEvent;
   viewType?: CalendarUserView;
+  onEdit?: (booking: Booking) => void;
 }
 
-export default function EventDetails({ event, viewType }: EventDetailsProps) {
+export default function EventDetails({ event, viewType, onEdit }: EventDetailsProps) {
   const { title, start, end, extendedProps } = event;
   const status = extendedProps?.status ?? null;
   const pickupAddress = extendedProps?.pickupAddress;
   const destinationAddress = extendedProps?.destinationAddress;
   const passengerInfo = extendedProps?.passengerInfo;
   const purpose = extendedProps?.purpose;
+  const originalBooking = extendedProps?.originalBooking as Booking | undefined;
   const StatusIcon = getBookingStatusIcon(status);
   const statusColor = getBookingStatusColor(status);
 
   function handleEdit() {
-    console.log("edit"); // TODO: Implement edit
+    if (originalBooking && onEdit) {
+      onEdit(originalBooking);
+    }
   }
 
   function handleDelete() {

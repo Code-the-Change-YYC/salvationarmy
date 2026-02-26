@@ -175,16 +175,43 @@ export const bookingsRouter = createTRPCRouter({
   // PATCH /bookings/:id
   update: protectedProcedure
     .input(
-      z.object({
-        id: z.number(),
-        title: z.string().optional(),
-        pickupAddress: z.string().optional(),
-        destinationAddress: z.string().optional(),
-        purpose: z.string().optional(),
-        passengerInfo: z.string().optional(),
-        driverId: z.string().optional().nullable(),
-        status: StatusZ.optional(),
-      }),
+      z
+        .object({
+          id: z.number(),
+          title: z.string().optional(),
+          pickupAddress: z.string().optional(),
+          destinationAddress: z.string().optional(),
+          purpose: z.string().optional(),
+          passengerInfo: z.string().optional().nullable(),
+          phoneNumber: z.string().optional().nullable(),
+          driverId: z.string().optional().nullable(),
+          status: StatusZ.optional(),
+          startTime: z.string().datetime().optional(),
+          endTime: z.string().datetime().optional(),
+        })
+        .refine(
+          (data) => {
+            const hasBoth = data.startTime !== undefined && data.endTime !== undefined;
+            const hasNeither = data.startTime === undefined && data.endTime === undefined;
+            return hasBoth || hasNeither;
+          },
+          {
+            message: "Must provide both startTime and endTime together",
+            path: ["startTime"],
+          },
+        )
+        .refine(
+          (data) => {
+            if (data.startTime && data.endTime) {
+              return new Date(data.endTime) > new Date(data.startTime);
+            }
+            return true;
+          },
+          {
+            message: "endTime must be after startTime",
+            path: ["endTime"],
+          },
+        ),
     )
     .mutation(async ({ ctx, input }) => {
       const { id, ...updates } = input;
