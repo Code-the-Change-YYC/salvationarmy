@@ -15,7 +15,7 @@ export const InviteAgencyForm = ({ form }: InviteAgencyFormProps) => {
   return (
     <Stack gap="xl">
       <Stack gap="md">
-        <Box fw={600} fz="lg" c="#8B2635">
+        <Box fw={600} fz="lg" c="var(--color-primary)">
           Agency Information
         </Box>
         <TextInput

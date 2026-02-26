@@ -45,7 +45,7 @@ export const InviteUserForm = ({ form, organizations }: InviteUserFormProps) => 
   return (
     <Stack gap="xl">
       <Stack gap="md">
-        <Box fw={600} fz="lg" c="#8B2635">
+        <Box fw={600} fz="lg" c="var(--color-primary)">
           Invitee Information
         </Box>
         <TextInput
@@ -58,7 +58,7 @@ export const InviteUserForm = ({ form, organizations }: InviteUserFormProps) => 
       </Stack>
 
       <Stack gap="md">
-        <Box fw={600} fz="lg" c="#8B2635">
+        <Box fw={600} fz="lg" c="var(--color-primary)">
           Role Information
         </Box>
         <Box>
@@ -70,7 +70,7 @@ export const InviteUserForm = ({ form, organizations }: InviteUserFormProps) => 
               <Button
                 key={role}
                 variant={selectedRole === role ? "filled" : "default"}
-                color={selectedRole === role ? "#8B2635" : "gray"}
+                color={selectedRole === role ? "var(--color-primary)" : "gray"}
                 leftSection={
                   <User
                     width="16"
@@ -81,7 +81,7 @@ export const InviteUserForm = ({ form, organizations }: InviteUserFormProps) => 
                 onClick={() => handleRoleChange(role)}
                 style={{
                   flex: 1,
-                  backgroundColor: selectedRole === role ? "#8B2635" : undefined,
+                  backgroundColor: selectedRole === role ? "var(--color-primary)" : undefined,
                 }}
               >
                 {ROLE_LABELS[role]}

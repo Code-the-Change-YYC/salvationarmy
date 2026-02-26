@@ -35,7 +35,10 @@ export const AdminDashboard = () => {
 
   const createAgencyMutation = api.organization.createOrganization.useMutation({
     onSuccess: (data) => {
-      if (!data) return;
+      if (!data) {
+        notify.error("Failed to create agency");
+        return;
+      }
       notify.success(`Agency "${data.name}" created successfully`);
       agencyForm.reset();
       setShowInviteModal(false);
@@ -154,7 +157,7 @@ export const AdminDashboard = () => {
 
   return (
     <>
-      <Button onClick={() => setShowInviteModal(true)}>Invite New User</Button>
+      <Button onClick={() => setShowInviteModal(true)}>Send Invitation</Button>
 
       {/* Invite Type Selection Modal */}
       {inviteType === null && (
