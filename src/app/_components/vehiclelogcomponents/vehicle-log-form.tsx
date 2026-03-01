@@ -6,6 +6,7 @@ import type { UseFormReturnType } from "@mantine/form";
 import classes from "./vehicle-log-form.module.scss";
 
 interface VehicleLogFormData {
+  id: number | null;
   date: string | null;
   destination: string;
   departureTime: string | null;
