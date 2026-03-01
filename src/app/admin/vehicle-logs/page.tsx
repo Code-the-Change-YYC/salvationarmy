@@ -11,12 +11,40 @@ import VehicleLogTableView, {
 } from "@/app/_components/vehiclelogcomponents/vehicle-log-table-view";
 import Grid from "@/assets/icons/grid";
 import Plus from "@/assets/icons/plus";
+import { useSession } from "@/lib/auth-client";
 import { notify } from "@/lib/notifications";
+import { api } from "@/trpc/react";
 
 export default function VehicleLogsPage() {
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [loading, setLoading] = useState(false);
+
+  const { data: session } = useSession();
+  const utils = api.useUtils();
+
+  const createLog = api.vehicleLogs.create.useMutation({
+    onSuccess: () => {
+      void utils.vehicleLogs.getAll.invalidate();
+      setShowModal(false);
+      notify.success("Vehicle log added successfully");
+      form.reset();
+    },
+    onError: (error) => {
+      notify.error(error.message ?? "Failed to add vehicle log");
+    },
+  });
+
+  const updateLog = api.vehicleLogs.update.useMutation({
+    onSuccess: () => {
+      void utils.vehicleLogs.getAll.invalidate();
+      setShowModal(false);
+      notify.success("Vehicle log updated successfully");
+      form.reset();
+    },
+    onError: (error) => {
+      notify.error(error.message ?? "Failed to update vehicle log");
+    },
+  });
 
   const form = useForm({
     initialValues: {
@@ -81,28 +109,51 @@ export default function VehicleLogsPage() {
     setShowModal(true);
   };
 
-  const handleConfirm = async () => {
-    setLoading(true);
-
+  const handleConfirm = () => {
     const validation = form.validate();
     const hasErrors = Object.keys(validation.errors).length > 0;
 
     if (hasErrors) {
       notify.error("Please fix the errors in the form before submitting");
-      setLoading(false);
       return;
     }
 
-    // TODO: Call tRPC mutation to save vehicle log
+    const values = form.values;
+    const odometerStart = Math.round(Number.parseFloat(values.odometerStart));
+    const odometerEnd = Math.round(Number.parseFloat(values.odometerEnd));
 
-    setTimeout(() => {
-      setLoading(false);
-      setShowModal(false);
-      notify.success(
-        isEditMode ? "Vehicle log updated successfully" : "Vehicle log added successfully",
-      );
-      form.reset();
-    }, 2000);
+    if (isEditMode && values.id !== null) {
+      updateLog.mutate({
+        id: values.id,
+        date: values.date ?? undefined,
+        travelLocation: values.destination || undefined,
+        departureTime: values.departureTime ?? undefined,
+        arrivalTime: values.arrivalTime ?? undefined,
+        odometerStart,
+        odometerEnd,
+        driverName: values.driver || undefined,
+        vehicle: values.vehicle || undefined,
+      });
+    } else {
+      // validation already guarantees these fields are non-null;
+      // capture as local consts so TypeScript can narrow the types
+      if (!values.date || !values.departureTime || !values.arrivalTime) return;
+      const date = values.date;
+      const departureTime = values.departureTime;
+      const arrivalTime = values.arrivalTime;
+
+      createLog.mutate({
+        date,
+        travelLocation: values.destination,
+        departureTime,
+        arrivalTime,
+        odometerStart,
+        odometerEnd,
+        driverId: session?.user.id,
+        driverName: values.driver,
+        vehicle: values.vehicle,
+      });
+    }
   };
 
   return (
@@ -135,7 +186,7 @@ export default function VehicleLogsPage() {
         size="xl"
         showDefaultFooter
         confirmText={isEditMode ? "Save Changes" : "Add to Log"}
-        loading={loading}
+        loading={createLog.isPending || updateLog.isPending}
       >
         <VehicleLogForm form={form} />
       </Modal>
