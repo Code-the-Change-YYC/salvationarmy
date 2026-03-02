@@ -24,7 +24,7 @@ export const tripRouter = createTRPCRouter({
         title: input.title,
         pickupAddress: input.pickupAddress,
         destinationAddress: input.destinationAddress,
-        passengerInfo: `${input.residentName} ${input.additionalInfo ? `${input.additionalInfo}` : ""}`,
+        passengerInfo: `${input.residentName}|${input.phoneNumber}|${input.additionalInfo || ""}`,
         phoneNumber: input.phoneNumber,
         agencyId: ctx.session.user.id,
         purpose: input.purpose,
