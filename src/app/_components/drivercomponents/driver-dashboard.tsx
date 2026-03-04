@@ -20,7 +20,7 @@ export const DriverDashboard = () => {
 
   let driverTrips = [{}] as Booking[];
 
-  const tripQuery = api.bookings.getDriverTrip.useQuery(
+  const tripQuery = api.bookings.getAll.useQuery(
     {
       startDate: dateJSON.startDate,
       endDate: dateJSON.endDate,
