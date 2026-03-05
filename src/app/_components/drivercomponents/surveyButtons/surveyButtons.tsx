@@ -27,14 +27,13 @@ export default function SurveyViewToggle({
     initialData: initialSurveys,
     refetchInterval: 60000,
   });
-  const { data: rawBookings = [] } = api.bookings.getAll.useQuery(
+  const { data: bookings = [] } = api.bookings.getAll.useQuery(
     { surveyCompleted: false },
     {
       initialData: initialBookings,
       refetchInterval: 60000,
     },
   );
-  const bookings = rawBookings.filter((b) => b.driverId === session?.user?.id);
 
   return (
     <>
