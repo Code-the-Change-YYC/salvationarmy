@@ -4,7 +4,7 @@ import { memo } from "react";
 const SvgComponent = ({
   width = "24px",
   height = "24px",
-  stroke = "#434343",
+  color = "currentColor",
   ...props
 }: SVGProps<SVGSVGElement>) => (
   <svg
@@ -13,25 +13,20 @@ const SvgComponent = ({
     height={height}
     fill="none"
     viewBox="0 0 24 24"
-    aria-label="Home"
+    aria-label="Play"
     {...props}
   >
-    <title>Home</title>
+    <title>Play</title>
     <path
-      stroke={stroke}
+      stroke={color}
+      strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={2}
-      d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"
-    />
-    <path
-      stroke={stroke}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M9 22V12h6v10"
+      fill="none"
+      d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14Z"
     />
   </svg>
 );
-const Home = memo(SvgComponent);
-export default Home;
+
+const Play = memo(SvgComponent);
+export default Play;

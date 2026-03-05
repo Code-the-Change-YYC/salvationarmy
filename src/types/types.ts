@@ -49,6 +49,12 @@ export enum ViewMode {
   TABLE = "table",
 }
 
+export enum CalendarUserView {
+  ADMIN = "admin",
+  DRIVER = "driver",
+  AGENCY = "agency",
+}
+
 export type { ViewMode as IViewMode };
 
 export enum BookingStatus {
@@ -58,27 +64,27 @@ export enum BookingStatus {
   CANCELLED = "cancelled",
 }
 
-export const ALL_BOOKING_STATUSES = [
+export const BOOKING_STATUSES = [
   BookingStatus.INCOMPLETE,
   BookingStatus.IN_PROGRESS,
   BookingStatus.COMPLETED,
   BookingStatus.CANCELLED,
 ] as const;
 
-export type BookingStatusValue = (typeof ALL_BOOKING_STATUSES)[number];
+export type BookingStatusValue = (typeof BOOKING_STATUSES)[number];
 
 export interface CalendarEvent {
   id: string;
   title: string;
   start: string;
-  end?: string;
+  end: string;
   allDay?: boolean;
   color?: string;
   extendedProps?: {
     pickupAddress: string;
     destinationAddress: string;
     purpose?: string | null;
-    passengerInfo: string;
+    passengerInfo: string | null;
     status: BookingStatus;
     agencyId: string;
     driverId?: string | null;
@@ -86,6 +92,7 @@ export interface CalendarEvent {
     updatedAt?: Date | string | null;
     createdBy?: string;
     updatedBy?: string;
+    originalBooking?: Booking;
   };
 }
 
@@ -95,7 +102,7 @@ export type Survey = SurveySelectType;
 
 export interface ScheduleInformation {
   CREATED_AT: string; // string or date type?
-  CLIENT_NAME: string;
+  CLIENT_NAME: string | null;
   TELEPHONE: string;
   DATE_BOOKED: string; // Eventually this will be a date type
   TIME_BOOKED: string; // Eventually this will be a time type

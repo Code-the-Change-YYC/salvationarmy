@@ -40,6 +40,16 @@
   :global(.fc-event) {
     margin: 0 4px !important;
     cursor: pointer !important;
+    border-radius: 8px !important;
+  }
+
+  // Remove dark overlay when event is selected/clicked
+  :global(.fc-event-selected::after) {
+    display: none !important;
+  }
+
+  :global(.fc-event:focus::after) {
+    display: none !important;
   }
 
   :global(.fc-header-toolbar) {
@@ -82,9 +92,33 @@
   letter-spacing: 0.5px;
 }
 
-.eventContentContainer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+
+.drawerContent {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 101;
+  background: white;
+  border-radius: 12px 12px 0 0;
+  padding: 1rem;
+  max-height: 85vh;
+  outline: none;
+}
+
+// Visually hidden but still accessible to screen readers.
+// Using 1px dimensions instead of 0 because some screen readers skip zero-sized elements.
+// display:none or visibility:hidden would remove the element from the accessibility tree entirely.
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
 }

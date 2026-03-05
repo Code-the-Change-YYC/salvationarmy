@@ -16,7 +16,7 @@ import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/trpc/react";
-import { ALL_BOOKING_STATUSES, BookingStatus, type BookingStatusValue } from "@/types/types";
+import { BOOKING_STATUSES, BookingStatus, type BookingStatusValue } from "@/types/types";
 import styles from "./BookingDebugPage.module.scss";
 
 /** Returns true if end is after start (or invalid); used for form validation. */
@@ -151,7 +151,7 @@ export default function BookingDebugPage() {
       agencyId: "", // set from getCurrentUser (must be valid user.id for FK)
       purpose: EXAMPLE_BOOKING.purpose,
       driverId: "",
-      status: BookingStatus.INCOMPLETE as BookingStatusValue,
+      status: BookingStatus.INCOMPLETE,
     },
     validate: {
       title: (v) => (!v.trim() ? "Title is required" : null),
@@ -310,7 +310,7 @@ export default function BookingDebugPage() {
     onError: (err) => notifications.show({ color: "red", message: err.message }),
   });
 
-  const statusOptions = ALL_BOOKING_STATUSES.map((s) => ({
+  const statusOptions = BOOKING_STATUSES.map((s) => ({
     value: s,
     label: s.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase()),
   }));
@@ -507,9 +507,7 @@ export default function BookingDebugPage() {
         </Button>
       </form>
 
-      {createMutation.isError && (
-        <p className={styles.errorMessage}>{createMutation.error.message}</p>
-      )}
+      {createMutation.isError && <p>{createMutation.error.message}</p>}
 
       {createMutation.data && (
         <pre className={styles.jsonBlock}>{JSON.stringify(createMutation.data, null, 2)}</pre>

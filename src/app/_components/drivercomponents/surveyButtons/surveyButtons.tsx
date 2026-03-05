@@ -54,7 +54,7 @@ export default function SurveyViewToggle({
         {activeView === "pending"
           ? bookings.map((booking: Booking) => (
               <SurveyNotification
-                key={booking.id}
+                key={`booking-${booking.id}`}
                 survey={
                   {
                     createdAt: new Date(booking.startTime),
@@ -63,13 +63,13 @@ export default function SurveyViewToggle({
                     destinationAddress: booking.destinationAddress,
                     bookingId: booking.id,
                     driverId: booking.driverId, // there should hopefully always be an assigned driver...
+                    passengerInfo: booking.passengerInfo,
                   } as Survey // TODO: remove
                 }
-                additionalInformation={{ passengerInfo: booking.passengerInfo }}
               />
             ))
           : surveys.map((survey) => (
-              <SurveyNotification key={survey.id} survey={survey} completed />
+              <SurveyNotification key={`survey-${survey.id}`} survey={survey} completed />
             ))}
       </Stack>
     </>

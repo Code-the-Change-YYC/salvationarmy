@@ -12,9 +12,10 @@ import {
 import { roundUpToNearestIncrement } from "@/lib/datetime";
 import { getTravelTimeMinutes } from "@/lib/google-maps";
 import type { db } from "@/server/db";
+import { BOOKING_STATUSES, BookingStatus, Role } from "@/types/types";
 import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
 import { user } from "../../db/auth-schema";
-import { BOOKING_STATUS, type BookingInsertType, bookings } from "../../db/booking-schema";
+import { type BookingInsertType, bookings } from "../../db/booking-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 dayjs.extend(utc); //Allows dayjs to work in UTC
@@ -28,7 +29,7 @@ const TRAVEL_TIME_CACHE_TTL_MS = 10 * 60 * 1000;
 
 const travelTimeCache = new Map<string, { value: number; expiresAt: number }>();
 
-const StatusZ = z.enum(BOOKING_STATUS); // ← uses "cancelled" (double-L)
+const StatusZ = z.enum(BOOKING_STATUSES); // ← uses "cancelled" (double-L)
 
 type DbContext = { db: typeof db };
 
@@ -65,7 +66,7 @@ async function findOverlappingBooking(
   const { driverId, startTime, endTime, excludeBookingId } = params;
   const baseCondition = and(
     eq(bookings.driverId, driverId),
-    ne(bookings.status, "cancelled"),
+    ne(bookings.status, BookingStatus.CANCELLED),
     lt(bookings.startTime, endTime),
     gt(bookings.endTime, startTime),
   );
@@ -103,7 +104,7 @@ async function validateTravelBetweenAdjacentBookings(
 
   const baseDriverCondition = and(
     eq(bookings.driverId, driverId),
-    ne(bookings.status, "cancelled"),
+    ne(bookings.status, BookingStatus.CANCELLED),
   );
   const excludeCond =
     excludeBookingId !== undefined ? ne(bookings.id, excludeBookingId) : undefined;
@@ -527,18 +528,43 @@ export const bookingsRouter = createTRPCRouter({
   /** Updates a booking; re-validates driver when driver or time/address changes. */
   update: protectedProcedure
     .input(
-      z.object({
-        id: z.number(),
-        title: z.string().optional(),
-        pickupAddress: z.string().optional(),
-        destinationAddress: z.string().optional(),
-        purpose: z.string().optional(),
-        passengerInfo: z.string().optional(),
-        driverId: z.string().optional().nullable(),
-        status: StatusZ.optional(),
-        startTime: z.string().datetime().optional(),
-        endTime: z.string().datetime().optional(),
-      }),
+      z
+        .object({
+          id: z.number(),
+          title: z.string().optional(),
+          pickupAddress: z.string().optional(),
+          destinationAddress: z.string().optional(),
+          purpose: z.string().optional(),
+          passengerInfo: z.string().optional().nullable(),
+          phoneNumber: z.string().optional().nullable(),
+          driverId: z.string().optional().nullable(),
+          status: StatusZ.optional(),
+          startTime: z.string().datetime().optional(),
+          endTime: z.string().datetime().optional(),
+        })
+        .refine(
+          (data) => {
+            const hasBoth = data.startTime !== undefined && data.endTime !== undefined;
+            const hasNeither = data.startTime === undefined && data.endTime === undefined;
+            return hasBoth || hasNeither;
+          },
+          {
+            message: "Must provide both startTime and endTime together",
+            path: ["startTime"],
+          },
+        )
+        .refine(
+          (data) => {
+            if (data.startTime && data.endTime) {
+              return new Date(data.endTime) > new Date(data.startTime);
+            }
+            return true;
+          },
+          {
+            message: "endTime must be after startTime",
+            path: ["endTime"],
+          },
+        ),
     )
     .mutation(async ({ ctx, input }) => {
       const { id, ...updates } = input;
@@ -632,9 +658,71 @@ export const bookingsRouter = createTRPCRouter({
 
       return ctx.db
         .update(bookings)
-        .set({ status: "cancelled", updatedBy: ctx.session.user.id })
+        .set({
+          status: BookingStatus.CANCELLED,
+          updatedBy: ctx.session.user.id,
+        })
         .where(eq(bookings.id, input.id))
         .returning()
         .then((r) => r[0]);
+    }),
+
+  getDriverTrip: protectedProcedure
+    .input(
+      z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.query.user.findFirst({
+        where: (user, { eq }) => eq(user.id, ctx.session.user.id),
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found in database",
+        });
+      }
+
+      if (user.role !== Role.DRIVER) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "User is not a driver",
+        });
+      }
+
+      let startAndEndDateErrorMessage = "Invalid: ";
+
+      if (
+        !(isoTimeRegex.test(input.startDate) || isoTimeRegexFourDigitYears.test(input.startDate))
+      ) {
+        startAndEndDateErrorMessage = startAndEndDateErrorMessage + "Start Date ";
+      }
+
+      if (!(isoTimeRegex.test(input.endDate) || isoTimeRegexFourDigitYears.test(input.endDate))) {
+        startAndEndDateErrorMessage = startAndEndDateErrorMessage + "End Date ";
+      }
+
+      if (startAndEndDateErrorMessage !== "Invalid: ") {
+        //Either (or both) dates failed regex check
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: startAndEndDateErrorMessage,
+        });
+      }
+
+      return ctx.db
+        .select()
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.driverId, user.id),
+            gte(bookings.startTime, input.startDate),
+            lt(bookings.startTime, input.endDate),
+          ),
+        )
+        .orderBy(desc(bookings.createdAt));
     }),
 });
