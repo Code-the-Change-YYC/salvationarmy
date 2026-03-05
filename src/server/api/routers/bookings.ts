@@ -501,7 +501,7 @@ export const bookingsRouter = createTRPCRouter({
         conditions.push(eq(bookings.surveyCompleted, input.surveyCompleted));
       }
 
-      if (role === "admin") {
+      if (role === "admin" || role === "driver") {
         return ctx.db
           .select()
           .from(bookings)
