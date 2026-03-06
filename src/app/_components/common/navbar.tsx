@@ -32,34 +32,6 @@ function NavLink({ href, children }: NavLinkProps) {
 }
 
 export default function Navbar({ view, agencyName }: NavbarProps) {
-  const pathname = usePathname();
-
-  const section = pathname.split("/")[2] ?? "home";
-
-  const navbarText = () => {
-    switch (view) {
-      case "admin":
-        return `Admin ${section}`;
-      case "agency":
-        return `${agencyName ?? "[Agency name]"} ${section}`;
-      case "driver":
-        return `Driver ${section}`;
-      default:
-        return "";
-    }
-  };
-
-  const homeLink = () => {
-    switch (view) {
-      case "admin":
-        return `/admin/home`;
-      case "agency":
-        return `/agency/home`;
-      case "driver":
-        return `/driver/home`;
-    }
-  };
-
   return (
     <Group justify="space-between" className={`border-bottom ${styles.navbar}`}>
       <Group>
