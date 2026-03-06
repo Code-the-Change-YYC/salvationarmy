@@ -8,6 +8,14 @@
     color: inherit;
 }
 
+.navLinkButton {
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
 .navLinkDefault {
     font-weight: 400;
     transition: color 0.2s ease, background-color 0.2s ease;

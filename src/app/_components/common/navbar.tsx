@@ -3,6 +3,8 @@
 import { Group, Text } from "@mantine/core";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { AdminDashboard } from "@/app/_components/admincomponents/admin-dashboard";
 import Bell from "@/assets/icons/bell";
 import Home from "@/assets/icons/home";
 import styles from "./navbar.module.scss";
@@ -32,6 +34,8 @@ function NavLink({ href, children }: NavLinkProps) {
 }
 
 export default function Navbar({ view, agencyName }: NavbarProps) {
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+
   return (
     <Group justify="space-between" className={`border-bottom ${styles.navbar}`}>
       <Group>
@@ -42,7 +46,13 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
       {view === "admin" && (
         <Group gap={30}>
           <NavLink href="/admin/agencies">View Agencies</NavLink>
-          <NavLink href="/admin/invite">Invite</NavLink>
+          <button
+            type="button"
+            onClick={() => setInviteModalOpen(true)}
+            className={`${styles.navLink} ${styles.navLinkButton}`}
+          >
+            <span className={styles.navLinkDefault}>Invite</span>
+          </button>
           <NavLink href="/admin/rider-logs">Rider Logs</NavLink>
           <NavLink href="/admin/driver-logs">Vehicle Logs</NavLink>
           <NavLink href="/admin/schedule">View Schedule</NavLink>
@@ -63,6 +73,13 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
           <Bell />
           <Profile />
         </Group>
+      )}
+
+      {view === "admin" && (
+        <AdminDashboard
+          inviteModalOpened={inviteModalOpen}
+          onInviteModalClose={() => setInviteModalOpen(false)}
+        />
       )}
     </Group>
   );
