@@ -2,10 +2,12 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { organization } from "better-auth/plugins";
+import { and, eq } from "drizzle-orm";
 import RegisterAccountEmailTemplate from "@/app/_components/common/emails/register-account";
 import ResetPasswordEmailTemplate from "@/app/_components/common/emails/reset-password";
 import { resend } from "@/lib/emails";
 import { db } from "@/server/db";
+import { member as memberTable, organization as organizationTable } from "@/server/db/auth-schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -80,11 +82,29 @@ export const auth = betterAuth({
     nextCookies(),
     organization({
       allowUserToCreateOrganization: async (user) => {
-        // Check if user has admin role
-        const member = await db.query.member.findFirst({
-          where: (member, { eq }) => eq(member.userId, user.id),
-        });
-        return member?.role === "admin";
+        //Check if the user is part of the admin org
+        const listOfMembers = await db
+          .select()
+          .from(memberTable)
+          .where(
+            and(
+              eq(memberTable.userId, user.id),
+              eq(
+                memberTable.organizationId,
+                db
+                  .select({ id: organizationTable.id })
+                  .from(organizationTable)
+                  .where(eq(organizationTable.slug, "admins"))
+                  .limit(1),
+              ),
+            ),
+          )
+          .limit(1);
+
+        return (
+          listOfMembers.length !== 0 &&
+          (listOfMembers[0]?.role === "admin" || listOfMembers[0]?.role === "owner")
+        );
       },
     }),
   ],
