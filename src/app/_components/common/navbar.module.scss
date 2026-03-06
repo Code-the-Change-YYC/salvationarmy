@@ -1,13 +1,39 @@
-@use "@/styles/variables" as *;
-
 .navbar {
-  padding: 1rem;
-
-  @media (min-width: 768px) {
     padding: 1rem 2rem;
-  }
+    border-bottom: 1px solid var(--color-light-grey);
 }
 
-.flex {
-  display: flex;
+.navLink {
+    text-decoration: none;
+    color: inherit;
+}
+
+.navLinkButton {
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+.navLinkDefault {
+    font-weight: 400;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.navLinkDefault,
+.navLinkActive {
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+}
+
+.navLinkDefault:hover {
+    background-color: var(--color-light-grey);
+}
+
+.navLinkActive {
+    font-weight: 600;
+    transition: background-color 0.2s ease;
 }
