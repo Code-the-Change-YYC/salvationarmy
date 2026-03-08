@@ -11,6 +11,7 @@ import {
 } from "@/constants/driver-assignment";
 import { roundUpToNearestIncrement } from "@/lib/datetime";
 import { getTravelTimeMinutes } from "@/lib/google-maps";
+import { sendBookingUpdatedSms } from "@/lib/sms";
 import type { db } from "@/server/db";
 import { BOOKING_STATUSES, BookingStatus, Role } from "@/types/types";
 import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
@@ -632,6 +633,17 @@ export const bookingsRouter = createTRPCRouter({
           .where(eq(bookings.id, id))
           .returning();
       });
+
+      const updated = res[0];
+
+      if (updated) {
+        await sendBookingUpdatedSms({
+          title: updated.title,
+          startTime: updated.startTime,
+          pickupAddress: updated.pickupAddress,
+          destinationAddress: updated.destinationAddress,
+        });
+      }
 
       return res[0];
     }),

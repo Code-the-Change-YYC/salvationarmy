@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { sendBookingCreatedSms } from "@/lib/sms";
 import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 import { bookings } from "@/server/db/booking-schema";
 
@@ -31,6 +32,13 @@ export const tripRouter = createTRPCRouter({
         createdBy: ctx.session.user.id,
         startTime: input.startTime,
         endTime: input.endTime,
+      });
+
+      await sendBookingCreatedSms({
+        title: input.title,
+        startTime: input.startTime,
+        pickupAddress: input.pickupAddress,
+        destinationAddress: input.destinationAddress,
       });
     }),
 });
