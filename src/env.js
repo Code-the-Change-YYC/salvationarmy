@@ -13,6 +13,8 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.NODE_ENV === "production" ? z.string() : z.string().optional(),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     GOOGLE_MAPS_API_KEY: z.string(),
+    TELNYX_API_KEY: process.env.NODE_ENV === "production" ? z.string() : z.string().optional(),
+    TELNYX_NUMBER: process.env.NODE_ENV === "production" ? z.string() : z.string().optional(),
   },
 
   /**
@@ -39,6 +41,8 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
     NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    TELNYX_API_KEY: process.env.TELNYX_API_KEY,
+    TELNYX_NUMBER: process.env.TELNYX_NUMBER,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
