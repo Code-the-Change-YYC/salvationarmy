@@ -36,7 +36,7 @@ export const organizationRouter = createTRPCRouter({
     } else {
       switch (role) {
         case Role.ADMIN:
-          redirectUrl = "/admin/home";
+          redirectUrl = "/admin/schedule";
           break;
 
         case Role.AGENCY: {
