@@ -16,7 +16,7 @@ function CompleteRegistrationContent() {
   const token = searchParams.get("token");
 
   const {
-    data: userEmail,
+    data: userData,
     isLoading,
     isError,
   } = api.organization.verifyTokenAndReturnUserEmail.useQuery(
@@ -44,6 +44,7 @@ function CompleteRegistrationContent() {
     initialValues: {
       password: "",
       confirmPassword: "",
+      phoneNumber: "",
     },
     validate: {
       password: (value) => {
@@ -52,6 +53,12 @@ function CompleteRegistrationContent() {
       },
       confirmPassword: (value, values) =>
         value === values.password ? null : "Passwords do not match",
+      phoneNumber: (value) => {
+        if (userData?.role === "driver") {
+          return value.length > 0 ? null : "Phone number is required";
+        }
+        return null;
+      },
     },
   });
 
@@ -64,6 +71,7 @@ function CompleteRegistrationContent() {
     resetPasswordMutation.mutate({
       token: token,
       newPassword: values.password,
+      phoneNumber: userData?.role === "driver" ? values.phoneNumber : undefined,
     });
   };
 
@@ -86,7 +94,7 @@ function CompleteRegistrationContent() {
     );
   }
 
-  if (isError || !userEmail) {
+  if (isError || !userData) {
     return (
       <div className={styles.center}>
         <Title order={2}>Invalid Invitation Link</Title>
@@ -113,7 +121,7 @@ function CompleteRegistrationContent() {
             <Stack gap="md" className={styles.formStack}>
               <TextInput
                 label="Email"
-                value={userEmail ?? "Loading..."}
+                value={userData.email ?? "Loading..."}
                 disabled
                 description="This is the email address you were invited with"
               />
@@ -132,6 +140,15 @@ function CompleteRegistrationContent() {
                 required
                 {...form.getInputProps("confirmPassword")}
               />
+
+              {userData.role === "driver" && (
+                <TextInput
+                  label="Phone Number"
+                  placeholder="Enter your phone number"
+                  required
+                  {...form.getInputProps("phoneNumber")}
+                />
+              )}
 
               <Button type="submit" fullWidth loading={resetPasswordMutation.isPending} mt="md">
                 Complete Registration
