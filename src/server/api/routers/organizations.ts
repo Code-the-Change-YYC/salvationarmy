@@ -273,7 +273,7 @@ export const organizationRouter = createTRPCRouter({
         });
       }
 
-      return user.email;
+      return { email: user.email, role: user.role };
     }),
   resetPassword: publicProcedure
     .input(
