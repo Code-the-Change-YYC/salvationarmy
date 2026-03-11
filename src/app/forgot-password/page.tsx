@@ -23,7 +23,6 @@ export default function ForgotPasswordPage() {
 
   const sendResetEmailMutation = api.organization.sendPasswordResetEmail.useMutation({
     onSuccess: (data) => {
-      notify.success(`Password reset link sent to ${data.email}`);
       setIsSuccess(true);
     },
     onError: (error) => {
@@ -48,7 +47,8 @@ export default function ForgotPasswordPage() {
 
           <Stack gap="md">
             <Text size="sm">
-              We've sent a password reset link to <strong>{form.values.email}</strong>.
+              If this email exists in our system, check <strong>{form.values.email}</strong> for the
+              reset link.
             </Text>
 
             <Text size="sm" c="dimmed">
