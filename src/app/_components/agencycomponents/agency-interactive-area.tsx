@@ -189,6 +189,8 @@ export const BookingInteractiveArea = ({
       if (value.geometry) {
         //The value is one of google's suggested locations. Geometry field is set if picked location is valid
         setValidationAddressGood(true);
+        //Sync the Google-selected address back into Mantine form state
+        form.setFieldValue("destinationAddress", inputElement.current?.value ?? "");
       } else {
         //Google maps api could not figure out what the user gave it
         setValidationAddressGood(false);
@@ -206,7 +208,7 @@ export const BookingInteractiveArea = ({
       google.maps.event.clearInstanceListeners(googleAutoCompleteElement); //Removes the place_changed event listener to the old element
       inputElement.current?.removeEventListener("input", inputElementOnInput); //Removes the listener defined as inputElementOnInput from inputElement.current before replacing it
     };
-  }, [inputElement.current]);
+  }, [inputElement.current, form.setFieldValue]);
 
   const handleConfirm = () => {
     const validation = form.validate();
@@ -242,7 +244,7 @@ export const BookingInteractiveArea = ({
         phoneNumber: form.values.phoneNumber,
         additionalInfo: form.values.additionalInfo,
         pickupAddress: form.values.pickupAddress,
-        destinationAddress: inputElement.current?.value || "",
+        destinationAddress: form.values.destinationAddress,
         startTime: form.values.startTime,
         endTime: form.values.endTime,
         purpose: form.values.purpose,
@@ -254,7 +256,7 @@ export const BookingInteractiveArea = ({
         id: selectedBooking.id,
         title: form.values.title,
         pickupAddress: form.values.pickupAddress,
-        destinationAddress: inputElement.current?.value || "",
+        destinationAddress: form.values.destinationAddress,
         purpose: form.values.purpose,
         passengerInfo,
         phoneNumber: form.values.phoneNumber,
