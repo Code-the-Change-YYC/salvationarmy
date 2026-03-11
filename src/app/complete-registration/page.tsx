@@ -4,6 +4,9 @@ import { Button, Paper, PasswordInput, Stack, Text, TextInput, Title } from "@ma
 import { useForm } from "@mantine/form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
@@ -142,12 +145,33 @@ function CompleteRegistrationContent() {
               />
 
               {userData.role === "driver" && (
-                <TextInput
-                  label="Phone Number"
-                  placeholder="Enter your phone number"
-                  required
-                  {...form.getInputProps("phoneNumber")}
-                />
+                <div>
+                  <Text size="sm" fw={500} mb={4}>
+                    Phone Number{" "}
+                    <Text span c="red">
+                      *
+                    </Text>
+                  </Text>
+
+                  <PhoneInput
+                    international
+                    defaultCountry="CA"
+                    countryCallingCodeEditable={false}
+                    placeholder="Enter phone number"
+                    value={form.values.phoneNumber || undefined}
+                    onChange={(value) => form.setFieldValue("phoneNumber", value ?? "")}
+                  />
+
+                  <Text size="xs" c="dimmed" mt={4}>
+                    Used for driver contact and SMS notifications
+                  </Text>
+
+                  {form.errors.phoneNumber && (
+                    <Text size="xs" c="red" mt={4}>
+                      {form.errors.phoneNumber}
+                    </Text>
+                  )}
+                </div>
               )}
 
               <Button type="submit" fullWidth loading={resetPasswordMutation.isPending} mt="md">
