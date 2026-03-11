@@ -284,13 +284,7 @@ export const organizationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await auth.api.resetPassword({
-        body: {
-          token: input.token,
-          newPassword: input.newPassword,
-        },
-      });
-
+      let userId: string | null = null;
       if (input.phoneNumber != null) {
         const identifier = `reset-password:${input.token}`;
         const verification = await ctx.db.query.verification.findFirst({
@@ -300,13 +294,22 @@ export const organizationRouter = createTRPCRouter({
           const account = await ctx.db.query.account.findFirst({
             where: (account, { eq }) => eq(account.accountId, verification.value),
           });
-          if (account) {
-            await ctx.db
-              .update(user)
-              .set({ phoneNumber: input.phoneNumber })
-              .where(eq(user.id, account.userId));
-          }
+          if (account) userId = account.userId;
         }
+      }
+
+      await auth.api.resetPassword({
+        body: {
+          token: input.token,
+          newPassword: input.newPassword,
+        },
+      });
+
+      if (input.phoneNumber != null && userId != null) {
+        await ctx.db
+          .update(user)
+          .set({ phoneNumber: input.phoneNumber })
+          .where(eq(user.id, userId));
       }
     }),
 
