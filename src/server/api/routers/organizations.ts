@@ -280,15 +280,34 @@ export const organizationRouter = createTRPCRouter({
       z.object({
         token: z.string(),
         newPassword: passwordSchema,
+        phoneNumber: z.string().max(25).optional(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       await auth.api.resetPassword({
         body: {
           token: input.token,
           newPassword: input.newPassword,
         },
       });
+
+      if (input.phoneNumber != null) {
+        const identifier = `reset-password:${input.token}`;
+        const verification = await ctx.db.query.verification.findFirst({
+          where: (verification, { eq }) => eq(verification.identifier, identifier),
+        });
+        if (verification) {
+          const account = await ctx.db.query.account.findFirst({
+            where: (account, { eq }) => eq(account.accountId, verification.value),
+          });
+          if (account) {
+            await ctx.db
+              .update(user)
+              .set({ phoneNumber: input.phoneNumber })
+              .where(eq(user.id, account.userId));
+          }
+        }
+      }
     }),
 
   sendPasswordResetEmail: publicProcedure
