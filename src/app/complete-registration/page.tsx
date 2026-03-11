@@ -60,7 +60,7 @@ function CompleteRegistrationContent() {
         if (userData?.role !== "driver") return null;
         if (!value || value.trim().length === 0) return "Phone number is required";
         const res = phoneNumberSchema.safeParse(value.trim());
-        return res.success ? null : (res.error.message ?? "Invalid phone number format");
+        return res.success ? null : (res.error.issues[0]?.message ?? "Invalid phone number format");
       },
     },
   });
