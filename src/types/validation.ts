@@ -7,6 +7,12 @@ export const passwordSchema = z
   .regex(/[a-z]/, "Password must contain at least one lowercase letter")
   .regex(/[0-9]/, "Password must contain at least one number");
 
+export const phoneNumberSchema = z
+  .string()
+  .trim()
+  .regex(/^\+[1-9]\d{1,14}$/, "Phone number must be in international format, like +14031231234")
+  .optional();
+
 export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const nameRegex =

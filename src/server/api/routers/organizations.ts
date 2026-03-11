@@ -11,7 +11,7 @@ import {
 } from "@/server/api/trpc";
 import { user } from "@/server/db/auth-schema";
 import { OrganizationRole, Role } from "@/types/types";
-import { nameRegex, passwordSchema } from "@/types/validation";
+import { nameRegex, passwordSchema, phoneNumberSchema } from "@/types/validation";
 
 export const organizationRouter = createTRPCRouter({
   redirectToDashboard: protectedProcedure.mutation(async ({ ctx }) => {
@@ -280,7 +280,7 @@ export const organizationRouter = createTRPCRouter({
       z.object({
         token: z.string(),
         newPassword: passwordSchema,
-        phoneNumber: z.string().max(25).optional(),
+        phoneNumber: phoneNumberSchema,
       }),
     )
     .mutation(async ({ input, ctx }) => {

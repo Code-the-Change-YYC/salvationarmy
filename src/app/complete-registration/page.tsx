@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
-import { passwordSchema } from "@/types/validation";
+import { passwordSchema, phoneNumberSchema } from "@/types/validation";
 
 function CompleteRegistrationContent() {
   const searchParams = useSearchParams();
@@ -54,10 +54,10 @@ function CompleteRegistrationContent() {
       confirmPassword: (value, values) =>
         value === values.password ? null : "Passwords do not match",
       phoneNumber: (value) => {
-        if (userData?.role === "driver") {
-          return value.length > 0 ? null : "Phone number is required";
-        }
-        return null;
+        if (userData?.role !== "driver") return null;
+        if (!value || value.trim().length === 0) return "Phone number is required";
+        const res = phoneNumberSchema.safeParse(value.trim());
+        return res.success ? null : (res.error.message ?? "Invalid phone number format");
       },
     },
   });
