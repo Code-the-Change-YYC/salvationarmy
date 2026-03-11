@@ -116,6 +116,7 @@ async function seedUsers() {
     console.log("\nCreating driver user...");
     const driverEmail = "driver@salvationarmy.com";
     const existingDriver = await db.select().from(user).where(eq(user.email, driverEmail)).limit(1);
+    const driverPhoneNumber = "+14031234567";
 
     let driverUser: User;
     if (existingDriver.length > 0) {
@@ -133,6 +134,10 @@ async function seedUsers() {
         },
       });
       await db.update(user).set({ role: "driver" }).where(eq(user.email, driverEmail));
+      await db
+        .update(user)
+        .set({ phoneNumber: driverPhoneNumber })
+        .where(eq(user.email, driverEmail));
       console.log("Driver user created and role updated to driver");
       driverUser = res.user as User;
 
