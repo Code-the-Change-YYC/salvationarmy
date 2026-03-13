@@ -11,7 +11,7 @@ import {
 } from "@/server/api/trpc";
 import { member, organization, user } from "@/server/db/auth-schema";
 import { OrganizationRole, Role } from "@/types/types";
-import { nameRegex, passwordSchema } from "@/types/validation";
+import { nameRegex, passwordSchema, phoneNumberSchema } from "@/types/validation";
 
 export const organizationRouter = createTRPCRouter({
   redirectToDashboard: protectedProcedure.mutation(async ({ ctx }) => {
@@ -301,22 +301,44 @@ export const organizationRouter = createTRPCRouter({
         });
       }
 
-      return user.email;
+      return { email: user.email, role: user.role };
     }),
   resetPassword: publicProcedure
     .input(
       z.object({
         token: z.string(),
         newPassword: passwordSchema,
+        phoneNumber: phoneNumberSchema,
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      let userId: string | null = null;
+      if (input.phoneNumber != null) {
+        const identifier = `reset-password:${input.token}`;
+        const verification = await ctx.db.query.verification.findFirst({
+          where: (verification, { eq }) => eq(verification.identifier, identifier),
+        });
+        if (verification) {
+          const account = await ctx.db.query.account.findFirst({
+            where: (account, { eq }) => eq(account.accountId, verification.value),
+          });
+          if (account) userId = account.userId;
+        }
+      }
+
       await auth.api.resetPassword({
         body: {
           token: input.token,
           newPassword: input.newPassword,
         },
       });
+
+      if (input.phoneNumber != null && userId != null) {
+        await ctx.db
+          .update(user)
+          .set({ phoneNumber: input.phoneNumber })
+          .where(eq(user.id, userId));
+      }
     }),
 
   sendPasswordResetEmail: publicProcedure

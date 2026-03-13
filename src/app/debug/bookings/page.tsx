@@ -15,6 +15,8 @@ import { DateInput, TimeInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useMemo, useState } from "react";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import { api } from "@/trpc/react";
 import { BOOKING_STATUSES, BookingStatus, type BookingStatusValue } from "@/types/types";
 import styles from "./BookingDebugPage.module.scss";
@@ -47,7 +49,7 @@ const EXAMPLE_BOOKING = {
   pickupAddress: "The Inn from the Cold, 110 11 Ave SE, Calgary, AB",
   destinationAddress: "Sheldon M. Chumir Health Centre, 1213 4 St SW, Calgary, AB",
   passengerInfo: "John Smith",
-  phoneNumber: "+1 (403) 760-9834",
+  phoneNumber: "+14037609834",
   purpose: "Medical appointment",
   start: "2026-02-12T15:00:00.000Z", // Feb 12, 2026 3:00 PM UTC
 };
@@ -361,12 +363,24 @@ export default function BookingDebugPage() {
           {...form.getInputProps("destinationAddress")}
         />
         <TextInput withAsterisk label="Passenger Info" {...form.getInputProps("passengerInfo")} />
-        <TextInput
-          label="Phone number (optional)"
-          placeholder="+1 (403) 760-9834"
-          maxLength={25}
-          {...form.getInputProps("phoneNumber")}
-        />
+        <div>
+          <Text size="sm" fw={500} mb={4}>
+            Phone number (optional)
+          </Text>
+          <PhoneInput
+            international
+            defaultCountry="CA"
+            countryCallingCodeEditable={false}
+            placeholder="Enter phone number"
+            value={form.values.phoneNumber || undefined}
+            onChange={(value) => form.setFieldValue("phoneNumber", value ?? "")}
+          />
+          {form.errors.phoneNumber && (
+            <Text size="xs" c="red" mt={4}>
+              {form.errors.phoneNumber}
+            </Text>
+          )}
+        </div>
         <TextInput withAsterisk label="Agency ID" {...form.getInputProps("agencyId")} />
         <TextInput label="Purpose (optional)" {...form.getInputProps("purpose")} />
 
