@@ -1,4 +1,5 @@
 "use client";
+import { Alert, Box, Loader } from "@mantine/core";
 import type { ColDef, IHeaderParams } from "ag-grid-community";
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
@@ -81,8 +82,8 @@ export default function VehicleLogTableView({ onRowClick }: VehicleLogTableViewP
   // Custom theme for the table
   const theme = themeQuartz.withParams(TABLE_THEME_PARAMS);
 
-  // Fetch vehicle logs from database (bookings + post-trip surveys joined)
-  const { data: vehicleLogs = [] } = api.vehicleLogs.getAll.useQuery();
+  // Fetch vehicle logs from database
+  const { data: vehicleLogs = [], isLoading, isError } = api.vehicleLogs.getAll.useQuery();
 
   const columnDefs: ColDef[] = useMemo(
     () => [
@@ -162,14 +163,26 @@ export default function VehicleLogTableView({ onRowClick }: VehicleLogTableViewP
 
   return (
     <div className={styles.tableContainer}>
-      <AgGridReact
-        theme={theme}
-        rowData={vehicleLogs}
-        columnDefs={columnDefs}
-        defaultColDef={defaultColDef}
-        pagination={false}
-        onRowClicked={(event) => event.data && onRowClick?.(event.data)}
-      />
+      {isLoading ? (
+        <Box className={styles.loadingContainer}>
+          <Loader color="#A03145" type="dots" />
+        </Box>
+      ) : isError ? (
+        <Box className={styles.errorContainer}>
+          <Alert variant="light" color="red">
+            Failed to load vehicle logs. Please try again later.
+          </Alert>
+        </Box>
+      ) : (
+        <AgGridReact
+          theme={theme}
+          rowData={vehicleLogs}
+          columnDefs={columnDefs}
+          defaultColDef={defaultColDef}
+          pagination={false}
+          onRowClicked={(event) => event.data && onRowClick?.(event.data)}
+        />
+      )}
     </div>
   );
 }
