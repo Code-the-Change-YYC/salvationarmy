@@ -3,6 +3,7 @@ import postgres from "postgres";
 import { env } from "@/env";
 import * as authSchema from "@/server/db/auth-schema";
 import * as bookingSchema from "@/server/db/booking-schema";
+import * as passengerSchema from "@/server/db/passenger-schema";
 import * as postTripSchema from "@/server/db/post-trip-schema";
 import * as schema from "@/server/db/schema";
 import * as logSchema from "@/server/db/vehicle-log";
@@ -25,5 +26,6 @@ export const db = drizzle(conn, {
     ...bookingSchema,
     ...postTripSchema,
     ...logSchema,
+    ...passengerSchema,
   },
 });
