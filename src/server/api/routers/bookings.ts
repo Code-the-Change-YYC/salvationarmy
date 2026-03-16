@@ -637,12 +637,23 @@ export const bookingsRouter = createTRPCRouter({
       const updated = res[0];
 
       if (updated) {
-        await sendBookingUpdatedSms({
-          title: updated.title,
-          startTime: updated.startTime,
-          pickupAddress: updated.pickupAddress,
-          destinationAddress: updated.destinationAddress,
-        });
+        const drivers = await ctx.db
+          .select({ phoneNumber: user.phoneNumber })
+          .from(user)
+          .where(eq(user.role, "driver"));
+        const driverPhones = drivers
+          .map((d) => d.phoneNumber)
+          .filter((n): n is string => Boolean(n?.trim()));
+
+        await sendBookingUpdatedSms(
+          {
+            title: updated.title,
+            startTime: updated.startTime,
+            pickupAddress: updated.pickupAddress,
+            destinationAddress: updated.destinationAddress,
+          },
+          driverPhones,
+        );
       }
 
       return res[0];
