@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
@@ -9,9 +9,9 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { user } from "@/server/db/auth-schema";
+import { member, organization, user } from "@/server/db/auth-schema";
 import { OrganizationRole, Role } from "@/types/types";
-import { nameRegex, passwordSchema } from "@/types/validation";
+import { nameRegex, passwordSchema, phoneNumberSchema } from "@/types/validation";
 
 export const organizationRouter = createTRPCRouter({
   redirectToDashboard: protectedProcedure.mutation(async ({ ctx }) => {
@@ -36,7 +36,7 @@ export const organizationRouter = createTRPCRouter({
     } else {
       switch (role) {
         case Role.ADMIN:
-          redirectUrl = "/admin/home";
+          redirectUrl = "/admin/schedule";
           break;
 
         case Role.AGENCY: {
@@ -207,26 +207,54 @@ export const organizationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const currentUserMember = await ctx.db.query.member.findFirst({
-        where: (member, { eq }) => eq(member.userId, ctx.session.user.id),
-      });
+      const listOfMembers = await ctx.db
+        .select()
+        .from(member)
+        .where(
+          and(
+            eq(member.userId, ctx.session.user.id),
+            eq(
+              member.organizationId,
+              ctx.db
+                .select({ id: organization.id })
+                .from(organization)
+                .where(eq(organization.slug, "admins"))
+                .limit(1),
+            ),
+          ),
+        )
+        .limit(1);
 
-      if (currentUserMember?.role !== "admin" && currentUserMember?.role !== "owner") {
+      if (listOfMembers.length === 0) {
+        //User is not part of the Admin org
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only admins can create organizations",
         });
+      } else if (listOfMembers[0]?.role !== "admin" && listOfMembers[0]?.role !== "owner") {
+        //User has insufficient privileges
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient privileges to create organizations",
+        });
       }
 
-      const org = await auth.api.createOrganization({
-        body: {
-          name: input.name,
-          slug: input.slug,
-        },
-        headers: ctx.headers,
-      });
+      try {
+        const org = await auth.api.createOrganization({
+          body: {
+            name: input.name,
+            slug: input.slug,
+          },
+          headers: ctx.headers,
+        });
 
-      return org;
+        return org;
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Internal server error encountered when creating an organization",
+        });
+      }
     }),
 
   // not sure if this can be public... I think it's fine since we are just verifying the token in db
@@ -273,22 +301,44 @@ export const organizationRouter = createTRPCRouter({
         });
       }
 
-      return user.email;
+      return { email: user.email, role: user.role };
     }),
   resetPassword: publicProcedure
     .input(
       z.object({
         token: z.string(),
         newPassword: passwordSchema,
+        phoneNumber: phoneNumberSchema,
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      let userId: string | null = null;
+      if (input.phoneNumber != null) {
+        const identifier = `reset-password:${input.token}`;
+        const verification = await ctx.db.query.verification.findFirst({
+          where: (verification, { eq }) => eq(verification.identifier, identifier),
+        });
+        if (verification) {
+          const account = await ctx.db.query.account.findFirst({
+            where: (account, { eq }) => eq(account.accountId, verification.value),
+          });
+          if (account) userId = account.userId;
+        }
+      }
+
       await auth.api.resetPassword({
         body: {
           token: input.token,
           newPassword: input.newPassword,
         },
       });
+
+      if (input.phoneNumber != null && userId != null) {
+        await ctx.db
+          .update(user)
+          .set({ phoneNumber: input.phoneNumber })
+          .where(eq(user.id, userId));
+      }
     }),
 
   sendPasswordResetEmail: publicProcedure

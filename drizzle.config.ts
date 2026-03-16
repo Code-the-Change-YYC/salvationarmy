@@ -9,6 +9,7 @@ export default defineConfig({
     "./src/server/db/booking-schema.ts", // booking schema
     "./src/server/db/post-trip-schema.ts", // post-trip schema
     "./src/server/db/vehicle-log.ts", // logs schema
+    "./src/server/db/passenger-schema.ts", // passenger schema
   ],
   dialect: "postgresql",
   dbCredentials: {

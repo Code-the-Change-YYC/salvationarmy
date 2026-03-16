@@ -4,10 +4,13 @@ import { Button, Paper, PasswordInput, Stack, Text, TextInput, Title } from "@ma
 import { useForm } from "@mantine/form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+
 import styles from "@/app/_components/common/auth-layout.module.scss";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
-import { passwordSchema } from "@/types/validation";
+import { passwordSchema, phoneNumberSchema } from "@/types/validation";
 
 function CompleteRegistrationContent() {
   const searchParams = useSearchParams();
@@ -16,7 +19,7 @@ function CompleteRegistrationContent() {
   const token = searchParams.get("token");
 
   const {
-    data: userEmail,
+    data: userData,
     isLoading,
     isError,
   } = api.organization.verifyTokenAndReturnUserEmail.useQuery(
@@ -44,6 +47,7 @@ function CompleteRegistrationContent() {
     initialValues: {
       password: "",
       confirmPassword: "",
+      phoneNumber: "",
     },
     validate: {
       password: (value) => {
@@ -52,6 +56,12 @@ function CompleteRegistrationContent() {
       },
       confirmPassword: (value, values) =>
         value === values.password ? null : "Passwords do not match",
+      phoneNumber: (value) => {
+        if (userData?.role !== "driver") return null;
+        if (!value || value.trim().length === 0) return "Phone number is required";
+        const res = phoneNumberSchema.safeParse(value.trim());
+        return res.success ? null : (res.error.issues[0]?.message ?? "Invalid phone number format");
+      },
     },
   });
 
@@ -64,6 +74,7 @@ function CompleteRegistrationContent() {
     resetPasswordMutation.mutate({
       token: token,
       newPassword: values.password,
+      phoneNumber: userData?.role === "driver" ? values.phoneNumber : undefined,
     });
   };
 
@@ -86,7 +97,7 @@ function CompleteRegistrationContent() {
     );
   }
 
-  if (isError || !userEmail) {
+  if (isError || !userData) {
     return (
       <div className={styles.center}>
         <Title order={2}>Invalid Invitation Link</Title>
@@ -113,7 +124,7 @@ function CompleteRegistrationContent() {
             <Stack gap="md" className={styles.formStack}>
               <TextInput
                 label="Email"
-                value={userEmail ?? "Loading..."}
+                value={userData.email ?? "Loading..."}
                 disabled
                 description="This is the email address you were invited with"
               />
@@ -132,6 +143,36 @@ function CompleteRegistrationContent() {
                 required
                 {...form.getInputProps("confirmPassword")}
               />
+
+              {userData.role === "driver" && (
+                <div>
+                  <Text size="sm" fw={500} mb={4}>
+                    Phone Number{" "}
+                    <Text span c="red">
+                      *
+                    </Text>
+                  </Text>
+
+                  <PhoneInput
+                    international
+                    defaultCountry="CA"
+                    countryCallingCodeEditable={false}
+                    placeholder="Enter phone number"
+                    value={form.values.phoneNumber || undefined}
+                    onChange={(value) => form.setFieldValue("phoneNumber", value ?? "")}
+                  />
+
+                  <Text size="xs" c="dimmed" mt={4}>
+                    Used for driver contact and SMS notifications
+                  </Text>
+
+                  {form.errors.phoneNumber && (
+                    <Text size="xs" c="red" mt={4}>
+                      {form.errors.phoneNumber}
+                    </Text>
+                  )}
+                </div>
+              )}
 
               <Button type="submit" fullWidth loading={resetPasswordMutation.isPending} mt="md">
                 Complete Registration
