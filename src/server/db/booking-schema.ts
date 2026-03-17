@@ -11,7 +11,7 @@ export const bookings = pgTable(
     pickupAddress: text("pickup_address").notNull(),
     destinationAddress: text("destination_address").notNull(),
     purpose: text("purpose"),
-    passengerInfo: text("passenger_info").notNull(),
+    passengerInfo: text("passenger_info"),
     phoneNumber: varchar("phone_number", { length: 25 }),
     surveyCompleted: boolean("survey_completed").default(false).notNull(),
     status: text("status", { enum: BOOKING_STATUSES }).notNull().default(BookingStatus.INCOMPLETE),
@@ -37,8 +37,17 @@ export const bookings = pgTable(
     createdBy: text("created_by").references(() => user.id),
     updatedBy: text("updated_by").references(() => user.id),
   },
-  //Runs after the table is created
-  (table) => [index("bookings_start_time_idx").on(table.startTime)],
+  // Runs after the table is created
+  (table) => [
+    index("bookings_start_time_idx").on(table.startTime),
+    index("bookings_driver_overlap_idx").on(
+      table.driverId,
+      table.status,
+      table.startTime,
+      table.endTime,
+    ),
+    index("bookings_driver_end_time_idx").on(table.driverId, table.endTime),
+  ],
 );
 
 export const bookingsRelations = relations(bookings, ({ one }) => ({

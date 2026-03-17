@@ -3,7 +3,8 @@
 import { Group, Text } from "@mantine/core";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Button from "@/app/_components/common/button/Button";
+import { useState } from "react";
+import { AdminDashboard } from "@/app/_components/admincomponents/admin-dashboard";
 import Bell from "@/assets/icons/bell";
 import Home from "@/assets/icons/home";
 import styles from "./navbar.module.scss";
@@ -16,58 +17,45 @@ interface NavbarProps {
   agencyName?: string;
 }
 
-export default function Navbar({ view, agencyName }: NavbarProps) {
+interface NavLinkProps {
+  href: string;
+  children: React.ReactNode;
+}
+
+function NavLink({ href, children }: NavLinkProps) {
   const pathname = usePathname();
+  const isActive = pathname === href;
 
-  const section = pathname.split("/")[2] ?? "home";
+  return (
+    <Link href={href} className={styles.navLink}>
+      <span className={isActive ? styles.navLinkActive : styles.navLinkDefault}>{children}</span>
+    </Link>
+  );
+}
 
-  const navbarText = () => {
-    switch (view) {
-      case "admin":
-        return `Admin ${section}`;
-      case "agency":
-        return `${agencyName ?? "[Agency name]"} ${section}`;
-      case "driver":
-        return `Driver ${section}`;
-      default:
-        return "";
-    }
-  };
-
-  const homeLink = () => {
-    switch (view) {
-      case "admin":
-        return `/admin/home`;
-      case "agency":
-        return `/agency/home`;
-      case "driver":
-        return `/driver/home`;
-    }
-  };
+export default function Navbar({ view, agencyName }: NavbarProps) {
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   return (
     <Group justify="space-between" className={`border-bottom ${styles.navbar}`}>
       <Group>
-        <Link className={styles.flex} href={homeLink()}>
-          <Home />
-        </Link>
-        <Text>{navbarText()}</Text>
+        <Home />
+        <Text>{view === "agency" ? `${agencyName ?? "[Agency name]"} Home` : ""}</Text>
       </Group>
 
       {view === "admin" && (
-        <Group gap={20}>
-          <Link href="/admin/agencies">
-            <Button text="View Agencies" variant="secondary" />
-          </Link>
-          <Link href="/admin/rider-logs">
-            <Button text="Rider Logs" variant="secondary" />
-          </Link>
-          <Link href="/admin/vehicle-logs">
-            <Button text="Vehicle Log" variant="secondary" />
-          </Link>
-          <Link href="/admin/schedule">
-            <Button text="Schedule" variant="secondary" />
-          </Link>
+        <Group gap={30}>
+          <NavLink href="/admin/agencies">View Agencies</NavLink>
+          <button
+            type="button"
+            onClick={() => setInviteModalOpen(true)}
+            className={`${styles.navLink} ${styles.navLinkButton}`}
+          >
+            <span className={styles.navLinkDefault}>Invite</span>
+          </button>
+          <NavLink href="/admin/rider-logs">Rider Logs</NavLink>
+          <NavLink href="/admin/driver-logs">Vehicle Logs</NavLink>
+          <NavLink href="/admin/schedule">View Schedule</NavLink>
           <Profile />
         </Group>
       )}
@@ -81,12 +69,17 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
 
       {view === "driver" && (
         <Group gap={30}>
-          <Link href="/driver/surveys">
-            <Button text="Surveys" variant="secondary" />
-          </Link>
+          <NavLink href="/driver/surveys">Surveys</NavLink>
           <Bell />
           <Profile />
         </Group>
+      )}
+
+      {view === "admin" && (
+        <AdminDashboard
+          inviteModalOpened={inviteModalOpen}
+          onInviteModalClose={() => setInviteModalOpen(false)}
+        />
       )}
     </Group>
   );

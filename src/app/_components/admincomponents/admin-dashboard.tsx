@@ -2,7 +2,7 @@
 
 import { Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { InviteAgencyForm } from "@/app/_components/admincomponents/invite-agency-form";
 import { InviteUserForm } from "@/app/_components/admincomponents/invite-user-form";
 import Button from "@/app/_components/common/button/Button";
@@ -16,9 +16,18 @@ import { emailRegex } from "@/types/validation";
 
 type InviteType = "user" | "agency" | null;
 
-export const AdminDashboard = () => {
-  const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
+interface AdminDashboardProps {
+  inviteModalOpened?: boolean;
+  onInviteModalClose?: () => void;
+}
+
+export const AdminDashboard = ({ inviteModalOpened, onInviteModalClose }: AdminDashboardProps) => {
+  const [internalInviteOpen, setInternalInviteOpen] = useState(false);
   const [inviteType, setInviteType] = useState<InviteType>(null);
+
+  const isControlled = inviteModalOpened !== undefined && onInviteModalClose !== undefined;
+  const showInviteModal = isControlled ? inviteModalOpened : internalInviteOpen;
+  const closeInviteModal = isControlled ? onInviteModalClose! : () => setInternalInviteOpen(false);
 
   const organizations = api.organization.getAll.useQuery();
 
@@ -26,7 +35,7 @@ export const AdminDashboard = () => {
     onSuccess: (data) => {
       notify.success(`Invitation sent to ${data.email}`);
       userForm.reset();
-      setShowInviteModal(false);
+      closeInviteModal();
     },
     onError: (error) => {
       notify.error(error.message || "Failed to send invitation");
@@ -41,7 +50,7 @@ export const AdminDashboard = () => {
       }
       notify.success(`Agency "${data.name}" created successfully`);
       agencyForm.reset();
-      setShowInviteModal(false);
+      closeInviteModal();
       void organizations.refetch();
     },
     onError: (error) => {
@@ -147,17 +156,23 @@ export const AdminDashboard = () => {
   const handleCloseModal = () => {
     userForm.clearErrors();
     agencyForm.clearErrors();
-    setShowInviteModal(false);
     setInviteType(null);
+    closeInviteModal();
   };
 
   const handleInviteTypeSelect = (type: "user" | "agency") => {
     setInviteType(type);
   };
 
+  useEffect(() => {
+    if (!showInviteModal) setInviteType(null);
+  }, [showInviteModal]);
+
   return (
     <>
-      <Button onClick={() => setShowInviteModal(true)}>Send Invitation</Button>
+      {!isControlled && (
+        <Button onClick={() => setInternalInviteOpen(true)}>Send Invitation</Button>
+      )}
 
       {/* Invite Type Selection Modal */}
       {inviteType === null && (

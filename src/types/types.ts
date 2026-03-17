@@ -84,7 +84,7 @@ export interface CalendarEvent {
     pickupAddress: string;
     destinationAddress: string;
     purpose?: string | null;
-    passengerInfo: string;
+    passengerInfo: string | null;
     status: BookingStatus;
     agencyId: string;
     driverId?: string | null;
@@ -92,6 +92,7 @@ export interface CalendarEvent {
     updatedAt?: Date | string | null;
     createdBy?: string;
     updatedBy?: string;
+    originalBooking?: Booking;
   };
 }
 
@@ -101,7 +102,7 @@ export type Survey = SurveySelectType;
 
 export interface ScheduleInformation {
   CREATED_AT: string; // string or date type?
-  CLIENT_NAME: string;
+  CLIENT_NAME: string | null;
   TELEPHONE: string;
   DATE_BOOKED: string; // Eventually this will be a date type
   TIME_BOOKED: string; // Eventually this will be a time type

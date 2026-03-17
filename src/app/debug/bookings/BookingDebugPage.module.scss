@@ -25,3 +25,50 @@
   overflow-x: auto;
   margin-top: 1rem;
 }
+
+.debugOutput {
+  grid-column: 1 / -1;
+  background: #1a1a2e;
+  color: #eee;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #6366f1;
+
+  h4 {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  pre {
+    margin: 0;
+    white-space: pre-wrap;
+    font-size: 0.85rem;
+  }
+}
+
+.errorMessage {
+  color: #ef4444;
+}
+
+.bookedSlotsTable {
+  grid-column: 1 / -1;
+  background: #1a1a2e;
+  color: #eee;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #22c55e;
+
+  h4 {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+  }
+}
+
+.bookedSlotsTableBody {
+  th,
+  td {
+    background: #252540 !important;
+    color: #eee !important;
+    border-color: #3f3f5a !important;
+  }
+}
