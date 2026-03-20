@@ -34,6 +34,7 @@ export const postTripSurveys = pgTable(
     timeOfDeparture: timestamp("time_of_departure"),
     timeOfArrival: timestamp("time_of_arrival"),
     destinationAddress: text("destination_address"),
+    vehicle: text("vehicle"),
 
     // Driver feedback
     originalLocationChanged: boolean("original_location_changed"),
