@@ -20,6 +20,7 @@ interface SurveyForm {
   timeOfDeparture: string;
   timeOfArrival: string;
   destinationAddress: string;
+  vehicle: string;
   originalLocationChanged: boolean;
   passengerFitRating: number | "";
   comments: string;
@@ -95,6 +96,12 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
           label="Destination Address"
           placeholder="123 Somestreet NW"
           {...form.getInputProps("destinationAddress")}
+          required
+        />
+        <TextInput
+          label="Vehicle"
+          placeholder="Enter vehicle used"
+          {...form.getInputProps("vehicle")}
           required
         />
         <DateTimePicker
