@@ -1,6 +1,9 @@
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { sendBookingCreatedSms } from "@/lib/sms";
 import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
+import { user } from "@/server/db/auth-schema";
 import { bookings } from "@/server/db/booking-schema";
 
 export const tripRouter = createTRPCRouter({
@@ -32,5 +35,25 @@ export const tripRouter = createTRPCRouter({
         startTime: input.startTime,
         endTime: input.endTime,
       });
+
+      void (async () => {
+        const drivers = await ctx.db
+          .select({ phoneNumber: user.phoneNumber })
+          .from(user)
+          .where(eq(user.role, "driver"));
+        const driverPhones = drivers
+          .map((d) => d.phoneNumber)
+          .filter((n): n is string => Boolean(n?.trim()));
+
+        await sendBookingCreatedSms(
+          {
+            title: input.title,
+            startTime: input.startTime,
+            pickupAddress: input.pickupAddress,
+            destinationAddress: input.destinationAddress,
+          },
+          driverPhones,
+        );
+      })();
     }),
 });
