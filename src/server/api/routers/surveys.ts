@@ -4,8 +4,10 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { and, desc, eq, gte, lt, or } from "drizzle-orm";
 import { z } from "zod";
+import { user } from "@/server/db/auth-schema";
 import { bookings } from "@/server/db/booking-schema";
 import { postTripSurveys, type SurveyInsertType } from "@/server/db/post-trip-schema";
+import { logs } from "@/server/db/vehicle-log";
 import { BookingStatus } from "@/types/types";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -151,38 +153,87 @@ export const surveysRouter = createTRPCRouter({
         });
       }
 
-      // create the survey
-      const [surveyRow] = await ctx.db
-        .insert(postTripSurveys)
-        .values({
-          bookingId: input.bookingId,
-          driverId: booking.driverId,
-          tripCompletionStatus: input.tripCompletionStatus,
-          startReading: input.startReading,
-          endReading: input.endReading,
-          timeOfDeparture: input.timeOfDeparture ? new Date(input.timeOfDeparture) : undefined,
-          timeOfArrival: input.timeOfArrival ? new Date(input.timeOfArrival) : undefined,
-          destinationAddress: input.destinationAddress,
-          vehicle: input.vehicle,
-          originalLocationChanged: input.originalLocationChanged,
-          passengerFitRating: input.passengerFitRating,
-          comments: input.comments,
-          passengerInfo: input.passengerInfo,
-        })
-        .returning();
+      const assignedDriverId = booking.driverId;
 
-      if (!surveyRow) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create survey",
-        });
-      }
+      const surveyRow = await ctx.db.transaction(async (tx) => {
+        // create the survey
+        const [createdSurvey] = await tx
+          .insert(postTripSurveys)
+          .values({
+            bookingId: input.bookingId,
+            driverId: assignedDriverId,
+            tripCompletionStatus: input.tripCompletionStatus,
+            startReading: input.startReading,
+            endReading: input.endReading,
+            timeOfDeparture: input.timeOfDeparture ? new Date(input.timeOfDeparture) : undefined,
+            timeOfArrival: input.timeOfArrival ? new Date(input.timeOfArrival) : undefined,
+            destinationAddress: input.destinationAddress,
+            vehicle: input.vehicle,
+            originalLocationChanged: input.originalLocationChanged,
+            passengerFitRating: input.passengerFitRating,
+            comments: input.comments,
+            passengerInfo: input.passengerInfo,
+          })
+          .returning();
 
-      // finally update it so that the booking has survey completed
-      await ctx.db
-        .update(bookings)
-        .set({ surveyCompleted: true })
-        .where(eq(bookings.id, input.bookingId));
+        if (!createdSurvey) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create survey",
+          });
+        }
+
+        // Auto-create a driver vehicle log from survey data for non-cancelled trips.
+        if (input.tripCompletionStatus !== BookingStatus.CANCELLED) {
+          if (
+            input.startReading == null ||
+            input.endReading == null ||
+            !input.timeOfDeparture ||
+            !input.timeOfArrival
+          ) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Cannot create driver log: missing required odometer or time fields",
+            });
+          }
+
+          const driverRecord = await tx
+            .select({ name: user.name })
+            .from(user)
+            .where(eq(user.id, assignedDriverId))
+            .limit(1)
+            .then((r) => r[0]);
+
+          if (!driverRecord) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Cannot create driver log: assigned driver record not found",
+            });
+          }
+
+          await tx.insert(logs).values({
+            date: dayjs(booking.startTime).format("YYYY-MM-DD"),
+            travelLocation: input.destinationAddress ?? booking.destinationAddress,
+            departureTime: input.timeOfDeparture,
+            arrivalTime: input.timeOfArrival,
+            odometerStart: input.startReading,
+            odometerEnd: input.endReading,
+            driverId: assignedDriverId,
+            driverName: driverRecord.name,
+            vehicle: input.vehicle ?? "Unknown",
+            createdBy: userId,
+            updatedBy: userId,
+          });
+        }
+
+        // finally update it so that the booking has survey completed
+        await tx
+          .update(bookings)
+          .set({ surveyCompleted: true })
+          .where(eq(bookings.id, input.bookingId));
+
+        return createdSurvey;
+      });
 
       return surveyRow;
     }),
