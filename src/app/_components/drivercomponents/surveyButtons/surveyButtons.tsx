@@ -4,7 +4,6 @@ import { Group, Stack } from "@mantine/core";
 import { useState } from "react";
 import Button from "@/app/_components/common/button/Button";
 import SurveyNotification from "@/app/_components/drivercomponents/surveyNotification/surveyNotification";
-import { authClient } from "@/lib/auth-client";
 import { api } from "@/trpc/react";
 import type { Booking, Survey } from "@/types/types";
 
@@ -20,7 +19,6 @@ export default function SurveyViewToggle({
   initialSurveys,
 }: SurveyViewToggleProps) {
   const [activeView, setActiveView] = useState<View>("pending");
-  const { data: session } = authClient.useSession();
 
   // will update every 60 seconds
   const { data: surveys = [] } = api.surveys.getAll.useQuery(undefined, {
