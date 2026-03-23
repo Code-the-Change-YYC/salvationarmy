@@ -1,8 +1,9 @@
 "use client";
 
-import { Box, Divider, Stack, TextInput } from "@mantine/core";
+import { Box, Divider, Select, Stack, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
+import { AVAILABLE_VEHICLES } from "@/constants/vehicles";
 import classes from "./vehicle-log-form.module.scss";
 
 interface VehicleLogFormData {
@@ -175,10 +176,12 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
       </div>
 
       <div className={classes.formRow}>
-        <TextInput
+        <Select
           withAsterisk
           label="Vehicle"
-          placeholder="Enter vehicle name"
+          placeholder="Select a vehicle"
+          data={AVAILABLE_VEHICLES}
+          searchable
           key={form.key("vehicle")}
           {...form.getInputProps("vehicle")}
         />

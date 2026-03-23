@@ -64,6 +64,12 @@ export const surveysRouter = createTRPCRouter({
                 path: ["timeOfArrival"],
                 message: "Arrival time is required",
               });
+            if (!data.vehicle)
+              ctx.addIssue({
+                code: "custom",
+                path: ["vehicle"],
+                message: "Vehicle is required",
+              });
           }
           if (data.timeOfDeparture && data.timeOfArrival) {
             if (new Date(data.timeOfArrival) <= new Date(data.timeOfDeparture)) {

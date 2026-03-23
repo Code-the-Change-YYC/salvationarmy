@@ -1,9 +1,19 @@
 "use client";
 
-import { Box, Divider, NumberInput, Radio, Stack, Textarea, TextInput } from "@mantine/core";
+import {
+  Box,
+  Divider,
+  NumberInput,
+  Radio,
+  Select,
+  Stack,
+  Textarea,
+  TextInput,
+} from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
 import dayjs from "dayjs";
+import { AVAILABLE_VEHICLES } from "@/constants/vehicles";
 import { BookingStatus } from "@/types/types";
 import styles from "./survey-form.module.scss";
 
@@ -14,6 +24,7 @@ interface SurveyForm {
   timeOfDeparture: string;
   timeOfArrival: string;
   destinationAddress: string;
+  vehicle: string;
   originalLocationChanged: boolean;
   passengerFitRating: number | "";
   comments: string;
@@ -168,6 +179,19 @@ export const SurveyForm = ({ form }: SurveyFormProps) => {
             key={form.key("destinationAddress")}
             {...form.getInputProps("destinationAddress")}
             error={form.errors.destinationAddress}
+          />
+        </div>
+
+        <div className={styles.formRow}>
+          <Select
+            withAsterisk
+            label="Vehicle"
+            placeholder="Select a vehicle"
+            data={AVAILABLE_VEHICLES}
+            searchable
+            key={form.key("vehicle")}
+            {...form.getInputProps("vehicle")}
+            error={form.errors.vehicle}
           />
         </div>
 
