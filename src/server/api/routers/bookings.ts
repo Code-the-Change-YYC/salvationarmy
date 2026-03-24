@@ -637,25 +637,34 @@ export const bookingsRouter = createTRPCRouter({
       const updated = res[0];
 
       if (updated) {
-        const drivers = await ctx.db
-          .select({ phoneNumber: user.phoneNumber })
-          .from(user)
-          .where(eq(user.role, "driver"));
-        const driverPhones = drivers
-          .map((d) => d.phoneNumber)
-          .filter((n): n is string => Boolean(n?.trim()));
+        // Only send SMS notifications if the start time, pickup address, or destination address has changed
+        const startChanged =
+          new Date(existing.startTime).getTime() !== new Date(updated.startTime).getTime();
+        const pickupChanged = existing.pickupAddress.trim() !== updated.pickupAddress.trim();
+        const destinationChanged =
+          existing.destinationAddress.trim() !== updated.destinationAddress.trim();
 
-        void sendBookingUpdatedSms(
-          {
-            title: updated.title,
-            startTime: updated.startTime,
-            pickupAddress: updated.pickupAddress,
-            destinationAddress: updated.destinationAddress,
-          },
-          driverPhones,
-        ).catch((err) => {
-          console.error("Failed to send booking updated SMS:", err);
-        });
+        if (startChanged || pickupChanged || destinationChanged) {
+          const drivers = await ctx.db
+            .select({ phoneNumber: user.phoneNumber })
+            .from(user)
+            .where(eq(user.role, "driver"));
+          const driverPhones = drivers
+            .map((d) => d.phoneNumber)
+            .filter((n): n is string => Boolean(n?.trim()));
+
+          void sendBookingUpdatedSms(
+            {
+              title: updated.title,
+              startTime: updated.startTime,
+              pickupAddress: updated.pickupAddress,
+              destinationAddress: updated.destinationAddress,
+            },
+            driverPhones,
+          ).catch((err) => {
+            console.error("Failed to send booking updated SMS:", err);
+          });
+        }
       }
 
       return res[0];
