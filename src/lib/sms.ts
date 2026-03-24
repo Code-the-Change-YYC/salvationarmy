@@ -26,7 +26,8 @@ async function sendSmsToNumbers(message: string, toNumbers: string[]) {
           text: message,
         });
       } catch (err) {
-        console.error(`Failed to send SMS to ${to}:`, err);
+        const redactedTo = `${"*".repeat(Math.max(0, to.length - 4))}${to.slice(-4)}`;
+        console.error(`Failed to send SMS to ${redactedTo}:`, err);
       }
     }),
   );
