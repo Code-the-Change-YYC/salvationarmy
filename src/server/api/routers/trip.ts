@@ -44,7 +44,7 @@ export const tripRouter = createTRPCRouter({
         .map((d) => d.phoneNumber)
         .filter((n): n is string => Boolean(n?.trim()));
 
-      await sendBookingCreatedSms(
+      void sendBookingCreatedSms(
         {
           title: input.title,
           startTime: input.startTime,
@@ -52,6 +52,8 @@ export const tripRouter = createTRPCRouter({
           destinationAddress: input.destinationAddress,
         },
         driverPhones,
-      );
+      ).catch((err) => {
+        console.error("Failed to send booking created SMS:", err);
+      });
     }),
 });

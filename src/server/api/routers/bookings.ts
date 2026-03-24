@@ -645,7 +645,7 @@ export const bookingsRouter = createTRPCRouter({
           .map((d) => d.phoneNumber)
           .filter((n): n is string => Boolean(n?.trim()));
 
-        await sendBookingUpdatedSms(
+        void sendBookingUpdatedSms(
           {
             title: updated.title,
             startTime: updated.startTime,
@@ -653,7 +653,9 @@ export const bookingsRouter = createTRPCRouter({
             destinationAddress: updated.destinationAddress,
           },
           driverPhones,
-        );
+        ).catch((err) => {
+          console.error("Failed to send booking updated SMS:", err);
+        });
       }
 
       return res[0];
