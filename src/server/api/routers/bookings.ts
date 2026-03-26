@@ -637,14 +637,16 @@ export const bookingsRouter = createTRPCRouter({
       const updated = res[0];
 
       if (updated) {
-        // Only send SMS notifications if the start time, pickup address, or destination address has changed
+        // Only send SMS if start/end time or pickup/destination address changed
         const startChanged =
           new Date(existing.startTime).getTime() !== new Date(updated.startTime).getTime();
+        const endChanged =
+          new Date(existing.endTime).getTime() !== new Date(updated.endTime).getTime();
         const pickupChanged = existing.pickupAddress.trim() !== updated.pickupAddress.trim();
         const destinationChanged =
           existing.destinationAddress.trim() !== updated.destinationAddress.trim();
 
-        if (startChanged || pickupChanged || destinationChanged) {
+        if (startChanged || endChanged || pickupChanged || destinationChanged) {
           const drivers = await ctx.db
             .select({ phoneNumber: user.phoneNumber })
             .from(user)
@@ -653,17 +655,24 @@ export const bookingsRouter = createTRPCRouter({
             .map((d) => d.phoneNumber)
             .filter((n): n is string => Boolean(n?.trim()));
 
-          void sendBookingUpdatedSms(
-            {
-              title: updated.title,
-              startTime: updated.startTime,
-              pickupAddress: updated.pickupAddress,
-              destinationAddress: updated.destinationAddress,
+          const beforeSnapshot = {
+            startTime: existing.startTime,
+            endTime: existing.endTime,
+            pickupAddress: existing.pickupAddress,
+            destinationAddress: existing.destinationAddress,
+          };
+          const afterSnapshot = {
+            startTime: updated.startTime,
+            endTime: updated.endTime,
+            pickupAddress: updated.pickupAddress,
+            destinationAddress: updated.destinationAddress,
+          };
+
+          void sendBookingUpdatedSms(updated.id, beforeSnapshot, afterSnapshot, driverPhones).catch(
+            (err) => {
+              console.error("Failed to send booking updated SMS:", err);
             },
-            driverPhones,
-          ).catch((err) => {
-            console.error("Failed to send booking updated SMS:", err);
-          });
+          );
         }
       }
 

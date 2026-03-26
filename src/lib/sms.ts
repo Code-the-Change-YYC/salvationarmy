@@ -34,28 +34,83 @@ async function sendSmsToNumbers(message: string, toNumbers: string[]) {
 }
 
 interface BookingSmsDetails {
-  title: string;
+  bookingId: number;
+  purpose: string;
   startTime: string;
+  endTime: string;
+  pickupAddress: string;
+  destinationAddress: string;
+}
+
+const BOOKING_SMS_DATE_FORMAT = "MMM D, YYYY";
+const BOOKING_SMS_TIME_FORMAT = "h:mm A";
+
+function formatBookingSmsDate(iso: string) {
+  return dayjs(iso).format(BOOKING_SMS_DATE_FORMAT);
+}
+
+function formatBookingSmsTime(iso: string) {
+  return dayjs(iso).format(BOOKING_SMS_TIME_FORMAT);
+}
+
+/** Snapshot fields used for booking-update SMS diffs (matches booking row shape). */
+export interface BookingSmsUpdateSnapshot {
+  startTime: string;
+  endTime: string;
   pickupAddress: string;
   destinationAddress: string;
 }
 
 export async function sendBookingCreatedSms(details: BookingSmsDetails, phoneNumbers: string[]) {
-  await sendSmsToNumbers(
-    `A new booking "${details.title}" has been created 🚗\n` +
-      `Date: ${dayjs(details.startTime).format("MMM D, YYYY")} at ${dayjs(details.startTime).format("h:mm A")}\n` +
-      `Pickup: ${details.pickupAddress}\n` +
-      `Destination: ${details.destinationAddress}`,
-    phoneNumbers,
-  );
+  const message = `Booking #${details.bookingId} has been created 🚗
+
+Purpose: ${details.purpose}
+Date: ${formatBookingSmsDate(details.startTime)}
+Time: ${formatBookingSmsTime(details.startTime)} - ${formatBookingSmsTime(details.endTime)}
+Pickup: ${details.pickupAddress}
+Destination: ${details.destinationAddress}`;
+
+  await sendSmsToNumbers(message, phoneNumbers);
 }
 
-export async function sendBookingUpdatedSms(details: BookingSmsDetails, phoneNumbers: string[]) {
-  await sendSmsToNumbers(
-    `Booking "${details.title}" has been updated 🚗\n` +
-      `Date: ${dayjs(details.startTime).format("MMM D, YYYY")} at ${dayjs(details.startTime).format("h:mm A")}\n` +
-      `Pickup: ${details.pickupAddress}\n` +
-      `Destination: ${details.destinationAddress}`,
-    phoneNumbers,
-  );
+export async function sendBookingUpdatedSms(
+  bookingId: number,
+  before: BookingSmsUpdateSnapshot,
+  after: BookingSmsUpdateSnapshot,
+  phoneNumbers: string[],
+) {
+  const lines: string[] = [];
+
+  const startChanged = new Date(before.startTime).getTime() !== new Date(after.startTime).getTime();
+  const endChanged = new Date(before.endTime).getTime() !== new Date(after.endTime).getTime();
+
+  if (startChanged || endChanged) {
+    const dateChanged =
+      formatBookingSmsDate(before.startTime) !== formatBookingSmsDate(after.startTime) ||
+      formatBookingSmsDate(before.endTime) !== formatBookingSmsDate(after.endTime);
+
+    if (dateChanged) {
+      lines.push(
+        `Date: ${formatBookingSmsDate(before.startTime)} → ${formatBookingSmsDate(after.startTime)}`,
+      );
+    }
+
+    lines.push(
+      `Time: ${formatBookingSmsTime(before.startTime)} - ${formatBookingSmsTime(before.endTime)} → ${formatBookingSmsTime(after.startTime)} - ${formatBookingSmsTime(after.endTime)}`,
+    );
+  }
+  if (before.pickupAddress.trim() !== after.pickupAddress.trim()) {
+    lines.push(`Pickup address: ${before.pickupAddress.trim()} → ${after.pickupAddress.trim()}`);
+  }
+  if (before.destinationAddress.trim() !== after.destinationAddress.trim()) {
+    lines.push(
+      `Destination address: ${before.destinationAddress.trim()} → ${after.destinationAddress.trim()}`,
+    );
+  }
+
+  if (lines.length === 0) return;
+
+  const message = `Updates have been made on booking #${bookingId}:\n\n${lines.join("\n")}`;
+
+  await sendSmsToNumbers(message, phoneNumbers);
 }

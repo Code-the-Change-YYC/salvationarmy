@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -23,18 +24,28 @@ export const tripRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(bookings).values({
-        title: input.title,
-        pickupAddress: input.pickupAddress,
-        destinationAddress: input.destinationAddress,
-        passengerInfo: `${input.residentName}|${input.phoneNumber}|${input.additionalInfo || ""}`,
-        phoneNumber: input.phoneNumber,
-        agencyId: ctx.session.user.id,
-        purpose: input.purpose,
-        createdBy: ctx.session.user.id,
-        startTime: input.startTime,
-        endTime: input.endTime,
-      });
+      const [inserted] = await ctx.db
+        .insert(bookings)
+        .values({
+          title: input.title,
+          pickupAddress: input.pickupAddress,
+          destinationAddress: input.destinationAddress,
+          passengerInfo: `${input.residentName}|${input.phoneNumber}|${input.additionalInfo || ""}`,
+          phoneNumber: input.phoneNumber,
+          agencyId: ctx.session.user.id,
+          purpose: input.purpose,
+          createdBy: ctx.session.user.id,
+          startTime: input.startTime,
+          endTime: input.endTime,
+        })
+        .returning({ id: bookings.id });
+
+      if (!inserted) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create booking",
+        });
+      }
 
       const drivers = await ctx.db
         .select({ phoneNumber: user.phoneNumber })
@@ -46,8 +57,10 @@ export const tripRouter = createTRPCRouter({
 
       void sendBookingCreatedSms(
         {
-          title: input.title,
+          bookingId: inserted.id,
+          purpose: input.purpose,
           startTime: input.startTime,
+          endTime: input.endTime,
           pickupAddress: input.pickupAddress,
           destinationAddress: input.destinationAddress,
         },
