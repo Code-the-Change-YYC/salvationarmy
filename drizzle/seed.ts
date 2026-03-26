@@ -340,6 +340,13 @@ async function seedBookings() {
       const agencyUser = agencyUsers[i % agencyUsers.length];
 
       if (!agencyUser) continue;
+      const userOrg = await db
+        .select()
+        .from(member)
+        .where(eq(member.userId, agencyUser.id))
+        .limit(1)
+        .then((r) => r[0]);
+      if (!userOrg) continue; // User somehow does not belong to an org
 
       bookingData.push({
         title: `${purposes[i % purposes.length]} - ${passengerNames[i % passengerNames.length]}`,
@@ -350,7 +357,7 @@ async function seedBookings() {
         phoneNumber: `+1 (403) ${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 9000 + 1000)}`,
         surveyCompleted: status === BookingStatus.COMPLETED ? Math.random() > 0.5 : false,
         status,
-        agencyId: agencyUser.id,
+        agencyId: userOrg.organizationId,
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
         driverId: driver.id,
@@ -373,6 +380,13 @@ async function seedBookings() {
       const agencyUser = agencyUsers[(pastCount + i) % agencyUsers.length];
 
       if (!agencyUser) continue;
+      const userOrg = await db
+        .select()
+        .from(member)
+        .where(eq(member.userId, agencyUser.id))
+        .limit(1)
+        .then((r) => r[0]);
+      if (!userOrg) continue; // User somehow does not belong to an org
 
       bookingData.push({
         title: `${purposes[(pastCount + i) % purposes.length]} - ${passengerNames[(pastCount + i) % passengerNames.length]}`,
@@ -383,7 +397,7 @@ async function seedBookings() {
         phoneNumber: `+1 (403) ${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 9000 + 1000)}`,
         surveyCompleted: false,
         status,
-        agencyId: agencyUser.id,
+        agencyId: userOrg.organizationId,
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
         driverId: driver.id,
@@ -404,6 +418,13 @@ async function seedBookings() {
       const agencyUser = agencyUsers[(pastCount + todayCount + i) % agencyUsers.length];
 
       if (!agencyUser) continue;
+      const userOrg = await db
+        .select()
+        .from(member)
+        .where(eq(member.userId, agencyUser.id))
+        .limit(1)
+        .then((r) => r[0]);
+      if (!userOrg) continue; // User somehow does not belong to an org
 
       bookingData.push({
         title: `${purposes[(pastCount + todayCount + i) % purposes.length]} - ${passengerNames[(pastCount + todayCount + i) % passengerNames.length]}`,
@@ -415,7 +436,7 @@ async function seedBookings() {
         phoneNumber: `+1 (403) ${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 9000 + 1000)}`,
         surveyCompleted: false,
         status: "incomplete" as BookingStatus,
-        agencyId: agencyUser.id,
+        agencyId: userOrg.organizationId,
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
         driverId: driver.id,
