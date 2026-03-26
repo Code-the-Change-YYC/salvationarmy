@@ -18,9 +18,9 @@ export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const nameRegex =
   /^(?!.*\s{2})[A-Za-z0-9][A-Za-z0-9\s]*[A-Za-z0-9][A-Za-z0-9\s]*[A-Za-z0-9]$/;
 
-export const isoTimeRegex = /^\+\d{5,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[-+]\d{2}:\d{2}$/; //ISO timestamp regex in MST for 5+ digit years
+export const isoTimeRegex = /^\+\d{5,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[-+]\d{2}:\d{2}$/; //ISO timestamp regex for 5+ digit years
 
-export const isoTimeRegexFourDigitYears = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[-+]\d{2}:\d{2}$/; //ISO timestamp regex in MST for 4 digit years
+export const isoTimeRegexFourDigitYears = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[-+]\d{2}:\d{2}$/; //ISO timestamp regex for 4 digit years
 
 /**
  * Validates a string's length with both minimum and maximum constraints.
