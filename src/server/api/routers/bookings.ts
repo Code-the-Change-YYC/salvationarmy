@@ -35,16 +35,19 @@ type DbContext = { db: typeof db };
 
 /**
  * Throws if the session user is not admin and not the booking's agency.
- * @param session - Session with user id and role
+ * @param session - Session with user id, role and affiliated agency
  * @param agencyId - Booking's agency id
  * @throws TRPCError FORBIDDEN when not allowed
  */
 function assertCanAccessBooking(
-  session: { user: { id: string; role?: string | null } },
+  session: {
+    user: { id: string; role?: string | null };
+    session: { activeOrganizationId?: string | null | undefined };
+  },
   agencyId: string,
 ): void {
   const role = session.user.role ?? "user";
-  const allowed = role === "admin" || agencyId === session.user.id;
+  const allowed = role === "admin" || agencyId === session.session.activeOrganizationId;
   if (!allowed) {
     throw new TRPCError({
       code: "FORBIDDEN",
@@ -245,6 +248,7 @@ export const bookingsRouter = createTRPCRouter({
     return {
       id: ctx.session.user.id,
       role: ctx.session.user.role ?? "user",
+      agencyId: ctx.session.session.activeOrganizationId ?? "",
     };
   }),
 
@@ -386,8 +390,9 @@ export const bookingsRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const role = ctx.session.user.role ?? "user";
 
-      // Only allow admins to specify agencyId; non-admins use their own ID
-      const agencyId = role === "admin" ? input.agencyId : userId;
+      // Only allow admins to specify agencyId; non-admins use their own agency ID
+      const agencyId =
+        role === "admin" ? input.agencyId : (ctx.session.session.activeOrganizationId ?? "");
 
       const bookingData: BookingInsertType = {
         title: input.title,
@@ -467,6 +472,7 @@ export const bookingsRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const role = ctx.session.user.role ?? "user";
       const startDate = input?.startDate ?? "1970-01-01T00:00:00-07:00";
+      const agencyId = ctx.session.session.activeOrganizationId ?? "";
       let endDate = input?.endDate ?? "";
 
       if (input === undefined || input.endDate === undefined) {
@@ -516,7 +522,7 @@ export const bookingsRouter = createTRPCRouter({
           and(
             or(
               eq(bookings.createdBy, userId),
-              eq(bookings.agencyId, userId),
+              eq(bookings.agencyId, agencyId),
               eq(bookings.driverId, userId),
             ),
             ...conditions,

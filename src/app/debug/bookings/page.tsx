@@ -43,7 +43,7 @@ function formatTimeSlot(startTime: string, endTime: string): string {
   return `${start} – ${end}`;
 }
 
-/** Example pre-filled booking for testing. agencyId must be a valid user.id; set dynamically from getCurrentUser. */
+/** Example pre-filled booking for testing. agencyId must be a valid organization.id; set dynamically from getCurrentUser. */
 const EXAMPLE_BOOKING = {
   title: "Test Example",
   pickupAddress: "The Inn from the Cold, 110 11 Ave SE, Calgary, AB",
@@ -150,7 +150,7 @@ export default function BookingDebugPage() {
       phoneNumber: EXAMPLE_BOOKING.phoneNumber ?? "",
       start: EXAMPLE_BOOKING.start, // will be kept in sync with picker (string)
       end: "", // will be kept in sync with picker (string), auto-calculated
-      agencyId: "", // set from getCurrentUser (must be valid user.id for FK)
+      agencyId: "", // set from getCurrentUser (must be valid organization.id for FK)
       purpose: EXAMPLE_BOOKING.purpose,
       driverId: "",
       status: BookingStatus.INCOMPLETE,
@@ -183,7 +183,7 @@ export default function BookingDebugPage() {
   // Set agencyId from current user so it references a valid user (fixes FK constraint)
   useEffect(() => {
     if (currentUserQuery.data && !form.values.agencyId) {
-      form.setFieldValue("agencyId", currentUserQuery.data.id);
+      form.setFieldValue("agencyId", currentUserQuery.data.agencyId);
     }
   }, [currentUserQuery.data, form.setFieldValue, form.values.agencyId]);
 
