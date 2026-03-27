@@ -31,6 +31,7 @@ export default function SurveyNotification({ survey, completed = false }: Survey
       : "",
     timeOfArrival: inputSurvey.timeOfArrival ? dayjs(inputSurvey.timeOfArrival).toISOString() : "",
     destinationAddress: inputSurvey.destinationAddress || "",
+    vehicle: inputSurvey.vehicle || "",
     originalLocationChanged: inputSurvey.originalLocationChanged ?? false,
     passengerFitRating: inputSurvey.passengerFitRating || ("" as number | ""),
     comments: inputSurvey.comments || "",
@@ -106,6 +107,10 @@ export default function SurveyNotification({ survey, completed = false }: Survey
         return validateTimeRange(values.timeOfDeparture, value);
       },
       destinationAddress: (value) => validateStringLength(value, 1, 300, "Destination address"),
+      vehicle: (value, values) => {
+        if (values.tripCompletionStatus === BookingStatus.CANCELLED) return null;
+        return validateStringLength(value, 1, 100, "Vehicle");
+      },
       originalLocationChanged: (value, values) => {
         if (values.tripCompletionStatus === BookingStatus.CANCELLED) return null;
         if (typeof value !== "boolean") return "Please select an option";
@@ -166,6 +171,7 @@ export default function SurveyNotification({ survey, completed = false }: Survey
     submitSurveyMutation.mutate({
       bookingId: survey.bookingId as number, // TODO: will remove eventually!
       driverId: survey.driverId as string, // TODO: will remove castin eveentually
+      vehicle: form.values.vehicle,
       ...basePayload,
     });
   };

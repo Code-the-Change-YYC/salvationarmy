@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Radio, Rating, Stack, Text, Textarea, TextInput } from "@mantine/core";
+import { Group, Radio, Rating, Select, Stack, Text, Textarea, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
 import dayjs from "dayjs";
@@ -9,6 +9,7 @@ import Rating2 from "@/assets/icons/rating2";
 import Rating3 from "@/assets/icons/rating3";
 import Rating4 from "@/assets/icons/rating4";
 import Rating5 from "@/assets/icons/rating5";
+import { AVAILABLE_VEHICLES } from "@/constants/vehicles";
 import { BookingStatus } from "@/types/types";
 import SegmentedControl from "../common/segmentedControl";
 import styles from "./TripSurveyModal.module.scss";
@@ -20,6 +21,7 @@ interface SurveyForm {
   timeOfDeparture: string;
   timeOfArrival: string;
   destinationAddress: string;
+  vehicle: string;
   originalLocationChanged: boolean;
   passengerFitRating: number | "";
   comments: string;
@@ -96,6 +98,17 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
           placeholder="123 Somestreet NW"
           {...form.getInputProps("destinationAddress")}
           required
+        />
+        <Select
+          withAsterisk
+          label="Vehicle"
+          placeholder="Select a vehicle"
+          data={AVAILABLE_VEHICLES}
+          searchable
+          key={form.key("vehicle")}
+          {...form.getInputProps("vehicle")}
+          error={form.errors.vehicle}
+          disabled={form.values.tripCompletionStatus === BookingStatus.CANCELLED}
         />
         <DateTimePicker
           label="Time of Departure"
