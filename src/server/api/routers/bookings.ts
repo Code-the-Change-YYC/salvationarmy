@@ -285,8 +285,18 @@ export const bookingsRouter = createTRPCRouter({
       const { driverId, startTime, endTime, excludeBookingId, pickupAddress, destinationAddress } =
         input;
 
-      if (await findOverlappingBooking(ctx, { driverId, startTime, endTime, excludeBookingId })) {
-        return { available: false, reason: "Driver has another booking at that time." };
+      if (
+        await findOverlappingBooking(ctx, {
+          driverId,
+          startTime,
+          endTime,
+          excludeBookingId,
+        })
+      ) {
+        return {
+          available: false,
+          reason: "Driver has another booking at that time.",
+        };
       }
 
       if (pickupAddress && destinationAddress) {
@@ -647,14 +657,6 @@ export const bookingsRouter = createTRPCRouter({
           existing.destinationAddress.trim() !== updated.destinationAddress.trim();
 
         if (startChanged || endChanged || pickupChanged || destinationChanged) {
-          const drivers = await ctx.db
-            .select({ phoneNumber: user.phoneNumber })
-            .from(user)
-            .where(eq(user.role, "driver"));
-          const driverPhones = drivers
-            .map((d) => d.phoneNumber)
-            .filter((n): n is string => Boolean(n?.trim()));
-
           const beforeSnapshot = {
             startTime: existing.startTime,
             endTime: existing.endTime,
@@ -668,11 +670,21 @@ export const bookingsRouter = createTRPCRouter({
             destinationAddress: updated.destinationAddress,
           };
 
-          void sendBookingUpdatedSms(updated.id, beforeSnapshot, afterSnapshot, driverPhones).catch(
-            (err) => {
-              console.error("Failed to send booking updated SMS:", err);
-            },
-          );
+          // SMS notifications are sent to the drivers.
+          // Updated booking is returned without waiting for the SMS to be sent.
+          void (async () => {
+            const drivers = await ctx.db
+              .select({ phoneNumber: user.phoneNumber })
+              .from(user)
+              .where(eq(user.role, "driver"));
+            const driverPhones = drivers
+              .map((d) => d.phoneNumber)
+              .filter((n): n is string => Boolean(n?.trim()));
+
+            await sendBookingUpdatedSms(updated.id, beforeSnapshot, afterSnapshot, driverPhones);
+          })().catch((err: unknown) => {
+            console.error("Failed to send booking updated SMS:", err);
+          });
         }
       }
 
