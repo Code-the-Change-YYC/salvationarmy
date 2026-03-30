@@ -11,6 +11,7 @@ import {
 } from "@/constants/driver-assignment";
 import { roundUpToNearestIncrement } from "@/lib/datetime";
 import { getTravelTimeMinutes } from "@/lib/google-maps";
+import { sendBookingUpdatedSms } from "@/lib/sms";
 import type { db } from "@/server/db";
 import { BOOKING_STATUSES, BookingStatus, Role } from "@/types/types";
 import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
@@ -284,8 +285,18 @@ export const bookingsRouter = createTRPCRouter({
       const { driverId, startTime, endTime, excludeBookingId, pickupAddress, destinationAddress } =
         input;
 
-      if (await findOverlappingBooking(ctx, { driverId, startTime, endTime, excludeBookingId })) {
-        return { available: false, reason: "Driver has another booking at that time." };
+      if (
+        await findOverlappingBooking(ctx, {
+          driverId,
+          startTime,
+          endTime,
+          excludeBookingId,
+        })
+      ) {
+        return {
+          available: false,
+          reason: "Driver has another booking at that time.",
+        };
       }
 
       if (pickupAddress && destinationAddress) {
@@ -632,6 +643,50 @@ export const bookingsRouter = createTRPCRouter({
           .where(eq(bookings.id, id))
           .returning();
       });
+
+      const updated = res[0];
+
+      if (updated) {
+        // Only send SMS if start/end time or pickup/destination address changed
+        const startChanged =
+          new Date(existing.startTime).getTime() !== new Date(updated.startTime).getTime();
+        const endChanged =
+          new Date(existing.endTime).getTime() !== new Date(updated.endTime).getTime();
+        const pickupChanged = existing.pickupAddress.trim() !== updated.pickupAddress.trim();
+        const destinationChanged =
+          existing.destinationAddress.trim() !== updated.destinationAddress.trim();
+
+        if (startChanged || endChanged || pickupChanged || destinationChanged) {
+          const beforeSnapshot = {
+            startTime: existing.startTime,
+            endTime: existing.endTime,
+            pickupAddress: existing.pickupAddress,
+            destinationAddress: existing.destinationAddress,
+          };
+          const afterSnapshot = {
+            startTime: updated.startTime,
+            endTime: updated.endTime,
+            pickupAddress: updated.pickupAddress,
+            destinationAddress: updated.destinationAddress,
+          };
+
+          // SMS notifications are sent to the drivers.
+          // Updated booking is returned without waiting for the SMS to be sent.
+          void (async () => {
+            const drivers = await ctx.db
+              .select({ phoneNumber: user.phoneNumber })
+              .from(user)
+              .where(eq(user.role, "driver"));
+            const driverPhones = drivers
+              .map((d) => d.phoneNumber)
+              .filter((n): n is string => Boolean(n?.trim()));
+
+            await sendBookingUpdatedSms(updated.id, beforeSnapshot, afterSnapshot, driverPhones);
+          })().catch((err: unknown) => {
+            console.error("Failed to send booking updated SMS:", err);
+          });
+        }
+      }
 
       return res[0];
     }),

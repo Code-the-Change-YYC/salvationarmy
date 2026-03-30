@@ -1,6 +1,10 @@
+import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { sendBookingCreatedSms } from "@/lib/sms";
 import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
+import { user } from "@/server/db/auth-schema";
 import { bookings } from "@/server/db/booking-schema";
 
 export const tripRouter = createTRPCRouter({
@@ -20,17 +24,49 @@ export const tripRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(bookings).values({
-        title: input.title,
-        pickupAddress: input.pickupAddress,
-        destinationAddress: input.destinationAddress,
-        passengerInfo: `${input.residentName}|${input.phoneNumber}|${input.additionalInfo || ""}`,
-        phoneNumber: input.phoneNumber,
-        agencyId: ctx.session.user.id,
-        purpose: input.purpose,
-        createdBy: ctx.session.user.id,
-        startTime: input.startTime,
-        endTime: input.endTime,
+      const [inserted] = await ctx.db
+        .insert(bookings)
+        .values({
+          title: input.title,
+          pickupAddress: input.pickupAddress,
+          destinationAddress: input.destinationAddress,
+          passengerInfo: `${input.residentName}|${input.phoneNumber}|${input.additionalInfo || ""}`,
+          phoneNumber: input.phoneNumber,
+          agencyId: ctx.session.user.id,
+          purpose: input.purpose,
+          createdBy: ctx.session.user.id,
+          startTime: input.startTime,
+          endTime: input.endTime,
+        })
+        .returning({ id: bookings.id });
+
+      if (!inserted) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create booking",
+        });
+      }
+
+      const drivers = await ctx.db
+        .select({ phoneNumber: user.phoneNumber })
+        .from(user)
+        .where(eq(user.role, "driver"));
+      const driverPhones = drivers
+        .map((d) => d.phoneNumber)
+        .filter((n): n is string => Boolean(n?.trim()));
+
+      void sendBookingCreatedSms(
+        {
+          bookingId: inserted.id,
+          purpose: input.purpose,
+          startTime: input.startTime,
+          endTime: input.endTime,
+          pickupAddress: input.pickupAddress,
+          destinationAddress: input.destinationAddress,
+        },
+        driverPhones,
+      ).catch((err) => {
+        console.error("Failed to send booking created SMS:", err);
       });
     }),
 });
