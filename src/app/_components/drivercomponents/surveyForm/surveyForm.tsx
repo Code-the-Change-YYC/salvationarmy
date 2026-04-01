@@ -13,7 +13,7 @@ import {
 import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
 import dayjs from "dayjs";
-import { AVAILABLE_VEHICLES } from "@/constants/vehicles";
+import { useVehicles } from "@/app/hooks/useVehicles";
 import { BookingStatus } from "@/types/types";
 import styles from "./survey-form.module.scss";
 
@@ -36,6 +36,7 @@ interface SurveyFormProps {
 
 export const SurveyForm = ({ form }: SurveyFormProps) => {
   const now = new Date();
+  const { vehicleOptions, isLoading: isLoadingVehicles } = useVehicles();
 
   return (
     <Stack gap="lg">
@@ -187,8 +188,9 @@ export const SurveyForm = ({ form }: SurveyFormProps) => {
             withAsterisk
             label="Vehicle"
             placeholder="Select a vehicle"
-            data={AVAILABLE_VEHICLES}
+            data={vehicleOptions}
             searchable
+            disabled={isLoadingVehicles}
             key={form.key("vehicle")}
             {...form.getInputProps("vehicle")}
             error={form.errors.vehicle}

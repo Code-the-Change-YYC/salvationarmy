@@ -1,11 +1,12 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: its just a seeding script so i think this is fine */
 import { generateId } from "better-auth";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/server/db";
 import { member, organization, type User, user } from "@/server/db/auth-schema";
 import { bookings } from "@/server/db/booking-schema";
 import { logs } from "@/server/db/vehicle-log";
+import { vehicles } from "@/server/db/vehicles-schema";
 import { BookingStatus } from "@/types/types";
 
 // Parse command line arguments
@@ -14,6 +15,7 @@ const flags = {
   users: args.includes("--users"),
   bookings: args.includes("--bookings"),
   logs: args.includes("--logs"),
+  vehicles: args.includes("--vehicles"),
   clear: args.includes("--clear"),
 };
 
@@ -22,6 +24,7 @@ if (!flags.users && !flags.bookings && !flags.logs) {
   flags.users = true;
   flags.bookings = true;
   flags.logs = true;
+  flags.vehicles = true;
 }
 
 const DEFAULT_PASSWORD = "Password123!";
@@ -557,6 +560,55 @@ async function seedLogs() {
   }
 }
 
+// ==================== SEED VEHICLES ====================
+async function seedVehicles() {
+  console.log("\n=== SEEDING VEHICLES ===\n");
+
+  try {
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "vehicles" (
+        "id" text PRIMARY KEY NOT NULL,
+        "name" text NOT NULL UNIQUE,
+        "active" boolean DEFAULT true NOT NULL,
+        "created_at" timestamp DEFAULT now() NOT NULL,
+        "updated_at" timestamp DEFAULT now() NOT NULL
+      );
+    `);
+
+    const vehicleData = [
+      "Ford Expedition CTW 2776",
+      "Salvation Army Vehicle 2",
+      "Salvation Army Vehicle 3",
+    ];
+
+    console.log(`Creating ${vehicleData.length} vehicles...`);
+
+    for (const vehicleName of vehicleData) {
+      const existing = await db
+        .select()
+        .from(vehicles)
+        .where(eq(vehicles.name, vehicleName))
+        .limit(1);
+
+      if (existing.length === 0) {
+        await db.insert(vehicles).values({
+          id: generateId(),
+          name: vehicleName,
+          active: true,
+        });
+        console.log(`  ✓ Created: ${vehicleName}`);
+      } else {
+        console.log(`  → Already exists: ${vehicleName}`);
+      }
+    }
+
+    console.log("\n✅ Vehicles seeded successfully!\n");
+  } catch (error) {
+    console.error("❌ Failed to seed vehicles:", error);
+    throw error;
+  }
+}
+
 async function main() {
   console.log("\nStarting seed process...");
   console.log(`Flags: ${JSON.stringify(flags, null, 2)}\n`);
@@ -572,6 +624,10 @@ async function main() {
 
     if (flags.logs) {
       await seedLogs();
+    }
+
+    if (flags.vehicles) {
+      await seedVehicles();
     }
 
     console.log("\n" + "=".repeat(50));

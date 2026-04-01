@@ -7,6 +7,7 @@ import * as passengerSchema from "@/server/db/passenger-schema";
 import * as postTripSchema from "@/server/db/post-trip-schema";
 import * as schema from "@/server/db/schema";
 import * as logSchema from "@/server/db/vehicle-log";
+import * as vehiclesSchema from "@/server/db/vehicles-schema";
 
 /**
  * Cache the database connection in development. This avoids creating a new connection on every HMR
@@ -27,5 +28,6 @@ export const db = drizzle(conn, {
     ...postTripSchema,
     ...logSchema,
     ...passengerSchema,
+    ...vehiclesSchema,
   },
 });

@@ -55,6 +55,7 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
           </button>
           <NavLink href="/admin/rider-logs">Rider Logs</NavLink>
           <NavLink href="/admin/vehicle-logs">Vehicle Logs</NavLink>
+          <NavLink href="/admin/vehicles">View Vehicles</NavLink>
           <NavLink href="/admin/schedule">View Schedule</NavLink>
           <Profile />
         </Group>

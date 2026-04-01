@@ -4,12 +4,12 @@ import { Group, Radio, Rating, Select, Stack, Text, Textarea, TextInput } from "
 import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
 import dayjs from "dayjs";
+import { useVehicles } from "@/app/hooks/useVehicles";
 import Rating1 from "@/assets/icons/rating1";
 import Rating2 from "@/assets/icons/rating2";
 import Rating3 from "@/assets/icons/rating3";
 import Rating4 from "@/assets/icons/rating4";
 import Rating5 from "@/assets/icons/rating5";
-import { AVAILABLE_VEHICLES } from "@/constants/vehicles";
 import { BookingStatus } from "@/types/types";
 import SegmentedControl from "../common/segmentedControl";
 import styles from "./TripSurveyModal.module.scss";
@@ -33,6 +33,7 @@ interface SurveyFormProps {
 
 export const TripSurveyModal = ({ form }: SurveyFormProps) => {
   const now = new Date();
+  const { vehicleOptions, isLoading: isLoadingVehicles } = useVehicles();
 
   const getIconStyle = (color?: string) => ({
     width: 32,
@@ -103,12 +104,14 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
           withAsterisk
           label="Vehicle"
           placeholder="Select a vehicle"
-          data={AVAILABLE_VEHICLES}
+          data={vehicleOptions}
           searchable
           key={form.key("vehicle")}
           {...form.getInputProps("vehicle")}
           error={form.errors.vehicle}
-          disabled={form.values.tripCompletionStatus === BookingStatus.CANCELLED}
+          disabled={
+            form.values.tripCompletionStatus === BookingStatus.CANCELLED || isLoadingVehicles
+          }
         />
         <DateTimePicker
           label="Time of Departure"
