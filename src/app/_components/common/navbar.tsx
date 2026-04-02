@@ -2,11 +2,13 @@
 
 import { Group, Text } from "@mantine/core";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { AdminDashboard } from "@/app/_components/admincomponents/admin-dashboard";
 import Bell from "@/assets/icons/bell";
 import Home from "@/assets/icons/home";
+import { api } from "@/trpc/react";
+import IconButton from "./button/IconButton";
 import styles from "./navbar.module.scss";
 import Profile from "./profile/profile";
 
@@ -35,11 +37,22 @@ function NavLink({ href, children }: NavLinkProps) {
 
 export default function Navbar({ view, agencyName }: NavbarProps) {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
-
+  const router = useRouter();
+  const { mutate } = api.organization.redirectToDashboard.useMutation({
+    onSuccess: (data) => {
+      router.replace(data.redirectUrl);
+    },
+  });
   return (
     <Group justify="space-between" className={`border-bottom ${styles.navbar}`}>
       <Group>
-        <Home />
+        <IconButton
+          onClick={() => mutate()}
+          ariaLabel="Button"
+          icon={<Home />}
+          color="blue"
+          transparent={true}
+        ></IconButton>
         <Text>{view === "agency" ? `${agencyName ?? "[Agency name]"} Home` : ""}</Text>
       </Group>
 
