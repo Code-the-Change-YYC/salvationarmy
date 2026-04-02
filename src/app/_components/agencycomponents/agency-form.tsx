@@ -21,9 +21,10 @@ interface AgencyBookingForm {
 interface AgencyFormProps {
   form: UseFormReturnType<AgencyBookingForm>;
   destinationAddressRef: React.RefObject<HTMLInputElement | null>;
+  pickupAddressRef: React.RefObject<HTMLInputElement | null>;
 }
 
-export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => {
+export const AgencyForm = ({ form, destinationAddressRef, pickupAddressRef }: AgencyFormProps) => {
   const now = new Date();
 
   return (
@@ -151,6 +152,7 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             placeholder="Enter address"
             key={form.key("pickupAddress")}
             {...form.getInputProps("pickupAddress")}
+            ref={pickupAddressRef}
           />
         </div>
         <div className={classes.formRow}>
