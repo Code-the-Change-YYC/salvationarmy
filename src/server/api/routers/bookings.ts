@@ -246,10 +246,16 @@ async function validateDriverForSlot(
 export const bookingsRouter = createTRPCRouter({
   /** Returns the current user id and role for the debug form default agencyId. */
   getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.session.session.activeOrganizationId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Not active organization ID set",
+      });
+    }
     return {
       id: ctx.session.user.id,
       role: ctx.session.user.role ?? "user",
-      agencyId: ctx.session.session.activeOrganizationId ?? "",
+      agencyId: ctx.session.session.activeOrganizationId,
     };
   }),
 
@@ -401,9 +407,15 @@ export const bookingsRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const role = ctx.session.user.role ?? "user";
 
+      if (!ctx.session.session.activeOrganizationId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Not active organization ID set",
+        });
+      }
+
       // Only allow admins to specify agencyId; non-admins use their own agency ID
-      const agencyId =
-        role === "admin" ? input.agencyId : (ctx.session.session.activeOrganizationId ?? "");
+      const agencyId = role === "admin" ? input.agencyId : ctx.session.session.activeOrganizationId;
 
       const bookingData: BookingInsertType = {
         title: input.title,
@@ -483,8 +495,16 @@ export const bookingsRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const role = ctx.session.user.role ?? "user";
       const startDate = input?.startDate ?? "1970-01-01T00:00:00-07:00";
-      const agencyId = ctx.session.session.activeOrganizationId ?? "";
       let endDate = input?.endDate ?? "";
+
+      if (!ctx.session.session.activeOrganizationId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Not active organization ID set",
+        });
+      }
+
+      const agencyId = ctx.session.session.activeOrganizationId;
 
       if (input === undefined || input.endDate === undefined) {
         // No end date given; use explicit format so result matches isoTimeRegexFourDigitYears (-07:00)
