@@ -131,6 +131,7 @@ export const organizationRouter = createTRPCRouter({
         email: z.string().email(),
         organizationRole: z.nativeEnum(OrganizationRole),
         organizationId: z.string(),
+        role: z.nativeEnum(Role),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -173,6 +174,8 @@ export const organizationRouter = createTRPCRouter({
             role: input.organizationRole,
           },
         });
+
+        await ctx.db.update(user).set({ role: input.role }).where(eq(user.id, newUser.user.id));
 
         // send the invitation email using the forgot password flow
         console.log("Sending password reset email to:", input.email);
