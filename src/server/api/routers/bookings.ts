@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { and, asc, desc, eq, gt, gte, lt, lte, ne, or } from "drizzle-orm";
+import { ParseError, parsePhoneNumberWithError } from "libphonenumber-js";
 import { z } from "zod";
 import {
   MAX_GAP_MINUTES_FOR_TRAVEL_CHECK,
@@ -14,9 +15,10 @@ import { getTravelTimeMinutes } from "@/lib/google-maps";
 import { sendBookingUpdatedSms } from "@/lib/sms";
 import type { db } from "@/server/db";
 import { BOOKING_STATUSES, BookingStatus, Role } from "@/types/types";
-import { isoTimeRegex, isoTimeRegexFourDigitYears } from "@/types/validation";
+import { isoTimeRegex, isoTimeRegexFourDigitYears, phoneNumberSchema } from "@/types/validation";
 import { user } from "../../db/auth-schema";
 import { type BookingInsertType, bookings } from "../../db/booking-schema";
+import { appRouter } from "../root";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 dayjs.extend(utc); //Allows dayjs to work in UTC
@@ -602,6 +604,65 @@ export const bookingsRouter = createTRPCRouter({
       const updatesToApply = Object.fromEntries(
         Object.entries(updates).filter(([, v]) => v !== undefined),
       );
+
+      if (updatesToApply.phoneNumber) {
+        //Wants to change phone number
+        try {
+          const res = phoneNumberSchema.safeParse(updatesToApply.phoneNumber.trim()); //Check if phone num is valid
+          const phoneNumber = parsePhoneNumberWithError(updatesToApply.phoneNumber);
+          if (!res.success || !phoneNumber.isValid()) {
+            // Failed regex check or API check
+            throw new Error(res.error?.issues[0]?.message ?? "Invalid phone number");
+          }
+          updatesToApply.phoneNumber = phoneNumber.number;
+        } catch (e) {
+          if (e instanceof Error) {
+            // Failed regex check or API check
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: e instanceof ParseError ? "Invalid phone number" : e.message,
+            });
+          }
+        }
+      }
+
+      if (updatesToApply.pickupAddress) {
+        // wants to change pickup addr
+        const serverCaller = appRouter.createCaller(ctx); //Make a blank ctx for the endpoint we call
+        await serverCaller.form
+          .validateAddress({
+            regionCode: "ca",
+            address: [updatesToApply.pickupAddress],
+          })
+          .then((result) => {
+            if (result === null) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Invalid Pickup Address",
+              });
+            }
+            updatesToApply.pickupAddress = result;
+          });
+      }
+
+      if (updatesToApply.destinationAddress) {
+        // wants to change destination addr
+        const serverCaller = appRouter.createCaller(ctx); //Make a blank ctx for the endpoint we call
+        await serverCaller.form
+          .validateAddress({
+            regionCode: "ca",
+            address: [updatesToApply.destinationAddress],
+          })
+          .then((result) => {
+            if (result === null) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Invalid Destination Address",
+              });
+            }
+            updatesToApply.destinationAddress = result;
+          });
+      }
 
       const driverId =
         updatesToApply.driverId !== undefined ? updatesToApply.driverId : existing.driverId;

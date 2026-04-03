@@ -107,6 +107,7 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
               format: "12h",
             }}
             clearable
+            error={form.errors.startTime}
           />
         </div>
 
@@ -133,6 +134,7 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
               format: "12h",
             }}
             clearable
+            error={form.values.startTime ? form.errors.endTime : ""}
           />
         </div>
         <div className={classes.formRow}>

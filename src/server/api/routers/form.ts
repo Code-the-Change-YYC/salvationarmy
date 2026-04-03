@@ -108,11 +108,10 @@ export const formRouter = createTRPCRouter({
     return "you can now see this secret message!";
   }),
 
-  //TODO: Change from publicProcedure to protectedProcedure (it is the former for testing until authentication is made)
-  validateDestinationAddress: publicProcedure
-    .input(z.object({ regionCode: z.string(), destinationAddress: z.array(z.string()) }))
+  validateAddress: protectedProcedure
+    .input(z.object({ regionCode: z.string(), address: z.array(z.string()) }))
     .mutation(async ({ input }) => {
-      const { regionCode, destinationAddress } = input; //Grab passed variables
+      const { regionCode, address } = input; //Grab passed variables
 
       try {
         //Make an API call to Google Maps API to validate the inputs
@@ -126,7 +125,7 @@ export const formRouter = createTRPCRouter({
             body: JSON.stringify({
               address: {
                 regionCode: regionCode,
-                addressLines: destinationAddress,
+                addressLines: address,
               },
             }),
           },
@@ -140,10 +139,20 @@ export const formRouter = createTRPCRouter({
           throw new Error("Invalid response from Google API");
         }
 
-        //If the address is good (addressComplete === true) then return Google's formatted version of the address, else null
-        return data.result.verdict.addressComplete === true
-          ? data.result.address.formattedAddress
-          : null;
+        const addrIsPerfect = data.result.verdict.addressComplete;
+        const missingFromAddr = data.result.address.missingComponentTypes; //List of things missing from addr
+        const addrIsGoodEnough =
+          missingFromAddr &&
+          (missingFromAddr.length === 0 ||
+            (missingFromAddr.length === 1 &&
+              (missingFromAddr[0] === "postal_code" || missingFromAddr[0] === "street_number")) ||
+            (missingFromAddr.length === 2 &&
+              (missingFromAddr[0] === "postal_code" || missingFromAddr[0] === "street_number") &&
+              (missingFromAddr[1] === "postal_code" || missingFromAddr[1] === "street_number") &&
+              missingFromAddr[0] !== missingFromAddr[1]));
+
+        //If the address is good then return Google's formatted version of the address, else null
+        return addrIsPerfect || addrIsGoodEnough ? data.result.address.formattedAddress : null;
       } catch (errorObject) {
         if (
           errorObject instanceof Error &&
