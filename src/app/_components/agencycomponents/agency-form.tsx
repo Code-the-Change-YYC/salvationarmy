@@ -20,10 +20,11 @@ interface AgencyBookingForm {
 
 interface AgencyFormProps {
   form: UseFormReturnType<AgencyBookingForm>;
+  pickupAddressRef: React.RefObject<HTMLInputElement | null>;
   destinationAddressRef: React.RefObject<HTMLInputElement | null>;
 }
 
-export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => {
+export const AgencyForm = ({ form, pickupAddressRef, destinationAddressRef }: AgencyFormProps) => {
   const now = new Date();
 
   return (
@@ -150,7 +151,9 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             label="Pickup Address"
             placeholder="Enter address"
             key={form.key("pickupAddress")}
-            {...form.getInputProps("pickupAddress")}
+            onChange={form.getInputProps("pickupAddress").onChange}
+            error={form.getInputProps("pickupAddress").error}
+            ref={pickupAddressRef}
           />
         </div>
         <div className={classes.formRow}>
@@ -159,7 +162,8 @@ export const AgencyForm = ({ form, destinationAddressRef }: AgencyFormProps) => 
             label="Destination Address"
             placeholder="Enter address"
             key={form.key("destinationAddress")}
-            {...form.getInputProps("destinationAddress")}
+            onChange={form.getInputProps("destinationAddress").onChange}
+            error={form.getInputProps("destinationAddress").error}
             ref={destinationAddressRef}
           />
         </div>
