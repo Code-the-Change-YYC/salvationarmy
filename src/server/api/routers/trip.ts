@@ -27,7 +27,7 @@ export const tripRouter = createTRPCRouter({
       if (!ctx.session.session.activeOrganizationId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Not active organization ID set",
+          message: "No active organization ID set",
         });
       }
 

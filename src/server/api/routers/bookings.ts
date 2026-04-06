@@ -249,7 +249,7 @@ export const bookingsRouter = createTRPCRouter({
     if (!ctx.session.session.activeOrganizationId) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Not active organization ID set",
+        message: "No active organization ID set",
       });
     }
     return {
@@ -410,7 +410,7 @@ export const bookingsRouter = createTRPCRouter({
       if (!ctx.session.session.activeOrganizationId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Not active organization ID set",
+          message: "No active organization ID set",
         });
       }
 
@@ -500,7 +500,7 @@ export const bookingsRouter = createTRPCRouter({
       if (!ctx.session.session.activeOrganizationId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Not active organization ID set",
+          message: "No active organization ID set",
         });
       }
 

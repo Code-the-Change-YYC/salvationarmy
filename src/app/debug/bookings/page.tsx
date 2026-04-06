@@ -180,7 +180,7 @@ export default function BookingDebugPage() {
   const listDriversQuery = api.bookings.listDrivers.useQuery();
   const currentUserQuery = api.bookings.getCurrentUser.useQuery();
 
-  // Set agencyId from current user so it references a valid user (fixes FK constraint)
+  // Set agencyId from current user so it references a valid organization (fixes FK constraint)
   useEffect(() => {
     if (currentUserQuery.data && !form.values.agencyId) {
       form.setFieldValue("agencyId", currentUserQuery.data.agencyId);
