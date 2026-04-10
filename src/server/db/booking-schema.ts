@@ -1,7 +1,7 @@
 import { type InferInsertModel, type InferSelectModel, relations } from "drizzle-orm";
 import { boolean, index, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { BOOKING_STATUSES, BookingStatus } from "@/types/types";
-import { user } from "./auth-schema";
+import { organization, user } from "./auth-schema";
 
 export const bookings = pgTable(
   "bookings",
@@ -18,7 +18,7 @@ export const bookings = pgTable(
     // the agency that created the booking
     agencyId: text("agency_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => organization.id, { onDelete: "cascade" }),
     startTime: timestamp("start_time", {
       mode: "string",
       withTimezone: true,
@@ -51,9 +51,9 @@ export const bookings = pgTable(
 );
 
 export const bookingsRelations = relations(bookings, ({ one }) => ({
-  agency: one(user, {
+  agency: one(organization, {
     fields: [bookings.agencyId],
-    references: [user.id],
+    references: [organization.id],
     relationName: "agencyBookings",
   }),
   driver: one(user, {

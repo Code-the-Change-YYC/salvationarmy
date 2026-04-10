@@ -24,6 +24,13 @@ export const tripRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.session.activeOrganizationId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No active organization ID set",
+        });
+      }
+
       const [inserted] = await ctx.db
         .insert(bookings)
         .values({
@@ -32,7 +39,7 @@ export const tripRouter = createTRPCRouter({
           destinationAddress: input.destinationAddress,
           passengerInfo: `${input.residentName}|${input.phoneNumber}|${input.additionalInfo || ""}`,
           phoneNumber: input.phoneNumber,
-          agencyId: ctx.session.user.id,
+          agencyId: ctx.session.session.activeOrganizationId,
           purpose: input.purpose,
           createdBy: ctx.session.user.id,
           startTime: input.startTime,
