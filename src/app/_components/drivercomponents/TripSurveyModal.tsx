@@ -185,7 +185,16 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
           disabled={form.values.tripCompletionStatus === BookingStatus.CANCELLED}
         ></SegmentedControl>
         Rate the passenger’s fitness for transport
-        <div className={styles.rating}>
+        <div
+          className={styles.rating}
+          style={{
+            border: form.errors.passengerFitRating
+              ? "1px solid var(--mantine-color-red-6)"
+              : "none",
+            borderRadius: 4,
+            padding: form.errors.passengerFitRating ? 4 : 0,
+          }}
+        >
           <Rating
             styles={{
               root: {
@@ -204,6 +213,11 @@ export const TripSurveyModal = ({ form }: SurveyFormProps) => {
         </div>
         <Group justify="space-between" className={styles.ratingLabel}>
           <Text>Very Poor</Text>
+          {form.errors.passengerFitRating && (
+            <Text size="xs" c="red">
+              {form.errors.passengerFitRating}
+            </Text>
+          )}
           <Text>Excellent</Text>
         </Group>
         Additional Notes
