@@ -139,7 +139,7 @@ export const vehicleLogsRouter = createTRPCRouter({
         .refine(
           (data) => {
             if (data.odometerEnd !== undefined && data.odometerStart !== undefined) {
-              return data.odometerEnd > data.odometerStart;
+              return data.odometerEnd >= data.odometerStart;
             }
             return true;
           },
