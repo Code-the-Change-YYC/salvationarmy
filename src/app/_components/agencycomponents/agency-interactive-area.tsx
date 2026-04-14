@@ -12,7 +12,7 @@ import { env } from "@/env";
 import { notify } from "@/lib/notifications";
 import { api } from "@/trpc/react";
 import { type Booking, type CalendarUserView, ViewMode } from "@/types/types";
-import { validateStringLength, validateTimeRange } from "@/types/validation";
+import { phoneNumberSchema, validateStringLength, validateTimeRange } from "@/types/validation";
 import TableView from "../agencypage/table-view";
 import LoadingScreen from "../common/loadingscreen";
 import styles from "./agency-interactive-area.module.scss";
@@ -104,7 +104,11 @@ export const BookingInteractiveArea = ({
     validate: {
       title: (value) => validateStringLength(value, 1, 150, "Booking name"),
       residentName: (value) => validateStringLength(value, 1, 100, "Resident name"),
-      phoneNumber: (value) => validateStringLength(value, 1, 150, "Contact information"),
+      phoneNumber: (value) => {
+        if (!value || value.trim().length === 0) return "Phone number is required";
+        const res = phoneNumberSchema.safeParse(value.trim());
+        return res.success ? null : (res.error.issues[0]?.message ?? "Invalid phone number format");
+      },
       additionalInfo: (value) => {
         // Optional field, only validate max length if provided
         if (value.trim().length === 0) return null;
@@ -120,7 +124,8 @@ export const BookingInteractiveArea = ({
       },
       endTime: (value, values) => {
         // First check if required
-        if (value.trim().length === 0) return "Date and time is required";
+        if (value.trim().length === 0 && values.startTime.trim().length !== 0)
+          return "Date and time is required";
         // Then validate time range (this also validates date format)
         return validateTimeRange(values.startTime, value);
       },
