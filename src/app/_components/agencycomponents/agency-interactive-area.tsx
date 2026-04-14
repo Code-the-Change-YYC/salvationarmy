@@ -44,6 +44,7 @@ export const BookingInteractiveArea = ({
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [isDayView, setIsDayView] = useState<boolean>(false);
   const [validationAddressGood, setValidationAddressGood] = useState<boolean>(false);
+  const [validationPickupAddressGood, setValidationPickupAddressGood] = useState<boolean>(false);
 
   const utils = api.useUtils();
   const {
@@ -79,6 +80,7 @@ export const BookingInteractiveArea = ({
   //Starts off as null but will equal (through inputElement.current) an HTML input element when assigned at runtime
   //Will be assigned an HTML input element when the mantine form loads
   const inputElement = useRef<HTMLInputElement | null>(null);
+  const pickupInputElement = useRef<HTMLInputElement | null>(null);
 
   //Load the Google maps API
   const { isLoaded } = useLoadScript({
@@ -133,6 +135,10 @@ export const BookingInteractiveArea = ({
     },
   });
 
+  //Keep a stable ref to form.setFieldValue so the autocomplete useEffects don't re-run when the form re-renders
+  const setFieldValueRef = useRef(form.setFieldValue);
+  setFieldValueRef.current = form.setFieldValue;
+
   useEffect(() => {
     if (selectedBooking && currentModalMode === "edit") {
       let residentName = "";
@@ -162,7 +168,13 @@ export const BookingInteractiveArea = ({
         destinationAddress: selectedBooking.destinationAddress,
       });
 
+      // Sync form state to the uncontrolled address inputs directly via their refs
+      if (inputElement.current) inputElement.current.value = selectedBooking.destinationAddress;
+      if (pickupInputElement.current)
+        pickupInputElement.current.value = selectedBooking.pickupAddress;
+
       setValidationAddressGood(true);
+      setValidationPickupAddressGood(true);
     }
   }, [selectedBooking, currentModalMode, form.setValues]);
 
@@ -194,6 +206,8 @@ export const BookingInteractiveArea = ({
       if (value.geometry) {
         //The value is one of google's suggested locations. Geometry field is set if picked location is valid
         setValidationAddressGood(true);
+        //Sync the Google-selected address back into Mantine form state
+        setFieldValueRef.current("destinationAddress", inputElement.current?.value ?? "");
       } else {
         //Google maps api could not figure out what the user gave it
         setValidationAddressGood(false);
@@ -213,12 +227,69 @@ export const BookingInteractiveArea = ({
     };
   }, [inputElement.current]);
 
+  //Run the following every time pickupInputElement.current gets a new value (occurs whenever pickupAddress field changes in mantine form)
+  // biome-ignore lint: pickupInputElement.current does change and needs to be changed in order for useEffect() to run
+  useEffect(() => {
+    //Do not run the code within the useEffect if the api or mantine form hasn't fully loaded
+    if (!isLoaded || google.maps.places === null || pickupInputElement.current === null) {
+      return;
+    }
+
+    //Make the google auto complete element and attach it to pickupInputElement (requires an HTML input element to mount to)
+    const googleAutoCompleteElement = new google.maps.places.Autocomplete(
+      pickupInputElement.current,
+      {
+        types: ["address"],
+      },
+    );
+
+    //Places bounds on what locations google will suggest
+    googleAutoCompleteElement.setComponentRestrictions({
+      country: ["ca"], //Only show places in Canada
+    });
+
+    //Specifies which values we want to grab when the user makes an API call
+    googleAutoCompleteElement.setFields(["geometry"]);
+
+    //Attaches an event listener whenever the element's field changes
+    googleAutoCompleteElement.addListener("place_changed", () => {
+      const value = googleAutoCompleteElement.getPlace(); //Gets the value the user inputted
+
+      if (value.geometry) {
+        //The value is one of google's suggested locations. Geometry field is set if picked location is valid
+        setValidationPickupAddressGood(true);
+        //Sync the Google-selected address back into Mantine form state
+        setFieldValueRef.current("pickupAddress", pickupInputElement.current?.value ?? "");
+      } else {
+        //Google maps api could not figure out what the user gave it
+        setValidationPickupAddressGood(false);
+      }
+    });
+
+    //Adds an event to pickupInputElement.current (now that it's not null)
+    function pickupInputElementOnInput() {
+      setValidationPickupAddressGood(false); //User started typing, assume input is invalid
+    }
+    pickupInputElement.current.addEventListener("input", pickupInputElementOnInput);
+
+    //When pickupInputElement.current changes, remove the listeners from old elements to prevent any performance issues
+    return () => {
+      google.maps.event.clearInstanceListeners(googleAutoCompleteElement); //Removes the place_changed event listener to the old element
+      pickupInputElement.current?.removeEventListener("input", pickupInputElementOnInput); //Removes the listener defined as pickupInputElementOnInput from pickupInputElement.current before replacing it
+    };
+  }, [pickupInputElement.current]);
+
   const handleConfirm = () => {
     const validation = form.validate();
     const hasErrors = Object.keys(validation.errors).length > 0;
 
     if (hasErrors) {
       notify.error("Please fix the errors in the form before submitting");
+      return;
+    }
+
+    if (!validationPickupAddressGood) {
+      form.setFieldError("pickupAddress", "Please select a valid address from the dropdown");
       return;
     }
 
@@ -247,7 +318,7 @@ export const BookingInteractiveArea = ({
         phoneNumber: form.values.phoneNumber,
         additionalInfo: form.values.additionalInfo,
         pickupAddress: form.values.pickupAddress,
-        destinationAddress: inputElement.current?.value || "",
+        destinationAddress: form.values.destinationAddress,
         startTime: form.values.startTime,
         endTime: form.values.endTime,
         purpose: form.values.purpose,
@@ -259,7 +330,7 @@ export const BookingInteractiveArea = ({
         id: selectedBooking.id,
         title: form.values.title,
         pickupAddress: form.values.pickupAddress,
-        destinationAddress: inputElement.current?.value || "",
+        destinationAddress: form.values.destinationAddress,
         purpose: form.values.purpose,
         passengerInfo,
         phoneNumber: form.values.phoneNumber,
@@ -271,8 +342,12 @@ export const BookingInteractiveArea = ({
 
   const handleModalCleanup = () => {
     form.reset();
+    // Clear the uncontrolled address inputs directly via their refs
+    if (inputElement.current) inputElement.current.value = "";
+    if (pickupInputElement.current) pickupInputElement.current.value = "";
     setShowBookingModal(false);
     setValidationAddressGood(false);
+    setValidationPickupAddressGood(false);
     setSelectedBooking(undefined);
   };
 
@@ -281,6 +356,7 @@ export const BookingInteractiveArea = ({
     setSelectedBooking(undefined);
     form.reset();
     setValidationAddressGood(false);
+    setValidationPickupAddressGood(false);
     setShowBookingModal(true);
   };
 
@@ -351,7 +427,11 @@ export const BookingInteractiveArea = ({
         confirmText={currentModalMode === "create" ? "Confirm Booking" : "Save Changes"}
         loading={createBookingMutation.isPending || updateBookingMutation.isPending}
       >
-        <AgencyForm form={form} destinationAddressRef={inputElement} />
+        <AgencyForm
+          form={form}
+          pickupAddressRef={pickupInputElement}
+          destinationAddressRef={inputElement}
+        />
       </Modal>
     </>
   );
