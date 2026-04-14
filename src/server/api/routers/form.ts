@@ -113,6 +113,14 @@ export const formRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const { regionCode, address } = input; //Grab passed variables
 
+      if (
+        address.length !== 1 || //Empty array or has more than one entry
+        !address[0] || //Only entry is not a string
+        address[0].length < 1 //Only entry is empty string
+      ) {
+        return null; //Reject
+      }
+
       try {
         //Make an API call to Google Maps API to validate the inputs
         const response = await fetch(

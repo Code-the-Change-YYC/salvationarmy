@@ -433,9 +433,63 @@ export const bookingsRouter = createTRPCRouter({
 
       // Only include optional fields if they are actually provided
       if (input.purpose !== undefined) bookingData.purpose = input.purpose;
-      if (input.phoneNumber !== undefined) bookingData.phoneNumber = input.phoneNumber;
       if (input.driverId !== undefined) bookingData.driverId = input.driverId;
       if (input.status !== undefined) bookingData.status = input.status;
+      if (input.phoneNumber) {
+        //Wants to change phone number
+        try {
+          const res = phoneNumberSchema.safeParse(input.phoneNumber.trim()); //Check if phone num is valid
+          const phoneNumber = parsePhoneNumberWithError(input.phoneNumber);
+          if (!res.success || !phoneNumber.isValid()) {
+            // Failed regex check or API check
+            throw new Error(res.error?.issues[0]?.message ?? "Invalid phone number");
+          }
+          bookingData.phoneNumber = phoneNumber.number;
+        } catch (e) {
+          if (e instanceof Error) {
+            // Failed regex check or API check
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: e instanceof ParseError ? "Invalid phone number" : e.message,
+            });
+          }
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Unknown error when updating a booking",
+          });
+        }
+      }
+
+      const serverCaller = appRouter.createCaller(ctx); //Make a blank ctx for the endpoint we call
+      await serverCaller.form
+        .validateAddress({
+          regionCode: "ca",
+          address: [input.pickupAddress],
+        })
+        .then((result) => {
+          if (result === null) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Invalid Pickup Address",
+            });
+          }
+          input.pickupAddress = result;
+        });
+
+      await serverCaller.form
+        .validateAddress({
+          regionCode: "ca",
+          address: [input.destinationAddress],
+        })
+        .then((result) => {
+          if (result === null) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Invalid Destination Address",
+            });
+          }
+          input.destinationAddress = result;
+        });
 
       const rows = await ctx.db.transaction(async (tx) => {
         if (input.driverId) {
@@ -628,7 +682,7 @@ export const bookingsRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       // 3) Filter only defined updates
       const updatesToApply = Object.fromEntries(
-        Object.entries(updates).filter(([, v]) => v !== undefined),
+        Object.entries(updates).filter(([, v]) => v !== undefined && v !== ""),
       );
 
       if (updatesToApply.phoneNumber) {
@@ -649,6 +703,10 @@ export const bookingsRouter = createTRPCRouter({
               message: e instanceof ParseError ? "Invalid phone number" : e.message,
             });
           }
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Unknown error when updating a booking",
+          });
         }
       }
 
