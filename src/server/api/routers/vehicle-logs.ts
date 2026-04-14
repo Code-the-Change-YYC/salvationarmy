@@ -82,7 +82,7 @@ export const vehicleLogsRouter = createTRPCRouter({
           vehicle: z.string().min(1, "Vehicle is required"),
         })
         .refine((data) => data.odometerEnd >= data.odometerStart, {
-          message: "Odometer end must be greater than odometer start",
+          message: "Odometer end must be greater than or equal to odometer start",
           path: ["odometerEnd"],
         })
         .refine((data) => new Date(data.arrivalTime) > new Date(data.departureTime), {
@@ -144,7 +144,7 @@ export const vehicleLogsRouter = createTRPCRouter({
             return true;
           },
           {
-            message: "Odometer end must be greater than odometer start",
+            message: "Odometer end must be greater than or equal to odometer start",
             path: ["odometerEnd"],
           },
         )
