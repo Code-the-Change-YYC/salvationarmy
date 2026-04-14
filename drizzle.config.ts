@@ -10,6 +10,7 @@ export default defineConfig({
     "./src/server/db/post-trip-schema.ts", // post-trip schema
     "./src/server/db/vehicle-log.ts", // logs schema
     "./src/server/db/passenger-schema.ts", // passenger schema
+    "./src/server/db/vehicles-schema.ts", // vehicles schema
   ],
   dialect: "postgresql",
   dbCredentials: {

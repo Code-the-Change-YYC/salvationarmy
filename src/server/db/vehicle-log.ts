@@ -39,7 +39,7 @@ export const logs = pgTable(
     updatedBy: text("updated_by").references(() => user.id),
   },
   (table) => [
-    check("odometer_check", sql`${table.odometerEnd} > ${table.odometerStart}`),
+    check("odometer_check", sql`${table.odometerEnd} >= ${table.odometerStart}`),
     check("time_check", sql`${table.arrivalTime} > ${table.departureTime}`),
   ],
 );

@@ -1,11 +1,13 @@
 "use client";
 
-import { Box, Divider, Stack, TextInput } from "@mantine/core";
+import { Box, Divider, Select, Stack, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import type { UseFormReturnType } from "@mantine/form";
+import { useVehicles } from "@/app/hooks/useVehicles";
 import classes from "./vehicle-log-form.module.scss";
 
 interface VehicleLogFormData {
+  id: number | null;
   date: string | null;
   destination: string;
   departureTime: string | null;
@@ -24,6 +26,7 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
   const now = new Date();
   const ninetyDaysAgo = new Date();
   ninetyDaysAgo.setDate(now.getDate() - 90);
+  const { vehicleOptions, isLoading: isLoadingVehicles } = useVehicles();
 
   // Calculate KM driven
   const calculateKmDriven = () => {
@@ -174,10 +177,13 @@ export const VehicleLogForm = ({ form }: VehicleLogFormProps) => {
       </div>
 
       <div className={classes.formRow}>
-        <TextInput
+        <Select
           withAsterisk
           label="Vehicle"
-          placeholder="Enter vehicle name"
+          placeholder="Select a vehicle"
+          data={vehicleOptions}
+          searchable
+          disabled={isLoadingVehicles}
           key={form.key("vehicle")}
           {...form.getInputProps("vehicle")}
         />

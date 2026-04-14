@@ -37,3 +37,18 @@
   font-size: 14px;
   font-weight: $font-weight-semibold;
 }
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.errorContainer {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: 16px;
+}

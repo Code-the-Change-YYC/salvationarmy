@@ -67,7 +67,8 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
             <span className={styles.navLinkDefault}>Invite</span>
           </button>
           <NavLink href="/admin/rider-logs">Rider Logs</NavLink>
-          <NavLink href="/admin/driver-logs">Vehicle Logs</NavLink>
+          <NavLink href="/admin/vehicle-logs">Vehicle Logs</NavLink>
+          <NavLink href="/admin/vehicles">View Vehicles</NavLink>
           <NavLink href="/admin/schedule">View Schedule</NavLink>
           <Profile />
         </Group>
