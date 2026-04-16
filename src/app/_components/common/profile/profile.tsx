@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu } from "@mantine/core";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import Arrow from "@/assets/icons/arrow";
 import User from "@/assets/icons/user";
@@ -13,11 +14,13 @@ import styles from "./Profile.module.scss";
 export default function Profile() {
   const { data: session } = useSession();
   const router = useRouter();
+  const queryClient = useQueryClient();
   function logout() {
     authClient
       .signOut()
       .then(() => {
         router.push("/logout");
+        queryClient.clear();
       })
       .catch((err) => {
         console.error("Logout failed:", err);

@@ -14,6 +14,29 @@ import { OrganizationRole, Role } from "@/types/types";
 import { nameRegex, passwordSchema, phoneNumberSchema } from "@/types/validation";
 
 export const organizationRouter = createTRPCRouter({
+  getUserOrgName: protectedProcedure.query(async ({ ctx }) => {
+    const orgId = ctx.session.session.activeOrganizationId;
+
+    if (!orgId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "No active organization ID set",
+      });
+    }
+
+    const org = await ctx.db.query.organization.findFirst({
+      where: (organization, { eq }) => eq(organization.id, orgId),
+    });
+
+    if (!org) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Organization not found in database",
+      });
+    }
+
+    return org.name;
+  }),
   redirectToDashboard: protectedProcedure.mutation(async ({ ctx }) => {
     const userId = ctx.session.user.id;
 

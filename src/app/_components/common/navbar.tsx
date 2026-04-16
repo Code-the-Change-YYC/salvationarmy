@@ -16,7 +16,6 @@ type NavbarView = "admin" | "agency" | "driver";
 
 interface NavbarProps {
   view: NavbarView;
-  agencyName?: string;
 }
 
 interface NavLinkProps {
@@ -35,9 +34,14 @@ function NavLink({ href, children }: NavLinkProps) {
   );
 }
 
-export default function Navbar({ view, agencyName }: NavbarProps) {
+export default function Navbar({ view }: NavbarProps) {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const router = useRouter();
+
+  const agencyName = api.organization.getUserOrgName.useQuery(undefined, {
+    enabled: view === "agency",
+  }).data;
+
   const { mutate } = api.organization.redirectToDashboard.useMutation({
     onSuccess: (data) => {
       router.replace(data.redirectUrl);
@@ -53,7 +57,7 @@ export default function Navbar({ view, agencyName }: NavbarProps) {
           color="blue"
           transparent={true}
         ></IconButton>
-        <Text>{view === "agency" ? `${agencyName ?? "[Agency name]"} Home` : ""}</Text>
+        <Text>{view === "agency" ? (agencyName ? `${agencyName} Home` : "Loading...") : ""}</Text>
       </Group>
 
       {view === "admin" && (
